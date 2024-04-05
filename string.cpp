@@ -26,6 +26,7 @@ String string(const char *str, i32 length, Allocator mem) EXPORT
 
 String string(const char *sz_str, Allocator mem)  EXPORT
 {
+    if (sz_str == nullptr) return {};
     return string(sz_str, (i32)strlen(sz_str), mem);
 }
 
