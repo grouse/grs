@@ -184,7 +184,7 @@ struct Rect {
     Rect() = default;
     Rect(Vector2 tl, Vector2 br) : tl(tl), br(br) {}
 
-    constexpr Vector2 size() { return br - tl; }
+    constexpr Vector2 size() const { return br - tl; }
     constexpr Vector2& operator[](i32 i) { return data[i]; }
 };
 
