@@ -15,7 +15,10 @@ struct HashTable {
         V value;
         bool occupied;
 
-        V& operator->() { return value; }
+        V* operator->() { return &value; }
+
+        operator V&() { return value; }
+        operator V*() { return &value; }
     };
 
     struct Iterator {
@@ -29,25 +32,10 @@ struct HashTable {
             return *this;
         }
 
-        bool operator!=(const Iterator &other)
-        {
-            return slot != other.slot;
-        }
+        bool operator!=(const Iterator &other) { return slot != other.slot; }
 
-        Pair& operator*()
-        {
-            return table->slots[slot];
-        }
-
-        V& operator->()
-        {
-            return table->slots[slot].value;
-        }
-
-        operator V&()
-        {
-            return table->slots[slot].value;
-        }
+        Pair& operator*() { return table->slots[slot]; }
+        Pair* operator->() { return &table->slots[slot]; }
     };
 
     Pair *slots = nullptr;
