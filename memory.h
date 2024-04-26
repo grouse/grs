@@ -34,37 +34,28 @@ struct Allocator {
 extern Allocator mem_dynamic;
 
 #define ALLOCATOR(alloc) ((Allocator)(alloc))
+#define ALLOC_STATE(alloc) (((Allocator)(alloc)).state)
+#define ALLOC_PROC(alloc, ...) (((Allocator)(alloc)).proc(((Allocator)(alloc)).state, __VA_ARGS__))
 
-#define ALLOC(alloc, size)               ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_ALLOC,   nullptr, 0, size,      M_DEFAULT_ALIGN)
-#define ALLOC_A(alloc, size, align)      ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_ALLOC,   nullptr, 0, size,      align)
-#define ALLOC_T(alloc, T)           new (ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_ALLOC,   nullptr, 0, sizeof(T), alignof(T))) T
+#define ALLOC(alloc, size)               ALLOC_PROC(alloc, M_ALLOC, nullptr, 0, size,      M_DEFAULT_ALIGN)
+#define ALLOC_A(alloc, size, align)      ALLOC_PROC(alloc, M_ALLOC, nullptr, 0, size,      align)
+#define ALLOC_T(alloc, T)           new (ALLOC_PROC(alloc, M_ALLOC, nullptr, 0, sizeof(T), alignof(T))) T
 
-#define FREE(alloc, ptr)                 ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_FREE,    ptr,     0,     0,    0)
+#define FREE(alloc, ptr)                 ALLOC_PROC(alloc, M_FREE,    ptr,     0,     0,    0)
 
-#define REALLOC(alloc, ptr, osize, size)          ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_REALLOC, ptr,     osize, size, M_DEFAULT_ALIGN)
-#define REALLOC_A(alloc, ptr, osize, size, align) ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_REALLOC, ptr,     osize, size, align)
+#define REALLOC(alloc, ptr, osize, size)          ALLOC_PROC(alloc, M_REALLOC, ptr,     osize, size, M_DEFAULT_ALIGN)
+#define REALLOC_A(alloc, ptr, osize, size, align) ALLOC_PROC(alloc, M_REALLOC, ptr,     osize, size, align)
 
-#define RESET_ALLOC(alloc)               ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_RESET,   nullptr, 0,     0,    0)
-#define RESTORE_ALLOC(alloc, ptr)        ALLOCATOR(alloc).proc(ALLOCATOR(alloc).state, M_RESET,   ptr,     0,     0,    0)
+#define RESET_ALLOC(alloc)        ALLOC_PROC(alloc, M_RESET, nullptr, 0,     0,    0)
+#define RESTORE_ALLOC(alloc, ptr) ALLOC_PROC(alloc, M_RESET, ptr,     0,     0,    0)
 
 
 #define ALLOC_ARR(alloc, T, count)\
-    (T*)ALLOCATOR(alloc).proc(\
-        ALLOCATOR(alloc).state, M_ALLOC,\
-        nullptr, 0, sizeof(T)*(count),\
-        alignof(T))
-
+    (T*)ALLOC_PROC(alloc, M_ALLOC, nullptr, 0, sizeof(T)*(count), alignof(T))
 #define REALLOC_ARR(alloc, T, old_ptr, old_count, new_count)\
-    (T*)ALLOCATOR(alloc).proc(\
-        ALLOCATOR(alloc).state, M_REALLOC,\
-        old_ptr, sizeof(T)*(old_count), sizeof(T)*(new_count),\
-        alignof(T))
-
+    (T*)ALLOC_PROC(alloc, M_REALLOC, old_ptr, sizeof(T)*(old_count), sizeof(T)*(new_count), alignof(T))
 #define REALLOC_ARR_A(alloc, T, old_ptr, old_count, new_count, alignment)\
-    (T*)ALLOCATOR(alloc).proc(\
-        ALLOCATOR(alloc).state, M_REALLOC,\
-        old_ptr, sizeof(T)*(old_count), sizeof(T)*(new_count),\
-        alignment)
+    (T*)ALLOC_PROC(alloc, M_REALLOC, old_ptr, sizeof(T)*(old_count), sizeof(T)*(new_count), alignment)
 
 
 void init_default_allocators();
