@@ -632,6 +632,8 @@ extern "C" {
         LPCWSTR lpCmdLine,
         int *pNumArgs);
 
+    LPWSTR GetCommandLineW();
+
     PIDLIST_ABSOLUTE SHBrowseForFolderW(LPBROWSEINFOW lpbi);
 
     BOOL SHGetPathFromIDListEx(

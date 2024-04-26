@@ -121,35 +121,34 @@ char* win32_system_error_message(DWORD error)
     return buffer;
 }
 
-Array<String> win32_commandline_args(LPWSTR pCmdLine, Allocator mem)
+Array<String> win32_commandline_args(Allocator mem)
 {
     Array<String> args{};
 
-    // NOTE(jesper): CommandLineToArgvW sets the first argument string to the executable path if and only if pCmdLine is empty
-    if (pCmdLine && *pCmdLine != '\0') {
-        i32 argv = 0;
-        LPWSTR* argc = CommandLineToArgvW(pCmdLine, &argv);
+    LPWSTR pCmdLine = GetCommandLineW();
+    if (!pCmdLine) return args;
 
-        if (argv > 0) {
-            i32 total_utf8_length = 0;
-            for (i32 i = 0; i < argv; i++) {
-                total_utf8_length += utf8_length(argc[i], wcslen(argc[i]));
-            }
+    i32 argv = 0;
+    LPWSTR* argc = CommandLineToArgvW(pCmdLine, &argv);
 
-            args.data = ALLOC_ARR(mem, String, argv);
-            args.count = argv;
+    if (argv <= 1) return args;
+    args.data = ALLOC_ARR(mem, String, argv-1);
+    args.count = argv-1;
 
-            char *args_mem = ALLOC_ARR(mem, char, total_utf8_length);
+    i32 total_utf8_length = 0;
+    for (i32 i = 1; i < argv; i++) {
+        total_utf8_length += utf8_length(argc[i], wcslen(argc[i]));
+    }
 
-            char *p = args_mem;
-            for (i32 i = 0; i < argv; i++) {
-                i32 l = wcslen(argc[i]);
+    char *args_mem = ALLOC_ARR(mem, char, total_utf8_length);
+    char *p = args_mem;
 
-                args[i].data = p;
-                args[i].length = utf8_from_utf16((u8*)p, l, argc[i], l);
-                p += l;
-            }
-        }
+    for (i32 i = 1; i < argv; i++) {
+        i32 l = wcslen(argc[i]);
+
+        args[i-1].data = p;
+        args[i-1].length = utf8_from_utf16((u8*)p, l, argc[i], l);
+        p += l;
     }
 
     return args;
