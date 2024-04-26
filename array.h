@@ -110,7 +110,7 @@ T* array_tail(Array<T> &arr)
 }
 
 template<typename T>
-void array_create(Array<T> *arr, i32 count, Allocator mem = mem_dynamic)
+void array_create(Array<T> *arr, i32 count, Allocator mem)
 {
     T *nptr = ALLOC_ARR(mem, T, count);
     if (arr->count > 0) {
