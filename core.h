@@ -49,7 +49,7 @@ extern "C" CRTIMP char* strerror(int errnum) NOTHROW;
 #define LOG_ERROR(...) log(__FILE__, __LINE__, LOG_TYPE_ERROR, __VA_ARGS__)
 #define LOG_INFO(...)  log(__FILE__, __LINE__, LOG_TYPE_INFO, __VA_ARGS__)
 
-
+#ifndef ASSERT
 #define ASSERT(cond)\
     do {\
         if (!(cond)) {\
@@ -57,16 +57,24 @@ extern "C" CRTIMP char* strerror(int errnum) NOTHROW;
             DEBUG_BREAK();\
         }\
     } while(0)
+#endif // ASSERT
 
+#ifndef PANIC
 #define PANIC(...)\
     do {\
         log(__FILE__, __LINE__, LOG_TYPE_PANIC, __VA_ARGS__);\
         DEBUG_BREAK();\
     } while(0)
 
-#define PANIC_IF(cond, ...) if (cond) PANIC(__VA_ARGS__)
-#define PANIC_UNREACHABLE() PANIC("unreachable code reached")
+#endif // PANIC
 
+#ifndef PANIC_IF
+#define PANIC_IF(cond, ...) if (cond) PANIC(__VA_ARGS__)
+#endif // PANIC_IF
+
+#ifndef PANIC_UNREACHABLE
+#define PANIC_UNREACHABLE() PANIC("unreachable code reached")
+#endif // PANIC_IF
 
 template <typename F>
 struct Defer {
