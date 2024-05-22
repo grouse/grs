@@ -1,20 +1,7 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <new>
-
-#ifndef CAT
-#define CAT_(a, b) a ## b
-#define CAT(a, b) CAT_(a, b)
-#endif
-
-#ifndef VAR
-#define VAR(v) CAT(v, __LINE__)
-#endif
+#include <setjmp.h>
 
 typedef void (*test_proc_t)();
 
@@ -30,10 +17,14 @@ struct TestSuite {
     const char *name;
     test_proc_t proc;
     TestResult *result = nullptr;
+
     bool expect_fail;
+    int checks_count;
 };
 
 extern TestSuite *current_test;
+
+extern bool assert_handler(const char *src, int line, const char *sz_cond, bool cond, const char *fmt, ...);
 
 extern void test_assert_handler(const char *src, int line, const char *condition);
 extern void test_panic_handler(
@@ -48,15 +39,25 @@ extern int run_tests(TestSuite *tests, int count);
 
 
 #define ASSERT(cond) do {\
-    if (!(cond) && !current_test->expect_fail) REPORT_ASSERT(#cond);\
+    if (current_test) current_test->checks_count++;\
+    if (!(cond)) {\
+        if (!current_test->expect_fail) REPORT_ASSERT(#cond);\
+        else { extern jmp_buf test_jmp; longjmp(test_jmp, 1); }\
+    }\
 } while(0)
 
 #define PANIC(...) do {\
+    if (current_test) current_test->checks_count++;\
     if (!current_test->expect_fail) REPORT_PANIC(nullptr, __VA_ARGS__);\
+    else { extern jmp_buf test_jmp; longjmp(test_jmp, 1); }\
 } while(0)
 
 #define PANIC_IF(cond, ...) do {\
-    if ((cond) && !current_test->expect_fail) REPORT_PANIC(#cond, __VA_ARGS__);\
+    if (current_test) current_test->checks_count++;\
+    if ((cond)) {\
+        if (!current_test->expect_fail) REPORT_PANIC(#cond, __VA_ARGS__);\
+        else { extern jmp_buf test_jmp; longjmp(test_jmp, 1); }\
+    }\
 } while(0)
 
 #define EXPECT_FAIL\
@@ -70,8 +71,14 @@ extern int run_tests(TestSuite *tests, int count);
 #ifdef TEST_H_IMPL
 #undef TEST_H_IMPL
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include <signal.h>
 #include <setjmp.h>
+
+#include <new>
 
 jmp_buf test_jmp;
 TestSuite *current_test = nullptr;
@@ -134,7 +141,10 @@ int run_tests(TestSuite *tests, int count)
 
         if (setjmp(test_jmp) == 0) tests[i].proc();
         bool result = tests[i].result == nullptr;
-        printf("%-80s : [%s]\n", tests[i].name, result ? "OK" : "ERROR");
+        printf("%-80s : [%s] (%d checks)\n",\
+               tests[i].name, \
+               result ? "OK" : "ERROR",\
+               tests[i].checks_count);
 
         if (!result) {
             for (auto *res = tests[i].result; res; res = res->next) {
