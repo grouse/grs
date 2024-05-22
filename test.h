@@ -30,6 +30,7 @@ struct TestSuite {
     const char *name;
     test_proc_t proc;
     TestResult *result = nullptr;
+    bool expect_fail;
 };
 
 extern TestSuite *current_test;
@@ -47,20 +48,21 @@ extern int run_tests(TestSuite *tests, int count);
 
 
 #define ASSERT(cond) do {\
-    if (!(cond)) REPORT_ASSERT(#cond);\
+    if (!(cond) && !current_test->expect_fail) REPORT_ASSERT(#cond);\
 } while(0)
 
 #define PANIC(...) do {\
-    REPORT_PANIC(nullptr, __VA_ARGS__);\
+    if (!current_test->expect_fail) REPORT_PANIC(nullptr, __VA_ARGS__);\
 } while(0)
 
 #define PANIC_IF(cond, ...) do {\
-    if ((cond)) REPORT_PANIC(#cond, __VA_ARGS__);\
+    if ((cond) && !current_test->expect_fail) REPORT_PANIC(#cond, __VA_ARGS__);\
 } while(0)
 
-#define EXPECT_SIG(sig)\
-    for (int i = setjmp(test_jmp); i == 0;\
-         i = (i != sig) ? (REPORT_PANIC("signal(" #sig ")", nullptr), -1) : 1)
+#define EXPECT_FAIL\
+    for (int i = ((current_test->expect_fail=true), setjmp(test_jmp));\
+         i == 0;\
+         i = ((current_test->expect_fail=false),((i != 1) ? (REPORT_PANIC("expected failure", nullptr), -1) : 1)))
 
 #endif // TEST_H
 
@@ -118,7 +120,7 @@ void test_panic_handler(
 
 void test_sig_handler(int sig) {
     signal(sig, test_sig_handler);
-    longjmp(test_jmp, sig);
+    longjmp(test_jmp, 1);
 }
 
 int run_tests(TestSuite *tests, int count)
