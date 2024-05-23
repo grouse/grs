@@ -1,6 +1,7 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <stdarg.h>
 #include <setjmp.h>
 
 typedef void (*test_proc_t)();
@@ -19,57 +20,37 @@ struct TestSuite {
     TestResult *result = nullptr;
 
     bool expect_fail;
-    int checks_count;
 };
 
 extern TestSuite *current_test;
 
-extern bool assert_handler(const char *src, int line, const char *sz_cond, bool cond, const char *fmt, ...);
-
-extern void test_assert_handler(const char *src, int line, const char *condition);
-extern void test_panic_handler(
-    const char *src, int line,
-    const char *condition,
-    const char *fmt, ...);
-
 extern int run_tests(TestSuite *tests, int count);
+extern void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...);
+extern void report_failv(const char *file, int line, const char *sz_cond, const char *msg, va_list va_args);
 
-#define REPORT_ASSERT(cond) test_assert_handler(__FILE__, __LINE__, cond)
-#define REPORT_PANIC(cond, ...) test_panic_handler(__FILE__, __LINE__, cond, __VA_ARGS__)
+#define REPORT_FAIL(...) report_fail(__FILE__, __LINE__, __VA_ARGS__)
 
-
-#define ASSERT(cond) do {\
-    if (current_test) current_test->checks_count++;\
-    if (!(cond)) {\
-        if (!current_test->expect_fail) REPORT_ASSERT(#cond);\
-        else { extern jmp_buf test_jmp; longjmp(test_jmp, 1); }\
+#define EXPECT_FAIL(body) do {\
+    current_test->expect_fail=true;\
+    test_jmp_i=1;\
+    bool failed = false;\
+    switch (setjmp(test_jmp)) {\
+    case 1: failed=true; break;\
+    case 0: { body } break;\
     }\
+    if (!failed) REPORT_FAIL(nullptr, "expected failure");\
+    current_test->expect_fail=false;\
+    test_jmp_i=0;\
 } while(0)
 
-#define PANIC(...) do {\
-    if (current_test) current_test->checks_count++;\
-    if (!current_test->expect_fail) REPORT_PANIC(nullptr, __VA_ARGS__);\
-    else { extern jmp_buf test_jmp; longjmp(test_jmp, 1); }\
-} while(0)
-
-#define PANIC_IF(cond, ...) do {\
-    if (current_test) current_test->checks_count++;\
-    if ((cond)) {\
-        if (!current_test->expect_fail) REPORT_PANIC(#cond, __VA_ARGS__);\
-        else { extern jmp_buf test_jmp; longjmp(test_jmp, 1); }\
-    }\
-} while(0)
-
-#define EXPECT_FAIL\
-    for (int i = ((current_test->expect_fail=true), setjmp(test_jmp));\
-         i == 0;\
-         i = ((current_test->expect_fail=false),((i != 1) ? (REPORT_PANIC("expected failure", nullptr), -1) : 1)))
 
 #endif // TEST_H
 
 
 #ifdef TEST_H_IMPL
 #undef TEST_H_IMPL
+
+#include "core.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -80,43 +61,66 @@ extern int run_tests(TestSuite *tests, int count);
 
 #include <new>
 
-jmp_buf test_jmp;
+jmp_buf test_jmp_[2];  int test_jmp_i = 0;
+#define test_jmp test_jmp_[test_jmp_i]
+
 TestSuite *current_test = nullptr;
 
-void test_assert_handler(const char *src, int line, const char *condition)
-{
-    TestResult *rep = new (malloc(sizeof *rep)) TestResult {
-        .src = src, .line = line, .cond = condition,
-        .next = current_test->result
-    };
-
-    current_test->result = rep;
+void test_sig_handler(int sig) {
+    signal(sig, test_sig_handler);
+    longjmp(test_jmp, 1);
 }
 
-void test_panic_handler(
-    const char *src, int line,
-    const char *condition,
-    const char *fmt, ...)
+bool test_assert_handler(
+    const char *file, int line,
+    const char *sz_cond)
+{
+    if (!current_test->expect_fail) {
+        report_fail(file, line, sz_cond, nullptr);
+    } else longjmp(test_jmp, 1);
+
+    return false;
+}
+
+bool test_panic_handler(
+    const char *file, int line,
+    const char *sz_cond,
+    const char *msg, ...)
+{
+    if (!current_test->expect_fail) {
+        va_list va_args;
+        va_start(va_args, msg);
+        report_failv(file, line, sz_cond, msg, va_args);
+        va_end(va_args);
+    } else longjmp(test_jmp, 1);
+
+    return false;
+}
+
+void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...)
+{
+    va_list va_args;
+    va_start(va_args, msg);
+    report_failv(file, line, sz_cond, msg, va_args);
+    va_end(va_args);
+}
+
+void report_failv(const char *file, int line, const char *sz_cond, const char *fmt, va_list va_args)
 {
     int length = 0;
     char msg[2048];
 
     if (fmt) {
-        va_list args;
-        va_start(args, fmt);
-
-        length = vsnprintf(msg, sizeof msg-1, fmt, args);
+        length = vsnprintf(msg, sizeof msg-1, fmt, va_args);
         length = length > sizeof msg-1 ? sizeof msg-1 : length;
-
-        va_end(args);
     };
-
     msg[length] = '\0';
 
     TestResult *rep = new (malloc(sizeof *rep + length+1)) TestResult {
-        .src = src, .line = line, .cond = condition,
+        .src = file, .line = line, .cond = sz_cond,
         .next = current_test->result
     };
+
     if (length > 0) {
         rep->msg = (char*)rep + sizeof *rep;
         strcpy(rep->msg, msg);
@@ -125,15 +129,16 @@ void test_panic_handler(
     current_test->result = rep;
 }
 
-void test_sig_handler(int sig) {
-    signal(sig, test_sig_handler);
-    longjmp(test_jmp, 1);
-}
-
 int run_tests(TestSuite *tests, int count)
 {
     signal(SIGINT, test_sig_handler);
     signal(SIGSEGV, test_sig_handler);
+
+    extern assert_handler_t assert_handler;
+    extern panic_handler_t panic_handler;
+
+    assert_handler = test_assert_handler;
+    panic_handler = test_panic_handler;
 
     int failed_tests = 0;
     for (int i = 0; i < count; i++) {
@@ -141,10 +146,9 @@ int run_tests(TestSuite *tests, int count)
 
         if (setjmp(test_jmp) == 0) tests[i].proc();
         bool result = tests[i].result == nullptr;
-        printf("%-80s : [%s] (%d checks)\n",\
-               tests[i].name, \
-               result ? "OK" : "ERROR",\
-               tests[i].checks_count);
+        printf("%-80s : [%s]\n",
+               tests[i].name,
+               result ? "OK" : "ERROR");
 
         if (!result) {
             for (auto *res = tests[i].result; res; res = res->next) {
