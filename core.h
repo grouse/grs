@@ -4,6 +4,8 @@
 #include "string.h"
 #include "platform.h"
 
+#include <stdarg.h>
+
 extern "C" CRTIMP void exit(int status) NOTHROW;
 extern "C" CRTIMP char* strerror(int errnum) NOTHROW;
 
@@ -44,32 +46,43 @@ extern "C" CRTIMP char* strerror(int errnum) NOTHROW;
 #define SCOPE_CEXPR(expr1, expr2) for (i32 CAT(i, __LINE__) = 0; CAT(i, __LINE__) == 0 && (expr1); CAT(i, __LINE__) = ((expr2), 1))
 
 
-#define LOGR(...)      log(__VA_ARGS__)
-#define LOG(...)       log(__FILE__, __LINE__, __VA_ARGS__)
-#define LOG_ERROR(...) log(__FILE__, __LINE__, LOG_TYPE_ERROR, __VA_ARGS__)
-#define LOG_INFO(...)  log(__FILE__, __LINE__, LOG_TYPE_INFO, __VA_ARGS__)
+#define LOGR(...)      logf(__VA_ARGS__)
+#define LOG(...)       logf(__FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...) logf(__FILE__, __LINE__, LOG_TYPE_ERROR, __VA_ARGS__)
+#define LOG_INFO(...)  logf(__FILE__, __LINE__, LOG_TYPE_INFO, __VA_ARGS__)
+
+typedef bool (*assert_handler_t)(const char *src, int line, const char *sz_cond);
+typedef bool (*panic_handler_t)(const char *src, int line, const char *sz_cond, const char *msg, ...);
+
+extern assert_handler_t assert_handler;
+extern panic_handler_t panic_handler;
+
+#define ASSERT_HANDLER(cond) assert_handler(__FILE__, __LINE__, #cond)
+#define PANIC_HANDLER(sz_cond, ...) panic_handler(__FILE__, __LINE__, sz_cond, __VA_ARGS__)
 
 #ifndef ASSERT
-#define ASSERT(cond)\
-    do {\
-        if (!(cond)) {\
-            log(__FILE__, __LINE__, LOG_TYPE_ASSERT, "%s", #cond);\
-            DEBUG_BREAK();\
-        }\
-    } while(0)
+#define ASSERT(cond) do {\
+    if (!(cond) && ASSERT_HANDLER(cond)) {\
+        DEBUG_BREAK();\
+    }\
+} while(0)
 #endif // ASSERT
 
 #ifndef PANIC
-#define PANIC(...)\
-    do {\
-        log(__FILE__, __LINE__, LOG_TYPE_PANIC, __VA_ARGS__);\
+#define PANIC(...) do {\
+    if (PANIC_HANDLER(nullptr, __VA_ARGS__)) {\
         DEBUG_BREAK();\
-    } while(0)
+    }\
+} while(0)
 
 #endif // PANIC
 
 #ifndef PANIC_IF
-#define PANIC_IF(cond, ...) if (cond) PANIC(__VA_ARGS__)
+#define PANIC_IF(cond, ...) do {\
+    if ((cond) && PANIC_HANDLER(#cond, __VA_ARGS__)) {\
+        DEBUG_BREAK();\
+    }\
+} while(0)
 #endif // PANIC_IF
 
 #ifndef PANIC_UNREACHABLE
@@ -103,7 +116,6 @@ enum LogType {
     LOG_TYPE_PANIC,
     LOG_TYPE_ERROR,
     LOG_TYPE_INFO,
-    LOG_TYPE_ASSERT
 };
 
 inline const char* sz_from_enum(LogType type)
@@ -112,15 +124,16 @@ inline const char* sz_from_enum(LogType type)
     case LOG_TYPE_PANIC: return "panic";
     case LOG_TYPE_ERROR: return "error";
     case LOG_TYPE_INFO: return "info";
-    case LOG_TYPE_ASSERT: return "assert";
     }
 
     return "";
 }
 
-typedef void (sink_proc_t)(const char *src, u32 line, LogType type, const char *msg);
-void log(const char *path, u32 line, LogType type, const char *fmt, ...);
-bool add_log_sink(sink_proc_t *sink);
+typedef void (*sink_proc_t)(const char *src, u32 line, LogType type, const char *msg);
+void log(const char *file, u32 line, LogType type, const char *msg);
+void logf(const char *file, u32 line, LogType type, const char *fmt, ...);
+void logv(const char *file, u32 line, LogType type, const char *fmt, va_list args) ;
+bool add_log_sink(sink_proc_t sink);
 
 template<typename T>
 i32 type_id(const char *type_name)

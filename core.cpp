@@ -8,28 +8,66 @@
 #error "unsupported platform"
 #endif
 
+#include <string.h>
+
 i32 next_type_id = 0;
 
-bool add_log_sink(sink_proc_t *sink)
+bool default_assert_handler(const char *file, int line, const char *sz_cond)
+{
+    logf(file, line, LOG_TYPE_ERROR, "assertion failed: %s", sz_cond);
+    return true;
+}
+assert_handler_t assert_handler = default_assert_handler;
+
+bool default_panic_handler(
+    const char *file, int line,
+    const char *sz_cond,
+    const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    if (!sz_cond) logv(file, line, LOG_TYPE_PANIC, fmt, args);
+    else {
+        char buffer[2048] = "";
+        strncat(buffer, fmt, sizeof buffer-1);
+        strncat(buffer, ": ", sizeof buffer-1);
+        strncat(buffer, sz_cond, sizeof buffer-1);
+        logv(file, line, LOG_TYPE_PANIC, buffer, args);
+    }
+    va_end(args);
+
+    return true;
+}
+panic_handler_t panic_handler = default_panic_handler;
+
+
+bool add_log_sink(sink_proc_t sink)
 {
     if (log_sinks.count == decltype(log_sinks)::capacity()) return false;
     array_add(&log_sinks, sink);
     return true;
 }
 
-void log(const char *path, u32 line, LogType type, const char *fmt, ...)
+void log(const char *file, u32 line, LogType type, const char *msg)
 {
-    char buffer[2048];
+    for (auto sink : log_sinks) sink(file, line, type, msg);
+}
 
+
+void logf(const char *path, u32 line, LogType type, const char *fmt, ...)
+{
     va_list args;
     va_start(args, fmt);
+    logv(path, line, type, fmt, args);
+    va_end(args);
+}
 
+void logv(const char *path, u32 line, LogType type, const char *fmt, va_list args)
+{
+    char buffer[2048];
     i32 length = vsnprintf(buffer, sizeof buffer-1, fmt, args);
     buffer[MIN(length, (i32)sizeof buffer-1)] = '\0';
-
-    va_end(args);
-
-    for (auto sink : log_sinks) sink(path, line, type, buffer);
+    log(path, line, type, buffer);
 }
 
 void stdio_sink(const char *path, u32 line, LogType type, const char *msg)
@@ -38,7 +76,6 @@ void stdio_sink(const char *path, u32 line, LogType type, const char *msg)
     switch (type) {
     case LOG_TYPE_INFO:
         break;
-    case LOG_TYPE_ASSERT:
     case LOG_TYPE_PANIC:
     case LOG_TYPE_ERROR:
         out = stderr;
@@ -46,7 +83,7 @@ void stdio_sink(const char *path, u32 line, LogType type, const char *msg)
 
     String filename = filename_of_sz(path);
     const char *type_s = sz_from_enum(type);
-    fprintf(out, "%.*s:%d %s %s\n", STRFMT(filename), line, type_s, msg);
+    fprintf(out, "%.*s:%d %s: %s\n", STRFMT(filename), line, type_s, msg);
 }
 
 String read_memory(MemoryBuffer *buf, Allocator mem) EXPORT
