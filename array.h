@@ -498,7 +498,7 @@ T* array_find_emplace(DynamicArray<T> *arr, const E& value)
 // -------------------------------------------------------------------------------
 template<typename T, i32 N>
 struct FixedArray {
-    T data[N];
+    alignas(alignof(T)) u8 data[sizeof(T)*N];
     i32 count;
 
     using capacity = std::integral_constant<i32, N>;
@@ -506,53 +506,63 @@ struct FixedArray {
     constexpr T& operator[](i32 i)
     {
         ASSERT(i < count && i >= 0);
-        return data[i];
+        return *(T*)&data[i*sizeof(T)];
     }
+
+    T* begin() { return (T*)&data[0]; }
+    T* end()   { return (T*)&data[count*sizeof(T)]; }
+
+    const T* begin() const { return (const T*)&data[0]; }
+    const T* end()   const { return (const T*)&data[count*sizeof(T)]; }
 
     bool operator==(const FixedArray<T, N> &other) const
     {
         if (this->count != other.count) return false;
         if (this->data == other.data) return true;
-        for (i32 i = 0; i < this->count; i++) if (this->data[i] != other.data[i]) return false;
+
+        auto *lhs = begin(), rhs = other.begin();
+        for (i32 i = 0; i < this->count; i++) {
+            if (lhs[i] != rhs[i]) return false;
+        }
         return true;
     }
 
-    T* begin() { return &data[0]; }
-    T* end() { return &data[count]; }
-
     FixedArray() = default;
-
-    FixedArray(FixedArray<T, N> &other) : count(other.count)
+    FixedArray(const FixedArray<T, N> &other) : count(other.count)
     {
-        memcpy(data, other.data, this->count * sizeof data[0]);
+        auto *dst = begin();
+        auto *src = other.begin();
+        for (i32 i = 0; i < other.count; i++) dst[i] = src[i];
     }
 
-    FixedArray(FixedArray<T, N> &&other) : count(other.count)
+    FixedArray<T, N>& operator=(const FixedArray<T, N> &other)
     {
-        memcpy(data, other.data, this->count * sizeof data[0]);
+        this->count = other.count;
+        auto *dst = begin();
+        auto *src = other.begin();
+        for (i32 i = 0; i < other.count; i++) dst[i] = src[i];
+        return *this;
     }
 
     FixedArray(Array<T> arr) : count(MIN(N, arr.count))
     {
-        memcpy(data, arr.data, this->count * sizeof data[0]);
+        auto *dst = begin();
+        for (i32 i = 0; i < arr.count; i++) dst[i] = arr.data[i];
     }
 
     FixedArray(std::initializer_list<T> list) : count(MIN(N, list.size()))
     {
-        memcpy(data, list.begin(), this->count * sizeof data[0]);
+        memcpy(&this->data[0], list.begin(), this->count * sizeof (T));
+        auto *dst = begin();
+        auto *src = list.begin();
+        for (i32 i = 0; i < (i32)list.size(); i++) dst[i] = src[i];
     }
 
     FixedArray<T, N>& operator=(const Array<T> &arr)
     {
         this->count = MIN(N, arr.count);
-        memcpy(data, arr.data, this->count * sizeof data[0]);
-        return *this;
-    }
-
-    FixedArray<T, N>& operator=(const FixedArray<T, N> &arr)
-    {
-        this->count = arr.count;
-        memcpy(data, arr.data, this->count * sizeof data[0]);
+        auto *dst = begin();
+        for (i32 i = 0; i < arr.count; i++) dst[i] = arr.data[i];
         return *this;
     }
 };
@@ -567,7 +577,7 @@ template<typename T, i32 N>
 i32 array_add(FixedArray<T, N> *arr, T e)
 {
     PANIC_IF(arr->count >= N, "FixedArray overflow");
-    arr->data[arr->count] = e;
+    *(T*)&arr->data[arr->count] = e;
     return arr->count++;
 }
 
