@@ -371,9 +371,8 @@ void array_destroy_reset(DynamicArray<T> *arr, Allocator mem, i32 reserve_capaci
     if (reserve_capacity > 0) array_reserve(arr, reserve_capacity);
 }
 
-
 template<typename T>
-i32 array_add(DynamicArray<T> *arr, T e)
+i32 array_add(DynamicArray<T> *arr, const T& e)
 {
     array_grow(arr, 1);
     arr->data[arr->count] = e;
@@ -381,7 +380,7 @@ i32 array_add(DynamicArray<T> *arr, T e)
 }
 
 template<typename T>
-i32 array_add(DynamicArray<T> *arr, T *es, i32 count)
+i32 array_add(DynamicArray<T> *arr, const T *es, i32 count)
 {
     array_grow(arr, count);
     memcpy(&arr->data[arr->count], es, count*sizeof *es);
@@ -391,7 +390,7 @@ i32 array_add(DynamicArray<T> *arr, T *es, i32 count)
 }
 
 template<typename T>
-i32 array_add(DynamicArray<T> *arr, Array<T> es)
+i32 array_add(DynamicArray<T> *arr, const Array<T> es)
 {
     array_grow(arr, es.count);
     memcpy(&arr->data[arr->count], es.data, es.count*sizeof(T));
@@ -408,14 +407,14 @@ i32 array_add(DynamicArray<T> *arr, std::initializer_list<T> list)
 }
 
 template<typename T>
-void array_copy(DynamicArray<T> *dst, Array<T> src)
+void array_copy(DynamicArray<T> *dst, const Array<T> src)
 {
     array_resize(dst, src.count);
     memcpy(dst->data, src.data, src.count*sizeof(T));
 }
 
 template<typename T>
-i32 array_insert(DynamicArray<T> *arr, i32 insert_at, T e)
+i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T& e)
 {
     ASSERT(insert_at <= arr->count);
     array_grow(arr, 1);
@@ -427,7 +426,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, T e)
 }
 
 template<typename T>
-i32 array_insert(DynamicArray<T> *arr, i32 insert_at, T *es, i32 count)
+i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T *es, i32 count)
 {
     ASSERT(insert_at <= arr->count);
     array_grow(arr, count);
@@ -439,7 +438,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, T *es, i32 count)
 }
 
 template<typename T>
-i32 array_insert(DynamicArray<T> *arr, i32 insert_at, Array<T> es)
+i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const Array<T> es)
 {
     ASSERT(insert_at >= 0);
     ASSERT(insert_at <= arr->count);
@@ -453,7 +452,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, Array<T> es)
 
 
 template<typename T>
-i32 array_replace(DynamicArray<T> *arr, i32 start, i32 end, Array<T> values)
+i32 array_replace(DynamicArray<T> *arr, i32 start, i32 end, const Array<T> values)
 {
     ASSERT(start >= 0);
     ASSERT(end >= 0);
@@ -487,7 +486,7 @@ i32 array_replace(DynamicArray<T> *arr, i32 start, i32 end, std::initializer_lis
 
 
 template<typename T, typename E>
-T* array_find_emplace(DynamicArray<T> *arr, E value)
+T* array_find_emplace(DynamicArray<T> *arr, const E& value)
 {
     i32 i = array_find_index(*arr, value);
     if (i >= 0) return &arr->at(i);
