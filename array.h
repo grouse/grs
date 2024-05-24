@@ -379,6 +379,13 @@ i32 array_add(DynamicArray<T> *arr, const T& e)
     return arr->count++;
 }
 
+inline i32 array_add(DynamicArray<const char*> *arr, const char *e)
+{
+    array_grow(arr, 1);
+    arr->data[arr->count] = e;
+    return arr->count++;
+}
+
 template<typename T>
 i32 array_add(DynamicArray<T> *arr, const T *es, i32 count)
 {
@@ -498,29 +505,35 @@ T* array_find_emplace(DynamicArray<T> *arr, const E& value)
 // -------------------------------------------------------------------------------
 template<typename T, i32 N>
 struct FixedArray {
-    alignas(alignof(T)) u8 data[sizeof(T)*N];
-    i32 count;
-
     using capacity = std::integral_constant<i32, N>;
+
+private:
+    alignas(alignof(T)) u8 storage[sizeof(T)*N];
+
+public:
+    i32 count;
 
     constexpr T& operator[](i32 i)
     {
         ASSERT(i < count && i >= 0);
-        return *(T*)&data[i*sizeof(T)];
+        return *(T*)&storage[i*sizeof(T)];
     }
 
-    T* begin() { return (T*)&data[0]; }
-    T* end()   { return (T*)&data[count*sizeof(T)]; }
+    constexpr T* data(i32 i = 0) { return &((T*)storage)[i]; }
 
-    const T* begin() const { return (const T*)&data[0]; }
-    const T* end()   const { return (const T*)&data[count*sizeof(T)]; }
+    T* begin() { return (T*)&storage[0]; }
+    T* end()   { return (T*)&storage[count*sizeof(T)]; }
+
+    const T* begin() const { return (const T*)&storage[0]; }
+    const T* end()   const { return (const T*)&storage[count*sizeof(T)]; }
 
     bool operator==(const FixedArray<T, N> &other) const
     {
         if (this->count != other.count) return false;
-        if (this->data == other.data) return true;
+        if (this->storage == other.storage) return true;
 
-        auto *lhs = begin(), rhs = other.begin();
+        auto *lhs = begin();
+        auto *rhs = other.begin();
         for (i32 i = 0; i < this->count; i++) {
             if (lhs[i] != rhs[i]) return false;
         }
@@ -540,22 +553,21 @@ struct FixedArray {
         this->count = other.count;
         auto *dst = begin();
         auto *src = other.begin();
-        for (i32 i = 0; i < other.count; i++) dst[i] = src[i];
+        for (i32 i = 0; i < count; i++) dst[i] = src[i];
         return *this;
     }
 
     FixedArray(Array<T> arr) : count(MIN(N, arr.count))
     {
         auto *dst = begin();
-        for (i32 i = 0; i < arr.count; i++) dst[i] = arr.data[i];
+        for (i32 i = 0; i < count; i++) dst[i] = arr.data[i];
     }
 
     FixedArray(std::initializer_list<T> list) : count(MIN(N, list.size()))
     {
-        memcpy(&this->data[0], list.begin(), this->count * sizeof (T));
         auto *dst = begin();
         auto *src = list.begin();
-        for (i32 i = 0; i < (i32)list.size(); i++) dst[i] = src[i];
+        for (i32 i = 0; i < count; i++) dst[i] = src[i];
     }
 
     FixedArray<T, N>& operator=(const Array<T> &arr)
@@ -568,16 +580,16 @@ struct FixedArray {
 };
 
 template<typename T, i32 N>
-ArrayIterator<T> iterator(FixedArray<T, N> &arr) { return { { .data = arr.data, .count = arr.count } }; }
+ArrayIterator<T> iterator(FixedArray<T, N> &arr) { return { { .data = arr.data(), .count = arr.count } }; }
 
 template<typename T, i32 N>
-ReverseIterator<T> reverse(FixedArray<T, N> &arr) { return { { .data = arr.data, .count = arr.count } }; }
+ReverseIterator<T> reverse(FixedArray<T, N> &arr) { return { { .data = arr.data(), .count = arr.count } }; }
 
 template<typename T, i32 N>
 i32 array_add(FixedArray<T, N> *arr, T e)
 {
     PANIC_IF(arr->count >= N, "FixedArray overflow");
-    *(T*)&arr->data[arr->count] = e;
+    *arr->data(arr->count) = e;
     return arr->count++;
 }
 
@@ -585,7 +597,7 @@ template<typename T, i32 N>
 i32 array_add(FixedArray<T, N> *arr, T *es, i32 count)
 {
     PANIC_IF(arr->count+count > N, "FixedArray overflow");
-    memcpy(&arr->data[arr->count], es, count*sizeof *es);
+    memcpy(arr->data(arr->count), es, count*sizeof *es);
     arr->count += count;
     return arr->count;
 }
@@ -594,14 +606,14 @@ template<typename T, i32 N>
 T array_pop(FixedArray<T, N> *arr)
 {
     ASSERT(arr->count > 0);
-    return arr->data[--arr->count];
+    return *arr->data(--arr->count);
 }
 
 template<typename T, i32 N>
 T* array_tail(FixedArray<T, N> &arr)
 {
     if (arr.count == 0) return nullptr;
-    return &arr.data[arr.count-1];
+    return arr.data(arr.count-1);
 }
 
 template<typename T, i32 N>
@@ -610,14 +622,14 @@ Array<T> slice(FixedArray<T, N> &arr, i32 start, i32 end)
     ASSERT(start <= end);
     ASSERT(start <= arr.count);
     ASSERT(end <= arr.count);
-    return { .data = &arr.data[start], .count = end-start };
+    return { .data = arr.data(start), .count = end-start };
 }
 
 template<typename T, i32 N>
 Array<T> slice(FixedArray<T, N> &arr, i32 start)
 {
     ASSERT(start <= arr.count);
-    return { .data = &arr.data[start], .count = arr.count-start };
+    return { .data = arr.data(start), .count = arr.count-start };
 }
 
 
