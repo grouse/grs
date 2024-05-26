@@ -6,10 +6,7 @@
 Vector2 abs(Vector2 v) EXPORT
 {
     // TODO(jesper): cmath dependency
-    Vector2 r;
-    r.x = fabsf(v.x);
-    r.y = fabsf(v.y);
-    return r;
+    return Vector2{ fabsf(v.x), fabsf(v.y) };
 }
 
 Vector2 lerp(Vector2 a, Vector2 b, f32 t) EXPORT
@@ -119,6 +116,11 @@ f32 dot(Vector2 lhs, Vector2 rhs) EXPORT { return lhs.x * rhs.x + lhs.y * rhs.y;
 
 
 // Vector3
+Vector3 abs(Vector3 v) EXPORT
+{
+    // TODO(jesper): cmath dependency
+    return Vector3{ fabsf(v.x), fabsf(v.y), fabsf(v.z ) };
+}
 f32 length(Vector3 v) EXPORT { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z); }
 f32 length_sq(Vector3 v) EXPORT { return dot(v, v); }
 
