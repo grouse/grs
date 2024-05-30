@@ -112,6 +112,11 @@ Vector2 operator/(Vector2 v, f32 scalar)
     return { v.x / scalar, v.y / scalar };
 }
 
+Vector2 operator/(Vector2 lhs, Vector2 rhs)
+{
+    return { lhs.x / rhs.x, lhs.y / rhs.y };
+}
+
 f32 dot(Vector2 lhs, Vector2 rhs) EXPORT { return lhs.x * rhs.x + lhs.y * rhs.y; }
 
 
