@@ -495,7 +495,7 @@ Matrix3 mat3_transpose(Matrix3 m) EXPORT
     return r;
 }
 
-Matrix3 inverse(Matrix3 m) EXPORT
+Matrix3 mat3_inverse(Matrix3 m) EXPORT
 {
     f32 det =
         m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
