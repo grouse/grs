@@ -296,6 +296,16 @@ Vector4 operator*(f32 scalar, Vector4 v)
     return r;
 }
 
+Vector4 operator*(Vector4 lhs, Vector4 rhs)
+{
+    Vector4 r;
+    r.x = lhs.x * rhs.x;
+    r.y = lhs.y * rhs.y;
+    r.z = lhs.z * rhs.z;
+    r.w = lhs.w * rhs.w;
+    return r;
+}
+
 Vector4 operator+(Vector4 lhs, Vector4 rhs)
 {
     Vector4 r;
