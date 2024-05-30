@@ -679,6 +679,30 @@ Matrix4 mat4_inv_transform(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
     return r;
 }
 
+Matrix4 mat4_transpose(Matrix4 m) EXPORT
+{
+    Matrix4 r;
+    r[0][0] = m[0][0];
+    r[0][1] = m[1][0];
+    r[0][2] = m[2][0];
+    r[0][3] = m[3][0];
+
+    r[1][0] = m[0][1];
+    r[1][1] = m[1][1];
+    r[1][2] = m[2][1];
+    r[1][3] = m[3][1];
+
+    r[2][0] = m[0][2];
+    r[2][1] = m[1][2];
+    r[2][2] = m[2][2];
+    r[2][3] = m[3][2];
+
+    r[3][0] = m[0][3];
+    r[3][1] = m[1][3];
+    r[3][2] = m[2][3];
+    r[3][3] = m[3][3];
+    return r;
+}
 Matrix4 operator*(Matrix4 lhs, Matrix4 rhs) EXPORT
 {
     Matrix4 m{};
