@@ -119,6 +119,7 @@ struct Vector4 {
     union {
         struct { f32 x, y, z, w; };
         struct { f32 r, g, b, a; };
+        struct { Vector2 xy; Vector2 zw; };
         struct { Vector3 rgb; f32 _a; };
         struct { Vector3 xyz; f32 _w; };
         f32 data[4];
