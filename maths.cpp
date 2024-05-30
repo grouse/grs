@@ -769,6 +769,15 @@ Matrix4 operator*(Matrix4 lhs, Matrix4 rhs) EXPORT
     return m;
 }
 
+Matrix4 operator*(Matrix4 m, f32 scalar) EXPORT
+{
+    Matrix4 r;
+    r[0] = m[0] * scalar;
+    r[1] = m[1] * scalar;
+    r[2] = m[2] * scalar;
+    r[3] = m[3] * scalar;
+    return r;
+}
 
 // intersection tests
 bool point_in_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size, f32 epsilon) EXPORT
