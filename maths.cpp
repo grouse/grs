@@ -703,6 +703,62 @@ Matrix4 mat4_transpose(Matrix4 m) EXPORT
     r[3][3] = m[3][3];
     return r;
 }
+
+Matrix4 mat4_inverse(Matrix4 m) EXPORT
+{
+    f32 c00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+    f32 c02 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
+    f32 c03 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
+
+    f32 c04 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+    f32 c06 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+    f32 c07 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
+
+    f32 c08 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+    f32 c10 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+    f32 c11 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+
+    f32 c12 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+    f32 c14 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
+    f32 c15 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
+
+    f32 c16 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+    f32 c18 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+    f32 c19 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+
+    f32 c20 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+    f32 c22 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+    f32 c23 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+    Vector4 f0{ c00, c00, c02, c03 };
+    Vector4 f1{ c04, c04, c06, c07 };
+    Vector4 f2{ c08, c08, c10, c11 };
+    Vector4 f3{ c12, c12, c14, c15 };
+    Vector4 f4{ c16, c16, c18, c19 };
+    Vector4 f6{ c20, c20, c22, c23 };
+
+    Vector4 v0{ m[1][0], m[0][0], m[0][0], m[0][0] };
+    Vector4 v1{ m[1][1], m[0][1], m[0][1], m[0][1] };
+    Vector4 v2{ m[1][2], m[0][2], m[0][2], m[0][2] };
+    Vector4 v3{ m[1][3], m[0][3], m[0][3], m[0][3] };
+
+    Vector4 inv0{ v1 * f0 - v2 * f1 + v3 * f2 };
+    Vector4 inv1{ v0 * f0 - v2 * f3 + v3 * f4 };
+    Vector4 inv2{ v0 * f1 - v1 * f3 + v3 * f6 };
+    Vector4 inv3{ v0 * f2 - v1 * f4 + v2 * f6 };
+
+    Vector4 sign_a{ +1, -1, +1, -1 };
+    Vector4 sign_b{ -1, +1, -1, +1 };
+    Matrix4 inv{ inv0 * sign_a, inv1 * sign_b, inv2 * sign_a, inv3 * sign_b };
+
+    Vector4 row0{ inv[0][0], inv[1][0], inv[2][0], inv[3][0] };
+    Vector4 d0{ m[0] * row0 };
+    f32 d1 = (d0.x + d0.y) + (d0.z + d0.w);
+
+    f32 inv_det = 1 / d1;
+    return inv * inv_det;
+}
+
 Matrix4 operator*(Matrix4 lhs, Matrix4 rhs) EXPORT
 {
     Matrix4 m{};
