@@ -160,6 +160,10 @@ struct Matrix4 {
     };
 
     M_SUBSCRIPT_OPS(Vector4, columns);
+    constexpr Vector4 row(i32 i)
+    {
+        return { columns[0][i], columns[1][i], columns[2][i], columns[3][i] };
+    }
 };
 M_MATRIX_OPS(Matrix4, Vector4);
 
