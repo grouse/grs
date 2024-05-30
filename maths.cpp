@@ -771,7 +771,61 @@ Matrix4 operator*(Matrix4 m, f32 scalar) EXPORT
     return r;
 }
 
+
 // intersection tests
+bool ray_intersect_capsule(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 cap_p0, Vector3 cap_p1, f32 cap_r,
+    f32 *tr) EXPORT
+{
+    Vector3 ldir = cap_p1-cap_p0;
+    Vector3 p = cap_p0-ray_o;
+    f32 q = length_sq(ldir);
+    f32 r = dot(ldir, ray_d);
+    f32 s = dot(ldir, p);
+    f32 t = dot(ray_d, p);
+    f32 denom = q - r*r;
+
+    f32 sn, sd, tn, td;
+    if (denom < f32_EPSILON) {
+        sd = td = 1.0f;
+        sn = 0.0f;
+        tn = t;
+    } else {
+        sd = td = denom;
+        sn = r * t - s;
+        tn = q * t - r * s;
+        if (sn < 0.0f) {
+            sn = 0.0f;
+            tn = t;
+            td = 1.0f;
+        } else if (sn > sd) {
+            sn = sd;
+            tn = t + r;
+            td = 1.0f;
+        }
+    }
+
+    f32 ts;
+    if (tn < 0.0f) {
+        *tr = 0.0f;
+        if (r >= 0.0f) {
+            ts = 0.0f;
+        } else if (s <= q) {
+            ts = 1.0f;
+        } else {
+            ts = -s/q;
+        }
+    } else {
+        *tr = tn/td;
+        ts = sn/sd;
+    }
+
+    Vector3 nearest_p = cap_p0+ldir*ts;
+    f32 dist_sq = length_sq(ray_o+ray_d*(*tr) - nearest_p);
+    return dist_sq < cap_r*cap_r;
+}
+
 bool point_in_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size, f32 epsilon) EXPORT
 {
     return
