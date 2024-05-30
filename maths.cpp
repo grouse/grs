@@ -316,6 +316,16 @@ Vector4 operator+(Vector4 lhs, Vector4 rhs)
     return r;
 }
 
+Vector4 operator-(Vector4 lhs, Vector4 rhs)
+{
+    Vector4 r;
+    r.x = lhs.x - rhs.x;
+    r.y = lhs.y - rhs.y;
+    r.z = lhs.z - rhs.z;
+    r.w = lhs.w - rhs.w;
+    return r;
+}
+
 Vector4 operator*(Matrix4 m, Vector4 v)
 {
     Vector4 r;
