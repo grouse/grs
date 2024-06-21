@@ -653,7 +653,7 @@ Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
     f32 tan_half_fov = tanf(fov/2);
     r[0][0] = 1 / (aspect * tan_half_fov);
     r[1][1] = 1 / tan_half_fov;
-    r[2][2] = far_z/(near_z - far_z);
+    r[2][2] = far_z/(near_z-far_z);
     r[2][3] = -1;
     r[3][2] = -(far_z * near_z)/(far_z - near_z);
 
@@ -662,9 +662,9 @@ Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
 
 Matrix4 mat4_inv_transform(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
 {
-    Vector3 Z = normalise(-forward);
-    Vector3 X = normalise(cross(up, Z));
-    Vector3 Y = cross(Z, X);
+    Vector3 Z = normalise(forward);
+    Vector3 X = normalise(cross(Z, up));
+    Vector3 Y = cross(X, Z);
 
     Matrix4 r;
     r[0] = { X[0], Y[0], Z[0], 0 };
