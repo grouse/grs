@@ -437,7 +437,7 @@ Matrix3 mat3_identity() EXPORT
     return r;
 }
 
-Matrix3 orthographic3(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
+Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
 {
     Matrix3 r = mat3_identity();
 
@@ -449,14 +449,14 @@ Matrix3 orthographic3(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/
     return r;
 }
 
-Matrix3 translate(Matrix3 m, Vector3 v) EXPORT
+Matrix3 mat3_translate(Matrix3 m, Vector3 v) EXPORT
 {
     Matrix3 r = m;
     r[2] = m[0]*v[0] + m[1]*v[1] + m[2]*v[2];
     return r;
 }
 
-Matrix3 scale(Matrix3 m, f32 scalar) EXPORT
+Matrix3 mat3_scale(Matrix3 m, f32 scalar) EXPORT
 {
     Matrix3 r;
     r[0] = m[0] * scalar;
@@ -465,16 +465,16 @@ Matrix3 scale(Matrix3 m, f32 scalar) EXPORT
     return r;
 }
 
-Matrix3 transform(Matrix3 projection, Vector2 position) EXPORT
+Matrix3 mat3_transform(Matrix3 projection, Vector2 position) EXPORT
 {
-    Matrix3 view = translate(mat3_identity(), { .xy = -position, 1 });
+    Matrix3 view = mat3_translate(mat3_identity(), { .xy = -position, 1 });
     return projection*view;
 }
 
-Matrix3 transform(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
+Matrix3 mat3_transform(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
 {
-    Matrix3 mview = translate(mat3_identity(), { .xy = -position, 1 });
-    Matrix3 mscale = scale(mat3_identity(), uni_scale);
+    Matrix3 mview = mat3_translate(mat3_identity(), { .xy = -position, 1 });
+    Matrix3 mscale = mat3_scale(mat3_identity(), uni_scale);
     return projection*mview*mscale;
 }
 
@@ -631,7 +631,7 @@ void mat4_trs_decompose(
     *rot = quat_from_mat4(trs);
 }
 
-Matrix4 orthographic4(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
+Matrix4 mat4_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
 {
     Matrix4 r = mat4_identity();
 
@@ -645,6 +645,9 @@ Matrix4 orthographic4(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/
 
 Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
 {
+    // right-handed perspective projection
+    // zero-to-one depth range
+
     Matrix4 r{};
 
     f32 tan_half_fov = tanf(fov/2);
