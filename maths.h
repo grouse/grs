@@ -36,12 +36,12 @@ extern "C" CRTIMP float fmodf( float x, float y ) NOTHROW;
 
 
 #define M_ADD_OPS(R, T_l, T_r)\
-    R operator+(T_l lhs,   T_l rhs);\
-    R operator+=(T_l &lhs, T_l rhs)\
+    R operator+(T_l lhs,   T_r rhs);\
+    R operator+=(T_l &lhs, T_r rhs)\
 
 #define M_SUB_OPS(R, T_l, T_r)\
-    R operator-(T_l lhs,   T_l rhs);\
-    R operator-=(T_l &lhs, T_l rhs)
+    R operator-(T_l lhs,   T_r rhs);\
+    R operator-=(T_l &lhs, T_r rhs)
 
 #define M_MUL_OPS(R, T_l, T_r)\
     R operator*(T_l lhs,   T_r rhs);\
@@ -62,7 +62,9 @@ extern "C" CRTIMP float fmodf( float x, float y ) NOTHROW;
 
 #define M_VECTOR_OPS(T)\
     M_ADD_OPS(T, T, T);\
+    M_ADD_OPS(T, T, f32);\
     M_SUB_OPS(T, T, T);\
+    M_SUB_OPS(T, T, f32);\
     M_MUL_OPS(T, T, T);\
     M_MUL_OPS(T, T, f32);\
     M_MUL_OPS(T, f32, T);\
@@ -178,7 +180,6 @@ struct Quaternion {
 
     M_SUBSCRIPT_OPS(f32, data);
 };
-
 
 struct Rect {
     union {

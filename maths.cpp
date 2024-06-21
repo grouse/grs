@@ -54,6 +54,14 @@ Vector2 operator+(Vector2 v, f32 scalar)
     return r;
 }
 
+Vector2 operator-(Vector2 v, f32 scalar)
+{
+    Vector2 r;
+    r.x = v.x - scalar;
+    r.y = v.y - scalar;
+    return r;
+}
+
 Vector2 operator+=(Vector2 &lhs, Vector2 rhs)
 {
     lhs.x += rhs.x;
