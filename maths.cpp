@@ -837,6 +837,30 @@ bool ray_intersect_capsule(
     return dist_sq < cap_r*cap_r;
 }
 
+bool nearest_ray_vs_line(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 line_o, Vector3 line_d,
+    f32 *t, f32 *u) EXPORT
+{
+    Vector3 v = ray_o - line_o;
+    f32 q = dot(ray_d, line_d);
+    f32 s = dot(line_d, v);
+
+    f32 d = 1.0f - q*q;
+    if (d < f32_EPSILON) { // parallel
+        *t = 0.0f;
+        *u = s;
+        *t = MAX(*u, 0.0f);
+        return false;
+    } else {
+        f32 r = dot(ray_d, v);
+        *t = (q*s - r) / d;
+        *u = (s - q*r) / d;
+        *t = MAX(*t, 0.0f);
+        return true;
+    }
+}
+
 bool point_in_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size, f32 epsilon) EXPORT
 {
     return
