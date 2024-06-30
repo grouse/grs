@@ -85,6 +85,8 @@ struct Vector2 {
     union {
         struct { f32 x, y; };
         struct { f32 w, h; };
+        struct { f32 u, v; };
+        struct { f32 r, g; };
         f32 data[2];
     };
 
@@ -105,11 +107,16 @@ M_VECTOR_OPS(Vector2);
 struct Vector3 {
     union {
         struct { f32 x, y, z; };
-        struct { f32 r, g, b; };
-        struct { f32 w, h, d; };
         struct { Vector2 xy; f32 _z; };
+        struct { f32 _x; Vector2 yz; };
+
+        struct { f32 r, g, b; };
         struct { Vector2 rg; f32 _b; };
+        struct { f32 _r; Vector2 gb; };
+
+        struct { f32 w, h, d; };
         struct { Vector2 wh; f32 _d; };
+        struct { f32 _w; Vector2 hd; };
         f32 data[3];
     };
 
@@ -120,10 +127,14 @@ M_VECTOR_OPS(Vector3);
 struct Vector4 {
     union {
         struct { f32 x, y, z, w; };
-        struct { f32 r, g, b, a; };
         struct { Vector2 xy; Vector2 zw; };
-        struct { Vector3 rgb; f32 _a; };
         struct { Vector3 xyz; f32 _w; };
+        struct { f32 _x; Vector3 yzw; };
+
+        struct { f32 r, g, b, a; };
+        struct { Vector3 rgb; f32 _a; };
+        struct { Vector2 rg; Vector2 ba; };
+        struct { f32 _r; Vector3 gba; };
         f32 data[4];
     };
 
