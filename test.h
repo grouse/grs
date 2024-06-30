@@ -1,8 +1,24 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include <stdarg.h>
+#define CATEGORY(cat) __attribute__((annotate("category:" #cat)))
+#define TEST_PROC(name, ...) void CAT(test_, name)() __attribute__((annotate("test"))) __VA_ARGS__
+#define EXPECT_FAIL(...)
+
+#endif // TEST_H
+
+#ifdef TEST_H_IMPL
+#undef TEST_H_IMPL
+
 #include <setjmp.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <new>
+
+#include "core.h"
 
 typedef void (*test_proc_t)();
 
@@ -24,12 +40,14 @@ struct TestSuite {
 extern TestSuite *test_current;
 extern int test_expect_fail;
 
+extern jmp_buf test_jmp_[2];
+extern int test_jmp_i;
+#define test_jmp test_jmp_[test_jmp_i]
+
 extern int run_tests(TestSuite *tests, int count);
 extern void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...);
 extern void report_failv(const char *file, int line, const char *sz_cond, const char *msg, va_list va_args);
 
-#define CATEGORY(cat) __attribute__((annotate("category:" #cat)))
-#define TEST_PROC(name, ...) void CAT(test_, name)() __attribute__((annotate("test"))) __VA_ARGS__
 
 #define REPORT_FAIL(...) report_fail(__FILE__, __LINE__, __VA_ARGS__)
 
@@ -39,33 +57,14 @@ extern void report_failv(const char *file, int line, const char *sz_cond, const 
     bool failed = false;\
     switch (setjmp(test_jmp)) {\
     case 1: failed=true; break;\
-    case 0: { body } break;\
+    case 0: { body; } break;\
     }\
     if (!failed) REPORT_FAIL(nullptr, "expected failure");\
     test_expect_fail=false;\
     test_jmp_i=0;\
 } while(0)
 
-
-#endif // TEST_H
-
-
-#ifdef TEST_H_IMPL
-#undef TEST_H_IMPL
-
-#include "core.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <signal.h>
-#include <setjmp.h>
-
-#include <new>
-
 jmp_buf test_jmp_[2];  int test_jmp_i = 0;
-#define test_jmp test_jmp_[test_jmp_i]
 
 TestSuite *test_current = nullptr;
 int test_expect_fail = 0;

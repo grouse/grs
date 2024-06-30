@@ -1,3 +1,6 @@
+#define TEST_H_IMPL
+#include "test.h"
+
 #include "maths.cpp"
 #include "core.cpp"
 #include "string.cpp"
@@ -6,8 +9,6 @@
 
 #include "gen/tests/tests.h"
 
-#define TEST_H_IMPL
-#include "test.h"
 
 int main()
 {
