@@ -1583,3 +1583,77 @@ Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
     l.a = sRGB.a;
     return l;
 }
+
+
+/// test suite
+#include "test.h"
+TEST_PROC(vec3_operators, CATEGORY(vector3))
+{
+    {
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        Vector3 c = a + b;
+        ASSERT(c.x == 6);
+        ASSERT(c.y == 9);
+        ASSERT(c.z == 14);
+    }
+    {
+        Vector3 a{ 1, 2, 3 };
+        f32 s = 5;
+        Vector3 c = a + s;
+        ASSERT(c.x == 6);
+        ASSERT(c.y == 7);
+        ASSERT(c.z == 8);
+    }
+
+    {
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        Vector3 c = a - b;
+        ASSERT(c.x == -4);
+        ASSERT(c.y == -5);
+        ASSERT(c.z == -8);
+    }
+    {
+        Vector3 a{ 1, 2, 3 };
+        f32 s = 5;
+        Vector3 c = a - s;
+        ASSERT(c.x == -4);
+        ASSERT(c.y == -3);
+        ASSERT(c.z == -2);
+    }
+
+    {
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        Vector3 c = a * b;
+        ASSERT(c.x == 5);
+        ASSERT(c.y == 14);
+        ASSERT(c.z == 33);
+    }
+    {
+        Vector3 a{ 1, 2, 3 };
+        f32 s = 5;
+        Vector3 c = a * s;
+        ASSERT(c.x == 5);
+        ASSERT(c.y == 10);
+        ASSERT(c.z == 15);
+    }
+
+    {
+        Vector3 a{ 1, 2, 4 };
+        Vector3 b{ 8, 16, 32};
+        Vector3 c = a / b;
+        ASSERT(c.x == 0.125f);
+        ASSERT(c.y == 0.125f);
+        ASSERT(c.z == 0.125f);
+    }
+    {
+        Vector3 a{ 1, 2, 4 };
+        f32 s = 8;
+        Vector3 c = a / s;
+        ASSERT(c.x == 0.125f);
+        ASSERT(c.y == 0.25f);
+        ASSERT(c.z == 0.5f);
+    }
+}

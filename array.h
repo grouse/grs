@@ -690,4 +690,10 @@ struct StaticArray : Array<T> {
     }
 };
 
+/// test suite
+#include "test.h"
+static TEST_PROC(array)
+{
+}
+
 #endif // ARRAY_H
