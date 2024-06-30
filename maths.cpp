@@ -1617,6 +1617,90 @@ Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
 
 /// test suite
 #include "test.h"
+TEST_PROC(vec2_operators, CATEGORY(vector2))
+{
+    {
+        Vector2 a{ 1, 2 };
+        Vector2 b{ 5, 7 };
+        Vector2 c = a + b;
+        ASSERT(c.x == 6);
+        ASSERT(c.y == 9);
+    }
+    {
+        Vector2 a{ 1, 2 };
+        f32 s = 5;
+        Vector2 c = a + s;
+        ASSERT(c.x == 6);
+        ASSERT(c.y == 7);
+    }
+
+    {
+        Vector2 a{ 1, 2 };
+        Vector2 b{ 5, 7 };
+        Vector2 c = a - b;
+        ASSERT(c.x == -4);
+        ASSERT(c.y == -5);
+    }
+    {
+        Vector2 a{ 1, 2 };
+        f32 s = 5;
+        Vector2 c = a - s;
+        ASSERT(c.x == -4);
+        ASSERT(c.y == -3);
+    }
+
+    {
+        Vector2 a{ 1, 2 };
+        Vector2 b{ 5, 7 };
+        Vector2 c = a * b;
+        ASSERT(c.x == 5);
+        ASSERT(c.y == 14);
+    }
+    {
+        Vector2 a{ 1, 2 };
+        f32 s = 5;
+        Vector2 c = a * s;
+        ASSERT(c.x == 5);
+        ASSERT(c.y == 10);
+    }
+
+    {
+        Vector2 a{ 1, 2 };
+        Vector2 b{ 8, 16 };
+        Vector2 c = a / b;
+        ASSERT(c.x == 0.125f);
+        ASSERT(c.y == 0.125f);
+    }
+    {
+        Vector2 a{ 1, 2 };
+        f32 s = 8;
+        Vector2 c = a / s;
+        ASSERT(c.x == 0.125f);
+        ASSERT(c.y == 0.25f);
+    }
+}
+
+TEST_PROC(vec2_swizzle, CATEGORY(vector2))
+{
+    {
+        Vector2 a{ 1, 2 };
+        ASSERT(a[0] == 1);
+        ASSERT(a[1] == 2);
+
+        ASSERT(a.x == 1);
+        ASSERT(a.y == 2);
+
+        ASSERT(a.w == 1);
+        ASSERT(a.h == 2);
+
+        ASSERT(a.r == 1);
+        ASSERT(a.g == 2);
+
+        ASSERT(a.u == 1);
+        ASSERT(a.v == 2);
+    }
+}
+
 TEST_PROC(vec3_operators, CATEGORY(vector3))
 {
     {
@@ -1685,5 +1769,144 @@ TEST_PROC(vec3_operators, CATEGORY(vector3))
         ASSERT(c.x == 0.125f);
         ASSERT(c.y == 0.25f);
         ASSERT(c.z == 0.5f);
+    }
+}
+
+TEST_PROC(vec3_swizzle, CATEGORY(vector3))
+{
+    {
+        Vector3 a{ 1, 2, 3 };
+        ASSERT(a[0] == 1);
+        ASSERT(a[1] == 2);
+        ASSERT(a[2] == 3);
+
+        ASSERT(a.x == 1);
+        ASSERT(a.y == 2);
+        ASSERT(a.z == 3);
+
+        ASSERT(a.w == 1);
+        ASSERT(a.h == 2);
+        ASSERT(a.d == 3);
+
+        ASSERT(a.r == 1);
+        ASSERT(a.g == 2);
+        ASSERT(a.b == 3);
+
+        ASSERT(a.xy == Vector2{ 1, 2 });
+        ASSERT(a.yz == Vector2{ 2, 3 });
+
+        ASSERT(a.wh == Vector2{ 1, 2 });
+        ASSERT(a.hd == Vector2{ 2, 3 });
+
+        ASSERT(a.rg == Vector2{ 1, 2 });
+        ASSERT(a.gb == Vector2{ 2, 3 });
+    }
+}
+
+TEST_PROC(vec4_operators, CATEGORY(vector4))
+{
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        Vector4 b{ 7, 9, 11, 13 };
+        Vector4 c = a + b;
+        ASSERT(c.x == 8);
+        ASSERT(c.y == 11);
+        ASSERT(c.z == 14);
+        ASSERT(c.w == 18);
+    }
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        f32 s = 7;
+        Vector4 c = a + s;
+        ASSERT(c.x == 8);
+        ASSERT(c.y == 9);
+        ASSERT(c.z == 10);
+        ASSERT(c.w == 12);
+    }
+
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        Vector4 b{ 7, 9, 11, 13 };
+        Vector4 c = a - b;
+        ASSERT(c.x == -6);
+        ASSERT(c.y == -7);
+        ASSERT(c.z == -8);
+        ASSERT(c.w == -8);
+    }
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        f32 s = 7;
+        Vector4 c = a - s;
+        ASSERT(c.x == -6);
+        ASSERT(c.y == -5);
+        ASSERT(c.z == -4);
+        ASSERT(c.w == -2);
+    }
+
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        Vector4 b{ 7, 9, 11, 13 };
+        Vector4 c = a * b;
+        ASSERT(c.x == 7);
+        ASSERT(c.y == 18);
+        ASSERT(c.z == 33);
+        ASSERT(c.w == 65);
+    }
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        f32 s = 7;
+        Vector4 c = a * s;
+        ASSERT(c.x == 7);
+        ASSERT(c.y == 14);
+        ASSERT(c.z == 21);
+        ASSERT(c.w == 35);
+    }
+
+    {
+        Vector4 a{ 1, 2, 4, 8 };
+        Vector4 b{ 8, 16, 32, 64 };
+        Vector4 c = a / b;
+        ASSERT(c.x == 0.125f);
+        ASSERT(c.y == 0.125f);
+        ASSERT(c.z == 0.125f);
+        ASSERT(c.w == 0.125f);
+    }
+    {
+        Vector4 a{ 1, 2, 4, 8 };
+        f32 s = 16;
+        Vector4 c = a / s;
+        ASSERT(c.x == 0.0625f);
+        ASSERT(c.y == 0.125f);
+        ASSERT(c.z == 0.25f);
+        ASSERT(c.w == 0.5f);
+    }
+}
+
+TEST_PROC(vec4_swizzle, CATEGORY(vector4))
+{
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        ASSERT(a[0] == 1);
+        ASSERT(a[1] == 2);
+        ASSERT(a[2] == 3);
+        ASSERT(a[3] == 5);
+
+        ASSERT(a.x == 1);
+        ASSERT(a.y == 2);
+        ASSERT(a.z == 3);
+        ASSERT(a.w == 5);
+
+        ASSERT(a.r == 1);
+        ASSERT(a.g == 2);
+        ASSERT(a.b == 3);
+        ASSERT(a.a == 5);
+
+        ASSERT(a.xy == Vector2{ 1, 2 });
+        ASSERT(a.zw == Vector2{ 3, 5 });
+        ASSERT(a.xyz == Vector3{ 1, 2, 3 });
+
+        ASSERT(a.rg == Vector2{ 1, 2 });
+        ASSERT(a.ba == Vector2{ 3, 5 });
+        ASSERT(a.rgb == Vector3{ 1, 2, 3 });
     }
 }
