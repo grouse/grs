@@ -177,12 +177,12 @@ Vector3 operator+(Vector3 lhs, Vector3 rhs)
     return r;
 }
 
-Vector3 operator+(f32 scalar, Vector3 v)
+Vector3 operator+(Vector3 v, f32 scalar)
 {
     Vector3 r;
-    r.x = scalar + v.x;
-    r.y = scalar + v.y;
-    r.z = scalar + v.z;
+    r.x = v.x + scalar;
+    r.y = v.y + scalar;
+    r.z = v.z + scalar;
     return r;
 }
 
@@ -200,6 +200,15 @@ Vector3 operator-(Vector3 lhs, Vector3 rhs)
     r.x = lhs.x-rhs.x;
     r.y = lhs.y-rhs.y;
     r.z = lhs.z-rhs.z;
+    return r;
+}
+
+Vector3 operator-(Vector3 v, f32 scalar)
+{
+    Vector3 r;
+    r.x = v.x-scalar;
+    r.y = v.y-scalar;
+    r.z = v.z-scalar;
     return r;
 }
 
@@ -235,6 +244,15 @@ Vector3 operator*(Vector3 lhs, Vector3 rhs)
     v.x = lhs.x * rhs.x;
     v.y = lhs.y * rhs.y;
     v.z = lhs.z * rhs.z;
+    return v;
+}
+
+Vector3 operator/(Vector3 lhs, Vector3 rhs)
+{
+    Vector3 v;
+    v.x = lhs.x / rhs.x;
+    v.y = lhs.y / rhs.y;
+    v.z = lhs.z / rhs.z;
     return v;
 }
 
