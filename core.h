@@ -61,8 +61,8 @@ extern panic_handler_t panic_handler;
 #define PANIC_HANDLER(sz_cond, ...) panic_handler(__FILE__, __LINE__, sz_cond, __VA_ARGS__)
 
 #ifndef ASSERT
-#define ASSERT(cond) do {\
-    if (!(cond) && ASSERT_HANDLER(cond)) {\
+#define ASSERT(...) do {\
+    if (!(__VA_ARGS__) && ASSERT_HANDLER((__VA_ARGS__))) {\
         DEBUG_BREAK();\
     }\
 } while(0)
