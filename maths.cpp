@@ -342,6 +342,16 @@ Vector4 operator+(Vector4 lhs, Vector4 rhs)
     return r;
 }
 
+Vector4 operator+(Vector4 v, f32 scalar)
+{
+    Vector4 r;
+    r.x = v.x + scalar;
+    r.y = v.y + scalar;
+    r.z = v.z + scalar;
+    r.w = v.w + scalar;
+    return r;
+}
+
 Vector4 operator-(Vector4 lhs, Vector4 rhs)
 {
     Vector4 r;
@@ -352,6 +362,16 @@ Vector4 operator-(Vector4 lhs, Vector4 rhs)
     return r;
 }
 
+Vector4 operator-(Vector4 lhs, f32 scalar)
+{
+    Vector4 r;
+    r.x = lhs.x - scalar;
+    r.y = lhs.y - scalar;
+    r.z = lhs.z - scalar;
+    r.w = lhs.w - scalar;
+    return r;
+}
+
 Vector4 operator*(Matrix4 m, Vector4 v)
 {
     Vector4 r;
@@ -359,6 +379,16 @@ Vector4 operator*(Matrix4 m, Vector4 v)
     r[1] = m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z + m[3][1]*v.w;
     r[2] = m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z + m[3][2]*v.w;
     r[3] = m[0][3] * v.x + m[1][3] * v.y + m[2][3] * v.z + m[3][3]*v.w;
+    return r;
+}
+
+Vector4 operator/(Vector4 lhs, Vector4 rhs)
+{
+    Vector4 r;
+    r.x = lhs.x / rhs.x;
+    r.y = lhs.y / rhs.y;
+    r.z = lhs.z / rhs.z;
+    r.w = lhs.w / rhs.w;
     return r;
 }
 
