@@ -885,6 +885,62 @@ bool ray_intersect_capsule(
     return dist_sq < cap_r*cap_r;
 }
 
+bool ray_intersect_triangle(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 p0, Vector3 p1, Vector3 p2,
+    f32 *tr) EXPORT
+{
+    Vector3 e1 = p1 - p0;
+    Vector3 e2 = p2 - p0;
+    Vector3 h = cross(ray_d, e2);
+
+    f32 a = dot(e1, h);
+    if (abs(a) < f32_EPSILON) return false;
+
+    Vector3 s = ray_o - p0;
+
+    f32 f = 1.0f / a;
+    f32 u = f * dot(s, h);
+    if (u < 0.0f || u > 1.0f) return false;
+
+    Vector3 q = cross(s, e1);
+    f32 v = f * dot(ray_d, q);
+    if (v < 0.0f || u + v > 1.0f) return false;
+
+    f32 t = f * dot(e2, q);
+    if (abs(t) > f32_EPSILON) {
+        *tr = t;
+        return true;
+    }
+
+    return false;
+}
+
+bool ray_intersect_quad(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3,
+    f32 *tr) EXPORT
+{
+    if (ray_intersect_triangle(ray_o, ray_d, p0, p1, p2, tr)) return true;
+    if (ray_intersect_triangle(ray_o, ray_d, p2, p3, p0, tr)) return true;
+    return false;
+}
+
+bool ray_intersect_plane(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 plane_n, f32 plane_d,
+    f32 *tr) EXPORT
+{
+    f32 d = dot(ray_d, plane_n);
+    if (abs(d) < f32_EPSILON) {
+        *tr = 0.0f;
+        return false;
+    }
+
+    *tr = (plane_d - dot(ray_o, plane_n)) / d;
+    return true;
+}
+
 bool nearest_ray_vs_line(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 line_o, Vector3 line_d,
