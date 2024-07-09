@@ -407,7 +407,7 @@ i32 array_add(DynamicArray<T> *arr, const Array<T> es)
 }
 
 template<typename T>
-i32 array_add(DynamicArray<T> *arr, std::initializer_list<T> list)
+i32 array_append(DynamicArray<T> *arr, std::initializer_list<T> list)
 {
     Array<T> l{ .data = (T*)list.begin(), .count = (i32)list.size() };
     return array_add(arr, l);
