@@ -15,6 +15,8 @@ extern "C" CRTIMP char* strerror(int errnum) NOTHROW;
 
 #define CAT_(a, b) a ## b
 #define CAT(a, b) CAT_(a, b)
+#define CAT3(a, b, c) CAT(CAT(a, b), c)
+#define CAT4(a, b, c, d) CAT(CAT3(a, b, c), d)
 
 #define VAR(v) CAT(v, __LINE__)
 

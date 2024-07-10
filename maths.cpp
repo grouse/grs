@@ -1673,7 +1673,7 @@ Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
 
 /// test suite
 #include "test.h"
-TEST_PROC(vec2_operators, CATEGORY(vector2))
+TEST_PROC(operators, CATEGORY(vector2))
 {
     {
         Vector2 a{ 1, 2 };
@@ -1736,7 +1736,7 @@ TEST_PROC(vec2_operators, CATEGORY(vector2))
     }
 }
 
-TEST_PROC(vec2_swizzle, CATEGORY(vector2))
+TEST_PROC(swizzle, CATEGORY(vector2))
 {
     {
         Vector2 a{ 1, 2 };
@@ -1757,7 +1757,7 @@ TEST_PROC(vec2_swizzle, CATEGORY(vector2))
     }
 }
 
-TEST_PROC(vec3_operators, CATEGORY(vector3))
+TEST_PROC(operators, CATEGORY(vector3))
 {
     {
         Vector3 a{ 1, 2, 3 };
@@ -1828,7 +1828,7 @@ TEST_PROC(vec3_operators, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(vec3_swizzle, CATEGORY(vector3))
+TEST_PROC(swizzle, CATEGORY(vector3))
 {
     {
         Vector3 a{ 1, 2, 3 };
@@ -1859,7 +1859,7 @@ TEST_PROC(vec3_swizzle, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(vec4_operators, CATEGORY(vector4))
+TEST_PROC(operators, CATEGORY(vector4))
 {
     {
         Vector4 a{ 1, 2, 3, 5 };
@@ -1938,7 +1938,7 @@ TEST_PROC(vec4_operators, CATEGORY(vector4))
     }
 }
 
-TEST_PROC(vec4_swizzle, CATEGORY(vector4))
+TEST_PROC(swizzle, CATEGORY(vector4))
 {
     {
         Vector4 a{ 1, 2, 3, 5 };

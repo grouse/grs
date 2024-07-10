@@ -2,7 +2,9 @@
 #define TEST_H
 
 #define CATEGORY(cat) __attribute__((annotate("category:" #cat)))
-#define TEST_PROC(name, ...) void CAT(test_, name)() __attribute__((annotate("test"))) __VA_ARGS__
+#define TEST_PROC(name, ...) void CAT3(name, _test, __LINE__)() __attribute__((annotate("test"))) __VA_ARGS__
+
+// no-op EXPECT_FAIL macros to avoid compiling unnecessary code when included in translation units outside the test-suite
 #define EXPECT_FAIL(...)
 
 #endif // TEST_H
@@ -33,7 +35,10 @@ struct TestResult {
 struct TestSuite {
     const char *name;
     test_proc_t proc;
-    const char *cateogory;
+
+    TestSuite *children;
+    int child_count;
+
     TestResult *result = nullptr;
 };
 
@@ -51,6 +56,7 @@ extern void report_failv(const char *file, int line, const char *sz_cond, const 
 
 #define REPORT_FAIL(...) report_fail(__FILE__, __LINE__, __VA_ARGS__)
 
+#undef EXPECT_FAIL
 #define EXPECT_FAIL(body) do {\
     test_expect_fail=true;\
     test_jmp_i=1;\
@@ -132,26 +138,22 @@ void report_failv(const char *file, int line, const char *sz_cond, const char *f
     test_current->result = rep;
 }
 
-int run_tests(TestSuite *tests, int count)
+static int run_tests_int(TestSuite *tests, int count, int depth = 0)
 {
-    signal(SIGINT, test_sig_handler);
-    signal(SIGSEGV, test_sig_handler);
-
-    extern assert_handler_t assert_handler;
-    extern panic_handler_t panic_handler;
-
-    assert_handler = test_assert_handler;
-    panic_handler = test_panic_handler;
-
-    printf("\nRunning %d test procedures\n", count);
-
     int failed_tests = 0;
     for (int i = 0; i < count; i++) {
         test_current = &tests[i];
 
+        if (tests[i].children && tests[i].child_count) {
+            printf("/%s\n", tests[i].name);
+            failed_tests += run_tests_int(tests[i].children, tests[i].child_count, depth+1);
+        }
+
+        if (!tests[i].proc) continue;
+
         if (setjmp(test_jmp) == 0) tests[i].proc();
         bool result = tests[i].result == nullptr;
-        printf("%-80s : [%s]\n", tests[i].name, result ? "OK" : "ERROR");
+        printf("%*s%-*s : [%s]\n", depth*2, "", 80-depth*2, tests[i].name, result ? "OK" : "ERROR");
 
         if (!result) {
             for (auto *res = tests[i].result; res; res = res->next) {
@@ -168,6 +170,22 @@ int run_tests(TestSuite *tests, int count)
         }
     }
 
+    return failed_tests;
+}
+
+int run_tests(TestSuite *tests, int count)
+{
+    signal(SIGINT, test_sig_handler);
+    signal(SIGSEGV, test_sig_handler);
+
+    extern assert_handler_t assert_handler;
+    extern panic_handler_t panic_handler;
+
+    assert_handler = test_assert_handler;
+    panic_handler = test_panic_handler;
+
+    printf("\nRunning %d test procedures\n", count);
+    int failed_tests = run_tests_int(tests, count);
     return failed_tests;
 }
 
