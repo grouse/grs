@@ -1538,6 +1538,20 @@ f32 radf(f32 theta) EXPORT
     return theta * f32_PI / 180.0f;
 }
 
+f32 degf(f32 rad) EXPORT
+{
+    return rad * 180.0f / f32_PI;
+}
+
+f32 angle_between(Vector3 v0, Vector3 v1) EXPORT
+{
+    f32 denom = length(v0) * length(v1);
+    f32 theta = acosf(dot(v0, v1) / denom);
+    return theta;
+}
+
+
+
 
 bool operator==(const Rect &lhs, const Rect &rhs)
 {
@@ -1964,5 +1978,22 @@ TEST_PROC(swizzle, CATEGORY(vector4))
         ASSERT(a.rg == Vector2{ 1, 2 });
         ASSERT(a.ba == Vector2{ 3, 5 });
         ASSERT(a.rgb == Vector3{ 1, 2, 3 });
+    }
+}
+
+TEST_PROC(angle_between, CATEGORY(maths_misc))
+{
+    {
+        Vector3 up = { 0, 1, 0 };
+        Vector3 right = { 1, 0, 0 };
+        f32 angle = angle_between(up, right);
+        ASSERT(angle == f32_PI/2.0f);
+    }
+
+    {
+        Vector3 up = { 0, 1, 0 };
+        Vector3 left = { -1, 0, 0 };
+        f32 angle = angle_between(up, left);
+        ASSERT(angle == f32_PI/2.0f);
     }
 }
