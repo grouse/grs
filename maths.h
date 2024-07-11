@@ -12,6 +12,7 @@ extern "C" CRTIMP double ceil (double x) NOTHROW;
 extern "C" CRTIMP float ceilf (float x) NOTHROW;
 extern "C" float fabsf( float arg ) NOTHROW;
 extern "C" CRTIMP float cosf( float arg ) NOTHROW;
+extern "C" CRTIMP float acosf( float arg ) NOTHROW;
 extern "C" CRTIMP float tanf( float arg ) NOTHROW;
 extern "C" CRTIMP float sinf( float arg ) NOTHROW;
 extern "C" double sin( double arg ) NOTHROW;
