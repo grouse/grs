@@ -422,15 +422,16 @@ Quaternion normalise(Quaternion q) EXPORT
 
 Quaternion quat_identity() EXPORT { return { 0, 0, 0, 1 }; }
 
-Quaternion quat_rotate(Vector3 v, f32 theta) EXPORT
+Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
 {
     f32 half_theta = theta/2;
     f32 s = sinf(half_theta);
     return { v.x*s, v.y*s, v.z*s, cosf(half_theta) };
 }
-Quaternion quat_yaw(f32 theta) EXPORT { return quat_rotate({ 0, 1, 0 }, theta); }
-Quaternion quat_pitch(f32 theta) EXPORT { return quat_rotate({ 1, 0, 0 }, theta); }
-Quaternion quat_roll(f32 theta) EXPORT { return quat_rotate({ 0, 0, 1 }, theta); }
+
+Quaternion quat_yaw(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 1, 0 }); }
+Quaternion quat_pitch(f32 theta) EXPORT { return quat_angle_axis(theta, { 1, 0, 0 }); }
+Quaternion quat_roll(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 0, 1 }); }
 
 Quaternion quat_from_mat4(Matrix4 trs) EXPORT
 {
