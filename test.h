@@ -2,7 +2,7 @@
 #define TEST_H
 
 #define CATEGORY(cat) __attribute__((annotate("category:" #cat)))
-#define TEST_PROC(name, ...) void CAT3(name, _test, __LINE__)() __attribute__((annotate("test"))) __VA_ARGS__
+#define TEST_PROC(name, ...) void CAT3(name, _test, __COUNTER__)() __attribute__((annotate("test"))) __VA_ARGS__
 
 // no-op EXPECT_FAIL macros to avoid compiling unnecessary code when included in translation units outside the test-suite
 #define EXPECT_FAIL(...)
