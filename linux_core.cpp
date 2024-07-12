@@ -1,5 +1,4 @@
 #include "core.h"
-#include "window.h"
 #include "core/array.h"
 
 #include <ctime>
@@ -15,15 +14,6 @@
 
 extern void stdio_sink(const char *path, u32 line, LogType type, const char *msg);
 FixedArray<sink_proc_t, 10> log_sinks{ stdio_sink };
-
-MouseCursor current_cursor;
-Cursor cursors[MC_MAX];
-
-void push_cursor(MouseCursor c)
-{
-    extern MouseCursor current_cursor;
-    current_cursor = c;
-}
 
 bool debugger_attached()
 {
