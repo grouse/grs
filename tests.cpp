@@ -12,6 +12,7 @@
 
 int main()
 {
-    init_default_allocators();
+    mem_sys = malloc_allocator();
+    mem_dynamic = malloc_allocator();
     return run_tests(TESTS_tests, sizeof(TESTS_tests) / sizeof(TESTS_tests[0]));
 }
