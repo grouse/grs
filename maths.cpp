@@ -1997,4 +1997,11 @@ TEST_PROC(angle_between, CATEGORY(maths_misc))
         f32 angle = angle_between(up, left);
         ASSERT(angle == f32_PI/2.0f);
     }
+
+    {
+        Vector3 up{ 0, 1, 0 };
+        Vector3 forward{ 0, 0, 1 };
+        f32 angle = angle_between(up, forward);
+        ASSERT(angle == f32_PI/2.0f);
+    }
 }
