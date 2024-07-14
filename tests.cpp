@@ -12,5 +12,6 @@
 
 int main()
 {
+    init_default_allocators();
     return run_tests(TESTS_tests, sizeof(TESTS_tests) / sizeof(TESTS_tests[0]));
 }

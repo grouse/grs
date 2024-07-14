@@ -438,8 +438,16 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T *es, i32 count)
     ASSERT(insert_at <= arr->count);
     array_grow(arr, count);
 
-    for (i32 i = arr->count+count-1; i > insert_at; i--) arr->data[i] = arr->data[i-1];
-    for (i32 i = 0; i < count; i++) arr->data[insert_at+i] = es[i];
+    for (i32 i = arr->count+count-1, j = insert_at;
+         j < arr->count;
+         j++,i--)
+    {
+        arr->data[i] = arr->data[j];
+    }
+
+    for (i32 i = 0; i < count; i++)
+        arr->data[insert_at+i] = es[i];
+
     arr->count += count;
     return insert_at;
 }
@@ -692,8 +700,84 @@ struct StaticArray : Array<T> {
 
 /// test suite
 #include "test.h"
-static TEST_PROC(array)
+static TEST_PROC(indexing, CATEGORY(array))
 {
+    i32 data[5] = { 1, 2, 3, 4, 5 };
+    Array<i32> arr{ .data = data, .count = ARRAY_COUNT(data)-1 };
+
+    ASSERT(arr.count == 4);
+    ASSERT(arr[0] == 1);
+    EXPECT_FAIL(arr[4] = 6);
+
+    ASSERT(array_tail(arr) == &arr[3]);
+    ASSERT(array_tail(arr) == &data[3]);
+}
+
+static TEST_PROC(find, CATEGORY(array))
+{
+    i32 data[5] = { 1, 2, 3, 4, 5 };
+    Array<i32> arr{ .data = data, .count = ARRAY_COUNT(data) };
+
+    ASSERT(*array_find(arr, 1) == 1);
+    ASSERT(*array_find(arr, 5) == 5);
+    ASSERT(array_find(arr, 6) == nullptr);
+
+    ASSERT(array_find(arr, 1) == &data[0]);
+    ASSERT(array_find(arr, 1) == &arr[0]);
+    ASSERT(array_find(arr, 5) == &data[4]);
+    ASSERT(array_find(arr, 5) == &arr[4]);
+
+    ASSERT(array_find_index(arr, 1) == 0);
+    ASSERT(array_find_index(arr, 5) == 4);
+    ASSERT(array_find_index(arr, 6) == -1);
+}
+
+static TEST_PROC(append, CATEGORY(dynamic_array))
+{
+    DynamicArray<i32> arr{};
+    ASSERT(arr.alloc.proc == nullptr);
+
+    array_add(&arr, 1);
+    ASSERT(arr.alloc == mem_dynamic);
+    ASSERT(arr.count == 1);
+    ASSERT(arr[0] == 1);
+
+    array_append(&arr, { 2, 3 });
+    ASSERT(arr.count == 3);
+    ASSERT(arr[1] == 2);
+    ASSERT(arr[2] == 3);
+
+    i32 ints[2] = { 4, 5 };
+    array_add(&arr, ints, ARRAY_COUNT(ints));
+    ASSERT(arr.count == 5);
+    ASSERT(arr[3] == 4);
+    ASSERT(arr[4] == 5);
+}
+
+static TEST_PROC(insert, CATEGORY(dynamic_array))
+{
+    DynamicArray<i32> arr{};
+    ASSERT(arr.alloc.proc == nullptr);
+
+    EXPECT_FAIL(array_insert(&arr, 1, 1));
+    ASSERT(arr.count == 0);
+
+    array_insert(&arr, 0, 1);
+    ASSERT(arr.count == 1);
+    ASSERT(arr[0] == 1);
+
+    array_insert(&arr, 0, 2);
+    ASSERT(arr.count == 2);
+    ASSERT(arr[0] == 2);
+    ASSERT(arr[1] == 1);
+
+    i32 ints[2] = { 3, 4 };
+    array_insert(&arr, 1, ints, ARRAY_COUNT(ints));
+    ASSERT(arr.count == 4);
+    ASSERT(arr[0] == 2);
+    ASSERT(arr[1] == 3);
+    ASSERT(arr[2] == 4);
+    ASSERT(arr[3] == 1);
 }
 
 #endif // ARRAY_H
