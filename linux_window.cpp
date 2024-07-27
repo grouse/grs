@@ -477,30 +477,30 @@ static void init_x11()
         X11_GET_ATOM(x11.dsp, WM_DELETE_WINDOW);
     }
 
-	if (!x11.xi_opcode) {
-		// see http://who-t.blogspot.com/2009/05/xi2-recipes-part-1.html
-		int event, error;
-		PANIC_IF(!XQueryExtension(x11.dsp, "XInputExtension", &x11.xi_opcode, &event, &error), "missing xi2 extension");
+    if (!x11.xi_opcode) {
+        // see http://who-t.blogspot.com/2009/05/xi2-recipes-part-1.html
+        int event, error;
+        PANIC_IF(!XQueryExtension(x11.dsp, "XInputExtension", &x11.xi_opcode, &event, &error), "missing xi2 extension");
 
-		int major = 2, minor = 0;
-		PANIC_IF(XIQueryVersion(x11.dsp, &major, &minor) == BadRequest, "failed querying XInput version");
-		PANIC_IF(major < 2, "unsupported XInput extension version: %d.%d", major, minor);
-		LOG_INFO("discovered xinput extension version %d.%d", major, minor);
+        int major = 2, minor = 0;
+        PANIC_IF(XIQueryVersion(x11.dsp, &major, &minor) == BadRequest, "failed querying XInput version");
+        PANIC_IF(major < 2, "unsupported XInput extension version: %d.%d", major, minor);
+        LOG_INFO("discovered xinput extension version %d.%d", major, minor);
 
-		XIEventMask ximask{};
-		unsigned char mask[XIMaskLen(XI_LASTEVENT)];
-		memset(mask, 0, sizeof mask);
+        XIEventMask ximask{};
+        unsigned char mask[XIMaskLen(XI_LASTEVENT)];
+        memset(mask, 0, sizeof mask);
 
-		ximask.deviceid = XIAllDevices;
-		ximask.mask_len = sizeof mask;
-		ximask.mask = mask;
+        ximask.deviceid = XIAllDevices;
+        ximask.mask_len = sizeof mask;
+        ximask.mask = mask;
 
-		XISetMask(mask, XI_RawMotion);
+        XISetMask(mask, XI_RawMotion);
 
-		// Since raw events do not have target windows they are delivered exclusively to all root windows. Thus, a client that registers for raw events on a standard client window will receive a BadValue from XISelectEvents(). Like normal events however, if a client has a grab on the device, then the event is delivered only to the grabbing client.
-		// see http://who-t.blogspot.com/2009/07/xi2-recipes-part-4.html
-		XISelectEvents(x11.dsp, DefaultRootWindow(x11.dsp), &ximask, 1);
-	}
+        // Since raw events do not have target windows they are delivered exclusively to all root windows. Thus, a client that registers for raw events on a standard client window will receive a BadValue from XISelectEvents(). Like normal events however, if a client has a grab on the device, then the event is delivered only to the grabbing client.
+        // see http://who-t.blogspot.com/2009/07/xi2-recipes-part-4.html
+        XISelectEvents(x11.dsp, DefaultRootWindow(x11.dsp), &ximask, 1);
+    }
 }
 
 static void init_cursors(Window wnd)
@@ -570,6 +570,15 @@ bool next_event(AppWindow *wnd, WindowEvent *dst)
     }
 
     return true;
+}
+
+void wait_for_next_event(AppWindow *wnd)
+{
+    while (!wnd->events.count) {
+        XEvent event;
+        if (XNextEvent(x11.dsp, &event))
+            linux_input_event(&wnd->events, wnd, event);
+    }
 }
 
 void push_cursor(MouseCursor c)
