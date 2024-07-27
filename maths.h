@@ -4,12 +4,12 @@
 #include "platform.h"
 #include "core.h"
 
-extern "C" double fabs( double arg ) NOTHROW;
 extern "C" CRTIMP double floor (double x) NOTHROW;
 extern "C" CRTIMP float floorf(float x) NOTHROW;
 extern "C" CRTIMP float powf( float base, float exponent ) NOTHROW;
 extern "C" CRTIMP double ceil (double x) NOTHROW;
 extern "C" CRTIMP float ceilf (float x) NOTHROW;
+extern "C" double fabs( double arg ) NOTHROW;
 extern "C" float fabsf( float arg ) NOTHROW;
 extern "C" CRTIMP float cosf( float arg ) NOTHROW;
 extern "C" CRTIMP float acosf( float arg ) NOTHROW;

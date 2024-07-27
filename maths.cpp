@@ -896,7 +896,7 @@ bool ray_intersect_triangle(
     Vector3 h = cross(ray_d, e2);
 
     f32 a = dot(e1, h);
-    if (abs(a) < f32_EPSILON) return false;
+    if (fabsf(a) < f32_EPSILON) return false;
 
     Vector3 s = ray_o - p0;
 
@@ -909,7 +909,7 @@ bool ray_intersect_triangle(
     if (v < 0.0f || u + v > 1.0f) return false;
 
     f32 t = f * dot(e2, q);
-    if (abs(t) > f32_EPSILON) {
+    if (fabsf(t) > f32_EPSILON) {
         *tr = t;
         return true;
     }
@@ -933,7 +933,7 @@ bool ray_intersect_plane(
     f32 *tr) EXPORT
 {
     f32 d = dot(ray_d, plane_n);
-    if (abs(d) < f32_EPSILON) {
+    if (fabsf(d) < f32_EPSILON) {
         *tr = 0.0f;
         return false;
     }
