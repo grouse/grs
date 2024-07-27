@@ -22,10 +22,9 @@ VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance)
 AppWindow* create_window(WindowCreateDesc desc)
 {
     init_x11();
-    if (!(desc.flags & WINDOW_VULKAN)) PANIC("unsupported render backend");
+    PANIC_IF(!(desc.flags & WINDOW_VULKAN), "unsupported render backend");
 
     SArena scratch = tl_scratch_arena();
-
     AppWindow *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
 
     Window parent = XDefaultRootWindow(x11.dsp);
