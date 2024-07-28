@@ -61,7 +61,7 @@ AppWindow* create_window(WindowCreateDesc desc)
 
     wglMakeCurrent(dummy_hdc, dummy_glrc);
 
-    HANDLE gl_dll = LoadLibraryA("opengl32.dll");
+    HMODULE gl_dll = LoadLibraryA("opengl32.dll");
     LOAD_GL_ARB_PROC(wglChoosePixelFormat, gl_dll);
     LOAD_GL_ARB_PROC(wglCreateContextAttribs, gl_dll);
 
