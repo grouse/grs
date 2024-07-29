@@ -186,6 +186,14 @@ Vector3 operator+(Vector3 v, f32 scalar)
     return r;
 }
 
+Vector3 operator+=(Vector3 &lhs, f32 scalar)
+{
+    lhs.x += scalar;
+    lhs.y += scalar;
+    lhs.z += scalar;
+    return lhs;
+}
+
 Vector3 operator+=(Vector3 &lhs, Vector3 rhs)
 {
     lhs.x += rhs.x;
@@ -203,6 +211,14 @@ Vector3 operator-(Vector3 lhs, Vector3 rhs)
     return r;
 }
 
+Vector3 operator-=(Vector3 &lhs, Vector3 rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    return lhs;
+}
+
 Vector3 operator-(Vector3 v, f32 scalar)
 {
     Vector3 r;
@@ -212,15 +228,15 @@ Vector3 operator-(Vector3 v, f32 scalar)
     return r;
 }
 
-Vector3 operator-=(Vector3 &lhs, Vector3 rhs)
+Vector3 operator-=(Vector3 &lhs, f32 scalar)
 {
-    lhs.x -= rhs.x;
-    lhs.y -= rhs.y;
-    lhs.z -= rhs.z;
+    lhs.x -= scalar;
+    lhs.y -= scalar;
+    lhs.z -= scalar;
     return lhs;
 }
 
-Vector3 operator*(f32 scalar, Vector3 v)
+Vector3 operator*(Vector3 v, f32 scalar)
 {
     Vector3 r;
     r.x = scalar * v.x;
@@ -229,7 +245,15 @@ Vector3 operator*(f32 scalar, Vector3 v)
     return r;
 }
 
-Vector3 operator*(Vector3 v, f32 scalar)
+Vector3 operator*=(Vector3 &v, f32 scalar)
+{
+    v.x *= scalar;
+    v.y *= scalar;
+    v.z *= scalar;
+    return v;
+}
+
+Vector3 operator*(f32 scalar, Vector3 v)
 {
     Vector3 r;
     r.x = scalar * v.x;
@@ -247,6 +271,14 @@ Vector3 operator*(Vector3 lhs, Vector3 rhs)
     return v;
 }
 
+Vector3 operator*=(Vector3 &lhs, Vector3 rhs)
+{
+    lhs.x *= rhs.x;
+    lhs.y *= rhs.y;
+    lhs.z *= rhs.z;
+    return lhs;
+}
+
 Vector3 operator/(Vector3 lhs, Vector3 rhs)
 {
     Vector3 v;
@@ -256,6 +288,14 @@ Vector3 operator/(Vector3 lhs, Vector3 rhs)
     return v;
 }
 
+Vector3 operator/=(Vector3 &lhs, Vector3 rhs)
+{
+    lhs.x /= rhs.x;
+    lhs.y /= rhs.y;
+    lhs.z /= rhs.z;
+    return lhs;
+}
+
 Vector3 operator/(Vector3 v, f32 scalar)
 {
     Vector3 r;
@@ -263,6 +303,14 @@ Vector3 operator/(Vector3 v, f32 scalar)
     r.y = v.y/scalar;
     r.z = v.z/scalar;
     return r;
+}
+
+Vector3 operator/=(Vector3 &v, f32 scalar)
+{
+    v.x /= scalar;
+    v.y /= scalar;
+    v.z /= scalar;
+    return v;
 }
 
 f32 dot(Vector3 lhs, Vector3 rhs) EXPORT { return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z; }
@@ -1784,11 +1832,28 @@ TEST_PROC(operators, CATEGORY(vector3))
     }
     {
         Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        a += b;
+        ASSERT(a.x == 6);
+        ASSERT(a.y == 9);
+        ASSERT(a.z == 14);
+    }
+
+    {
+        Vector3 a{ 1, 2, 3 };
         f32 s = 5;
         Vector3 c = a + s;
         ASSERT(c.x == 6);
         ASSERT(c.y == 7);
         ASSERT(c.z == 8);
+    }
+    {
+        Vector3 a{ 1, 2, 3 };
+        f32 s = 5;
+        a += s;
+        ASSERT(a.x == 6);
+        ASSERT(a.y == 7);
+        ASSERT(a.z == 8);
     }
 
     {
@@ -1801,11 +1866,28 @@ TEST_PROC(operators, CATEGORY(vector3))
     }
     {
         Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        a -= b;
+        ASSERT(a.x == -4);
+        ASSERT(a.y == -5);
+        ASSERT(a.z == -8);
+    }
+
+    {
+        Vector3 a{ 1, 2, 3 };
         f32 s = 5;
         Vector3 c = a - s;
         ASSERT(c.x == -4);
         ASSERT(c.y == -3);
         ASSERT(c.z == -2);
+    }
+    {
+        Vector3 a{ 1, 2, 3 };
+        f32 s = 5;
+        a -= s;
+        ASSERT(a.x == -4);
+        ASSERT(a.y == -3);
+        ASSERT(a.z == -2);
     }
 
     {
@@ -1818,11 +1900,28 @@ TEST_PROC(operators, CATEGORY(vector3))
     }
     {
         Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        a *= b;
+        ASSERT(a.x == 5);
+        ASSERT(a.y == 14);
+        ASSERT(a.z == 33);
+    }
+
+    {
+        Vector3 a{ 1, 2, 3 };
         f32 s = 5;
         Vector3 c = a * s;
         ASSERT(c.x == 5);
         ASSERT(c.y == 10);
         ASSERT(c.z == 15);
+    }
+    {
+        Vector3 a{ 1, 2, 3 };
+        f32 s = 5;
+        a *= s;
+        ASSERT(a.x == 5);
+        ASSERT(a.y == 10);
+        ASSERT(a.z == 15);
     }
 
     {
@@ -1835,11 +1934,28 @@ TEST_PROC(operators, CATEGORY(vector3))
     }
     {
         Vector3 a{ 1, 2, 4 };
+        Vector3 b{ 8, 16, 32};
+        a /= b;
+        ASSERT(a.x == 0.125f);
+        ASSERT(a.y == 0.125f);
+        ASSERT(a.z == 0.125f);
+    }
+
+    {
+        Vector3 a{ 1, 2, 4 };
         f32 s = 8;
         Vector3 c = a / s;
         ASSERT(c.x == 0.125f);
         ASSERT(c.y == 0.25f);
         ASSERT(c.z == 0.5f);
+    }
+    {
+        Vector3 a{ 1, 2, 4 };
+        f32 s = 8;
+        a /= s;
+        ASSERT(a.x == 0.125f);
+        ASSERT(a.y == 0.25f);
+        ASSERT(a.z == 0.5f);
     }
 }
 
