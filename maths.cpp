@@ -457,17 +457,6 @@ f32 dot(Vector4 lhs, Vector4 rhs) EXPORT
 
 
 // Quaternion
-Quaternion normalise(Quaternion q) EXPORT
-{
-    f32 length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
-    Quaternion r;
-    r.x = q.x / length;
-    r.y = q.y / length;
-    r.z = q.z / length;
-    r.w = q.w / length;
-    return r;
-}
-
 Quaternion quat_identity() EXPORT { return { 0, 0, 0, 1 }; }
 
 Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
@@ -514,6 +503,27 @@ Quaternion quat_from_mat4(Matrix4 trs) EXPORT
     return q;
 }
 
+Quaternion normalise(Quaternion q) EXPORT
+{
+    f32 length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+    Quaternion r;
+    r.x = q.x / length;
+    r.y = q.y / length;
+    r.z = q.z / length;
+    r.w = q.w / length;
+    return r;
+}
+
+Quaternion quat_conjugate(Quaternion q) EXPORT
+{
+    return { .xyz = -q.xyz, q.w };
+}
+
+Quaternion quat_inverse(Quaternion q) EXPORT
+{
+    return quat_conjugate(q) / dot(q.xyzw, q.xyzw);
+}
+
 Quaternion operator*(Quaternion p, Quaternion q) EXPORT
 {
     Quaternion r;
@@ -528,6 +538,11 @@ Vector3 operator*(Quaternion q, Vector3 v) EXPORT
 {
     Vector3 t = 2.0f * cross(q.xyz, v);
     return v + q.w*t + cross(q.xyz, t);
+}
+
+Quaternion operator/(Quaternion q, f32 scalar) EXPORT
+{
+    return { .xyzw = q.xyzw / scalar };
 }
 
 

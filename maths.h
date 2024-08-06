@@ -187,11 +187,13 @@ struct Quaternion {
         struct { f32 x, y, z, w; };
         struct { Vector3 v; f32 s; };
         struct { Vector3 xyz; f32 _w; };
+        Vector4 xyzw;
         f32 data[4];
     };
 
     M_SUBSCRIPT_OPS(f32, data);
 };
+M_DIV_OPS(Quaternion, Quaternion, f32);
 
 struct Rect {
     union {
