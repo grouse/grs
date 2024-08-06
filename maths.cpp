@@ -466,6 +466,18 @@ Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
     return { v.x*s, v.y*s, v.z*s, cosf(half_theta) };
 }
 
+Quaternion quat_euler(f32 pitch, f32 yaw, f32 roll) EXPORT
+{
+    Quaternion q = quat_yaw(yaw) * quat_pitch(pitch) * quat_roll(roll);
+    return normalise(q);
+}
+
+Quaternion quat_euler(Vector3 euler) EXPORT
+{
+    Quaternion q = quat_yaw(euler.y) * quat_pitch(euler.x) * quat_roll(euler.z);
+    return normalise(q);
+}
+
 Quaternion quat_yaw(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 1, 0 }); }
 Quaternion quat_pitch(f32 theta) EXPORT { return quat_angle_axis(theta, { 1, 0, 0 }); }
 Quaternion quat_roll(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 0, 1 }); }
@@ -535,6 +547,12 @@ Quaternion operator*(Quaternion p, Quaternion q) EXPORT
 }
 
 Vector3 operator*(Quaternion q, Vector3 v) EXPORT
+{
+    Vector3 t = 2.0f * cross(q.xyz, v);
+    return v + q.w*t + cross(q.xyz, t);
+}
+
+Vector3 operator*(Vector3 v, Quaternion q) EXPORT
 {
     Vector3 t = 2.0f * cross(q.xyz, v);
     return v + q.w*t + cross(q.xyz, t);
@@ -1607,6 +1625,11 @@ f32 degf(f32 rad) EXPORT
     return rad * 180.0f / f32_PI;
 }
 
+f32 almost_equal(f32 a, f32 b, f32 epsilon) EXPORT
+{
+    return fabsf(a-b) < epsilon;
+}
+
 f32 angle_between(Vector3 v0, Vector3 v1) EXPORT
 {
     f32 denom = length(v0) * length(v1);
@@ -2110,6 +2133,189 @@ TEST_PROC(swizzle, CATEGORY(vector4))
         ASSERT(a.rg == Vector2{ 1, 2 });
         ASSERT(a.ba == Vector2{ 3, 5 });
         ASSERT(a.rgb == Vector3{ 1, 2, 3 });
+    }
+}
+
+TEST_PROC(constructors, CATEGORY(maths_quaternion))
+{
+    {
+        Quaternion q{};
+        ASSERT(q.x == 0);
+        ASSERT(q.y == 0);
+        ASSERT(q.z == 0);
+        ASSERT(q.w == 0);
+    }
+
+    {
+        Quaternion q = quat_identity();
+        ASSERT(q.x == 0);
+        ASSERT(q.y == 0);
+        ASSERT(q.z == 0);
+        ASSERT(q.w == 1);
+    }
+
+    {
+        Quaternion q{ 1, 2, 3, 4 };
+        ASSERT(q.x == 1);
+        ASSERT(q.y == 2);
+        ASSERT(q.z == 3);
+        ASSERT(q.w == 4);
+    }
+
+    {
+        Quaternion q{ .xyzw.xyz = Vector3{ 1, 2, 3 }, 4 };
+        ASSERT(q.x == 1);
+        ASSERT(q.y == 2);
+        ASSERT(q.z == 3);
+        ASSERT(q.w == 4);
+    }
+}
+
+TEST_PROC(swizzle, CATEGORY(maths_quaternion))
+{
+    {
+        Quaternion q{ 1, 2, 3, 4 };
+        ASSERT(q[0] == 1);
+        ASSERT(q[1] == 2);
+        ASSERT(q[2] == 3);
+        ASSERT(q[3] == 4);
+
+        ASSERT(q.x == 1);
+        ASSERT(q.y == 2);
+        ASSERT(q.z == 3);
+        ASSERT(q.w == 4);
+
+        ASSERT(q.xyzw == Vector4{ 1, 2, 3, 4 });
+    }
+}
+
+TEST_PROC(angle_axis, CATEGORY(maths_quaternion))
+{
+    {
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+        ASSERT(q.x == 0);
+        ASSERT(q.y == 0);
+        ASSERT(q.z == 0.707106769f);
+        ASSERT(q.w == 0.707106769f);
+    }
+
+    {
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 1, 0 });
+        ASSERT(q.x == 0);
+        ASSERT(q.y == 0.707106769f);
+        ASSERT(q.z == 0);
+        ASSERT(q.w == 0.707106769f);
+    }
+
+    {
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 1, 0, 0 });
+        ASSERT(q.x == 0.707106769f);
+        ASSERT(q.y == 0);
+        ASSERT(q.z == 0);
+        ASSERT(q.w == 0.707106769f);
+    }
+}
+
+TEST_PROC(euler, CATEGORY(maths_quaternion))
+{
+    {
+        Quaternion q = quat_euler(0, 0, 0);
+        ASSERT(q.x == 0);
+        ASSERT(q.y == 0);
+        ASSERT(q.z == 0);
+        ASSERT(q.w == 1);
+
+        Vector3 v = q*Vector3{ 1, 2, 3 };
+        ASSERT(v.x == 1);
+        ASSERT(v.y == 2);
+        ASSERT(v.z == 3);
+    }
+
+    {
+        Quaternion q = quat_euler(f32_PI/2.0f, 0, 0);
+        ASSERT(almost_equal(q.x, 0.707106769f, 0.0001f));
+        ASSERT(q.y == 0);
+        ASSERT(q.z == 0);
+        ASSERT(almost_equal(q.w, 0.707106769f, 0.0001f));
+
+        Vector3 v = q*Vector3{ 1, 2, 3 };
+        ASSERT(almost_equal(v.x, 1, 0.0001f));
+        ASSERT(almost_equal(v.y, -3, 0.0001f));
+        ASSERT(almost_equal(v.z, 2, 0.0001f));
+    }
+
+    {
+        Quaternion q = quat_euler(0, f32_PI/2.0f, 0);
+        ASSERT(q.x == 0);
+        ASSERT(almost_equal(q.y, 0.707106769f, 0.0001f));
+        ASSERT(q.z == 0);
+        ASSERT(almost_equal(q.w, 0.707106769f, 0.0001f));
+
+        Vector3 v = q*Vector3{ 1, 2, 3 };
+        ASSERT(almost_equal(v.x, 3, 0.0001f));
+        ASSERT(almost_equal(v.y, 2, 0.0001f));
+        ASSERT(almost_equal(v.z, -1, 0.0001f));
+    }
+
+    {
+        Quaternion q = quat_euler(0, 0, f32_PI/2.0f);
+        ASSERT(q.x == 0);
+        ASSERT(q.y == 0);
+        ASSERT(almost_equal(q.z, 0.707106769f, 0.0001f));
+        ASSERT(almost_equal(q.w, 0.707106769f, 0.0001f));
+
+        Vector3 v = q*Vector3{ 1, 2, 3 };
+        ASSERT(almost_equal(v.x, -2, 0.0001f));
+        ASSERT(almost_equal(v.y, 1, 0.0001f));
+        ASSERT(almost_equal(v.z, 3, 0.0001f));
+    }
+}
+
+TEST_PROC(inverse, CATEGORY(maths_quaternion))
+{
+    {
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+        Quaternion inv = quat_inverse(q);
+        ASSERT(inv.x == 0);
+        ASSERT(inv.y == 0);
+        ASSERT(almost_equal(inv.z, -0.707106769f, 0.0001f));
+        ASSERT(almost_equal(inv.w, 0.707106769f, 0.0001f));
+
+        Vector3 v{ 1, 2, 3 };
+        Vector3 r = q*v*inv;
+        ASSERT(almost_equal(r.x, v.x, 0.0001f));
+        ASSERT(almost_equal(r.y, v.y, 0.0001f));
+        ASSERT(almost_equal(r.z, v.z, 0.0001f));
+    }
+
+    {
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 1, 0 });
+        Quaternion inv = quat_inverse(q);
+        ASSERT(inv.x == 0);
+        ASSERT(almost_equal(inv.y, -0.707106769f, 0.0001f));
+        ASSERT(inv.z == 0);
+        ASSERT(almost_equal(inv.w, 0.707106769f, 0.0001f));
+
+        Vector3 v{ 1, 2, 3 };
+        Vector3 r = q*v*inv;
+        ASSERT(almost_equal(r.x, v.x, 0.0001f));
+        ASSERT(almost_equal(r.y, v.y, 0.0001f));
+        ASSERT(almost_equal(r.z, v.z, 0.0001f));
+    }
+
+    {
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 1, 0, 0 });
+        Quaternion inv = quat_inverse(q);
+        ASSERT(almost_equal(inv.x, -0.707106769f, 0.0001f));
+        ASSERT(inv.y == 0);
+        ASSERT(inv.z == 0);
+        ASSERT(almost_equal(inv.w, 0.707106769f, 0.0001f));
+
+        Vector3 v{ 1, 2, 3 };
+        Vector3 r = q*v*inv;
+        ASSERT(almost_equal(r.x, v.x, 0.0001f));
+        ASSERT(almost_equal(r.y, v.y, 0.0001f));
+        ASSERT(almost_equal(r.z, v.z, 0.0001f));
     }
 }
 
