@@ -328,6 +328,21 @@ void array_resize(DynamicArray<T> *arr, i32 count)
 }
 
 template<typename T>
+void array_set_grow(DynamicArray<T> *arr, i32 index, T element)
+{
+    if (arr->capacity <= index+1) {
+        array_grow(arr, index-arr->capacity+1);
+
+        for (i32 i = arr->count; i < index; i++) {
+            arr->data[i] = {};
+        }
+    }
+
+    arr->count = MAX(arr->count, index+1);
+    arr->at(index) = element;
+}
+
+template<typename T>
 DynamicArray<T> array_duplicate(Array<T> src, Allocator mem)
 {
     DynamicArray<T> dst{ .alloc = mem };
@@ -779,5 +794,25 @@ static TEST_PROC(insert, CATEGORY(dynamic_array))
     ASSERT(arr[2] == 4);
     ASSERT(arr[3] == 1);
 }
+
+static TEST_PROC(set, CATEGORY(dynamic_array))
+{
+    {
+        DynamicArray<i32> arr{};
+        array_set_grow(&arr, 0, 1);
+        ASSERT(arr.count == 1);
+        ASSERT(arr.capacity >= 1);
+        ASSERT(arr[0] == 1);
+
+        array_set_grow(&arr, 3, 2);
+        ASSERT(arr.count == 4);
+        ASSERT(arr.capacity >= 4);
+        ASSERT(arr[0] == 1);
+        ASSERT(arr[1] == 0);
+        ASSERT(arr[2] == 0);
+        ASSERT(arr[3] == 2);
+    }
+}
+
 
 #endif // ARRAY_H
