@@ -17,7 +17,7 @@ Allocator vm_freelist_allocator(i64 max_size)
     extern void* vm_freelist_alloc(
         void *v_state,
         M_Proc cmd,
-        void *old_ptr,
+        const void *old_ptr,
         i64 old_size,
         i64 size,
         u8 alignment);

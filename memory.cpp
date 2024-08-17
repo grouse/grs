@@ -38,7 +38,7 @@ thread_local MArena mem_scratch[M_SCRATCH_ARENAS];
 void* align_ptr(void *ptr, u8 alignment, u8 header_size);
 
 template<typename T>
-T* get_header(void *aligned_ptr) { return (T*)((size_t)aligned_ptr-sizeof(T)); }
+T* get_header(const void *aligned_ptr) { return (T*)((size_t)aligned_ptr-sizeof(T)); }
 
 void init_default_allocators()
 {
@@ -85,7 +85,7 @@ void* align_ptr(void *ptr, u8 alignment, u8 header_size)
     return (void*)((size_t)ptr + offset);
 }
 
-void* tl_linear_alloc(void *v_state, M_Proc cmd, void *old_ptr, i64 old_size, i64 size, u8 alignment)
+void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment)
 {
     auto state = (TlLinearAllocatorState*)v_state;
 
@@ -108,7 +108,7 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, void *old_ptr, i64 old_size, i6
 
         if (old_ptr && state->last == old_ptr) {
             state->current += size-old_size;
-            return old_ptr;
+            return (void*)old_ptr;
         }
 
         void *ptr = tl_linear_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
@@ -122,7 +122,7 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, void *old_ptr, i64 old_size, i6
     }
 }
 
-void* linear_alloc(void *v_state, M_Proc cmd, void *old_ptr, i64 old_size, i64 size, u8 alignment)
+void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment)
 {
     auto state = (LinearAllocatorState*)v_state;
 
@@ -154,7 +154,7 @@ void* linear_alloc(void *v_state, M_Proc cmd, void *old_ptr, i64 old_size, i64 s
 
                 // NOTE(jesper): manual unlocking before return because the GUARD_MUTEX macro does not automatically unlock the mutex if we break out of the scope manually
                 unlock_mutex(state->mutex);
-                return old_ptr;
+                return (void*)old_ptr;
             }
 
             ptr = (u8*)align_ptr(state->current, alignment, 0);
@@ -176,7 +176,7 @@ void* linear_alloc(void *v_state, M_Proc cmd, void *old_ptr, i64 old_size, i64 s
     }
 }
 
-void* malloc_alloc(void */*v_state*/, M_Proc cmd, void *old_ptr, i64 /*old_size*/, i64 size, u8 alignment)
+void* malloc_alloc(void */*v_state*/, M_Proc cmd, const void *old_ptr, i64 /*old_size*/, i64 size, u8 alignment)
 {
     struct Header {
         u8 offset;
@@ -262,7 +262,7 @@ Allocator malloc_allocator()
 }
 
 
-void* vm_freelist_alloc(void *v_state, M_Proc cmd, void *old_ptr, i64 old_size, i64 size, u8 alignment)
+void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment)
 {
     struct Header {
         u64 total_size;
