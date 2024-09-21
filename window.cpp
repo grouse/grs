@@ -4,7 +4,7 @@
 #include "hash_table.h"
 #include "string.h"
 
-#include "gen/core/internal/window.h"
+#include "gen/internal/window.h"
 
 struct InputMap {
     String name;

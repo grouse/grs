@@ -834,6 +834,10 @@ LRESULT win32_window_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 #include "win32_vk_window.cpp"
 #endif
 
+#if !defined(GFX_OPENGL) && !defined(GFX_VULKAN)
+#error "undefined render backend"
+#endif
+
 Vector2 get_client_resolution(AppWindow *wnd)
 {
     Vector2 size{};

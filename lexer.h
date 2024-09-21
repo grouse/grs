@@ -85,7 +85,7 @@ inline const char* sz_from_enum(TokenType type)
     }
 }
 
-#include "gen/core/lexer.h"
+#include "gen/lexer.h"
 
 inline Token next_token(Lexer *lexer) { return next_token(lexer, lexer->flags); }
 inline Token peek_token(Lexer *lexer) { return peek_token(lexer, lexer->flags); }

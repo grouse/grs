@@ -237,7 +237,7 @@ struct XORShift128 {
     u32 state[4];
 };
 
-#include "gen/core/maths.h"
+#include "gen/maths.h"
 
 
 

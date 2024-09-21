@@ -1,0 +1,5 @@
+#ifndef LEXER_INTERNAL_H
+#define LEXER_INTERNAL_H
+
+
+#endif // LEXER_INTERNAL_H

@@ -1,6 +1,6 @@
-#include "core/window.h"
-#include "core/win32_lite.h"
-#include "core/win32_user32.h"
+#include "window.h"
+#include "win32_lite.h"
+#include "win32_user32.h"
 
 #include "external/volk/volk.h"
 

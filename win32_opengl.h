@@ -1,8 +1,8 @@
 #ifndef WIN32_OPENGL_H
 #define WIN32_OPENGL_H
 
-#include "core/platform.h"
-#include "core/win32_lite.h"
+#include "platform.h"
+#include "win32_lite.h"
 
 #define WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB             0x20A9
 
