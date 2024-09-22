@@ -404,7 +404,7 @@ struct WindowEvent {
     };
 };
 
-#include "gen/window.h"
+#include "generated/window.h"
 
 AppWindow* create_window(WindowCreateDesc desc);
 void present_window(AppWindow *wnd);

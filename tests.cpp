@@ -7,7 +7,7 @@
 #include "memory.cpp"
 #include "thread.cpp"
 
-#include "gen/tests/tests.h"
+#include "generated/tests/tests.h"
 
 
 int main()

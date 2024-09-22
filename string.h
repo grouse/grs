@@ -56,7 +56,7 @@ struct StringBuilder {
     Block *current = &head;
 };
 
-#include "gen/string.h"
+#include "generated/string.h"
 
 bool operator!=(String lhs, String rhs);
 bool operator==(String lhs, String rhs);

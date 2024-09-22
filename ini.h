@@ -29,6 +29,6 @@ struct IniSerializer {
          VAR(ini_section);\
          VAR(ini_section) = ini_in_section(ini) || (ini_section_end(ini), false))
 
-#include "gen/ini.h"
+#include "generated/ini.h"
 
 #endif // INI_H
