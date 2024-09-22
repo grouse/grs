@@ -1,5 +1,5 @@
 #include "core.h"
-#include "core/array.h"
+#include "array.h"
 
 #include <ctime>
 #include <stdarg.h>
