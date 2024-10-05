@@ -40,6 +40,9 @@ struct String {
     }
 
     operator bool() const { return length > 0; }
+
+    char* begin() { return &data[0]; }
+    char* end() { return &data[length]; }
 };
 
 inline String string(const char *sz_string) { return String{ (char*)sz_string, (i32)strlen(sz_string) }; }
