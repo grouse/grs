@@ -7,6 +7,7 @@
 #define CALLBACK __stdcall
 #define WINAPI __stdcall
 #define CONST const
+#define WINDLL __declspec(dllimport)
 
 #define DECLSPEC_ALLOCATOR __declspec(allocator)
 
@@ -23,10 +24,12 @@
 #define FILE_SHARE_WRITE                0x00000002
 #define FILE_SHARE_DELETE               0x00000004
 
-#define ERROR_FILE_NOT_FOUND 0x2
-#define ERROR_SHARING_VIOLATION 0x20
-#define ERROR_ALREADY_EXISTS 0xB7
+#define ERROR_FILE_NOT_FOUND      0x2
+#define ERROR_SHARING_VIOLATION   0x20
+#define ERROR_ALREADY_EXISTS      0xB7
 #define ERROR_INSUFFICIENT_BUFFER 0x7A
+#define ERROR_BROKEN_PIPE         0x6D
+#define ERROR_NO_DATA             0xE8
 
 #define FILE_LIST_DIRECTORY 1
 
@@ -663,13 +666,13 @@ extern "C" {
         DWORD                   dwCreationFlags,
         LPDWORD                 lpThreadId);
 
-    BOOL CreatePipe(
+    WINDLL BOOL CreatePipe(
         PHANDLE               hReadPipe,
         PHANDLE               hWritePipe,
         LPSECURITY_ATTRIBUTES lpPipeAttributes,
         DWORD                 nSize);
 
-    BOOL SetHandleInformation(
+    WINDLL BOOL SetHandleInformation(
         HANDLE hObject,
         DWORD  dwMask,
         DWORD  dwFlags);
@@ -686,7 +689,9 @@ extern "C" {
         LPSTARTUPINFOW        lpStartupInfo,
         LPPROCESS_INFORMATION lpProcessInformation);
 
-    BOOL GetExitCodeProcess(
+    WINDLL DWORD GetCurrentProcessId();
+
+    WINDLL BOOL GetExitCodeProcess(
         HANDLE  hProcess,
         LPDWORD lpExitCode);
 
@@ -695,7 +700,7 @@ extern "C" {
         BOOL                  bInitialOwner,
         LPCSTR                lpName);
 
-    DWORD WaitForSingleObject(
+    WINDLL DWORD WaitForSingleObject(
         HANDLE hHandle,
         DWORD  dwMilliseconds);
 
@@ -703,7 +708,7 @@ extern "C" {
 
     void Sleep(DWORD dwMilliseconds);
 
-    DWORD GetLastError();
+    WINDLL DWORD GetLastError();
 
     DWORD FormatMessageA(
         DWORD dwFlags,
@@ -767,9 +772,9 @@ extern "C" {
     LPVOID GlobalLock(HGLOBAL hMem);
     BOOL GlobalUnlock(HGLOBAL hMem);
 
-    BOOL CloseHandle(HANDLE hObject);
+    WINDLL BOOL CloseHandle(HANDLE hObject);
 
-    HANDLE CreateFileA(
+    WINDLL HANDLE CreateFileA(
         LPCSTR                lpFileName,
         DWORD                 dwDesiredAccess,
         DWORD                 dwShareMode,
@@ -787,7 +792,7 @@ extern "C" {
         LPDWORD      lpNumberOfBytesWritten,
         LPOVERLAPPED lpOverlapped);
 
-    BOOL ReadFile(
+    WINDLL BOOL ReadFile(
         HANDLE       hFile,
         LPVOID       lpBuffer,
         DWORD        nNumberOfBytesToRead,
