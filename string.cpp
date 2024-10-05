@@ -195,6 +195,18 @@ bool f32_from_string(String s, f32 *dst)
     return r == 1;
 }
 
+i32 find_first(String s, char c) EXPORT
+{
+    for (i32 i = 0; i < s.length; i++) if (s[i] == c) return i;
+    return -1;
+}
+
+i32 find_last(String s, char c) EXPORT
+{
+    for (i32 i = s.length-1; i >= 0; i--) if (s[i] == c) return i;
+    return -1;
+}
+
 bool starts_with(String lhs, String rhs)
 {
     return lhs.length >= rhs.length && memcmp(lhs.data, rhs.data, rhs.length) == 0;

@@ -13,6 +13,8 @@ extern u8 u8_from_string(String s);
 extern bool u8_from_string(String s, u8 *dst);
 extern u64 u64_from_string(String s);
 extern bool u64_from_string(String s, u64 *dst);
+extern i32 find_first(String s, char c);
+extern i32 find_last(String s, char c);
 extern bool string_contains(String lhs, String rhs);
 extern i32 utf8_length(const u16 *str, i32 utf16_len, i32 limit);
 extern i32 utf8_length(const u16 *str, i32 utf16_len);
