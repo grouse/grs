@@ -1,7 +1,7 @@
 #include "process.h"
-#include "core/thread.h"
+#include "thread.h"
 
-#include "core/win32_core.h"
+#include "win32_core.h"
 
 struct Process {
     HANDLE process_handle;

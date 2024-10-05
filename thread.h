@@ -16,4 +16,6 @@ void unlock_mutex(Mutex*);
 
 Thread* create_thread(ThreadProc proc, void *user_data = nullptr);
 
+#include "generated/thread.h"
+
 #endif // THREAD_H
