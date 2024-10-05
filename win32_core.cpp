@@ -173,3 +173,13 @@ void win32_client_rect(HWND hwnd, f32 *x, f32 *y)
         *y = (f32)(client_rect.bottom - client_rect.top);
     }
 }
+
+void sleep(i32 milliseconds) EXPORT
+{
+    Sleep(milliseconds);
+}
+
+i32 current_process_id() EXPORT
+{
+    return (i32)GetCurrentProcessId();
+}

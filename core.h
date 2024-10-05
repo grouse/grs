@@ -210,4 +210,6 @@ inline void write_memory(MemoryBuffer *buf, String str)
     write_memory(buf, str.data, str.length);
 }
 
+#include "generated/core.h"
+
 #endif // CORE_H

@@ -96,3 +96,6 @@ String read_memory(MemoryBuffer *buf, Allocator mem) EXPORT
 
     return {};
 }
+
+void sleep(i32 milliseconds) EXPORT;
+i32 current_process_id() EXPORT;
