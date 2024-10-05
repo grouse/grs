@@ -22,7 +22,7 @@ void win32_debugger_sink(const char *path, u32 line, LogType type, const char *m
 
     String filename = filename_of_sz(path);
     const char *type_s = sz_from_enum(type);
-    String s = stringf(buffer, sizeof buffer, "%.*s:%d %s %s\n\0", STRFMT(filename), line, type_s, msg);
+    String s = stringf(buffer, sizeof buffer, "%.*s:%d %s: %s\n\0", STRFMT(filename), line, type_s, msg);
     OutputDebugStringA(s.data);
 }
 
