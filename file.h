@@ -64,6 +64,8 @@ inline DynamicArray<String> list_folders(String dir, Allocator mem, u32 flags = 
 	return dirs;
 }
 
+#include "generated/file.h"
+
 void create_filewatch(String folder, DynamicArray<FileEvent> *events, Mutex *events_mutex);
 
 String absolute_path(String relative, Allocator mem);

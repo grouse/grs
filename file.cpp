@@ -7,3 +7,13 @@
 #else
 #error "unsupported platform"
 #endif
+
+String uri_from_path(String path, Allocator mem) EXPORT
+{
+    SArena scratch = tl_scratch_arena(mem);
+    path = absolute_path(path, scratch);
+    path = to_lower(path, scratch);
+    for (char &c : path) if (c == '\\') c = '/';
+
+    return stringf(mem, "file:///%.*s", STRFMT(path));
+}
