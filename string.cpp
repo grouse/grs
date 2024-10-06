@@ -975,7 +975,7 @@ i32 utf32_it_next(char **utf8, char *end) EXPORT
 
 void reset_string_builder(StringBuilder *sb) EXPORT
 {
-    for (auto it = sb->current; it; it = it->next) {
+    for (auto it = &sb->head; it; it = it->next) {
         it->written = 0;
     }
 
@@ -985,17 +985,16 @@ void reset_string_builder(StringBuilder *sb) EXPORT
 String create_string(StringBuilder *sb, Allocator mem) EXPORT
 {
     i32 length = 0;
-    for (auto it = sb->current; it; it = it->next) {
-        if (it->written == 0) break;
+    for (auto it = &sb->head; it && it->written > 0; it = it->next) {
         length += it->written;
     }
 
     String str{ ALLOC_ARR(mem, char, length), length };
 
     char *ptr = str.data;
-    for (auto it = sb->current; it; it = it->next) {
-        if (it->written == 0) break;
+    for (auto it = &sb->head; it && it->written > 0; it = it->next) {
         memcpy(ptr, it->data, it->written);
+        ptr += it->written;
     }
 
     return str;
