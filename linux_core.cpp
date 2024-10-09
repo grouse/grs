@@ -45,3 +45,8 @@ f32 app_time_s()
     timespec delta = { now.tv_sec - start_time.tv_sec, now.tv_nsec - start_time.tv_nsec };
     return (f32)delta.tv_sec + (f32)delta.tv_nsec/1000000000;
 }
+
+i32 current_process_id() EXPORT
+{
+    return getpid();
+}
