@@ -62,47 +62,59 @@ FileInfo read_file(String path, Allocator mem, i32 /*retry_count*/)
 void list_files(DynamicArray<String> *dst, String dir, String ext, Allocator mem, u32 flags)
 {
     SArena scratch = tl_scratch_arena(mem);
-    if (flags & FILE_LIST_ABSOLUTE) LOG_ERROR("unimplemented");
 
-	DynamicArray<char*> folders{ .alloc = scratch };
-	array_add(&folders, sz_string(dir, scratch));
+    DynamicArray<char*> folders{ .alloc = scratch };
+    array_add(&folders, sz_string(dir, scratch));
 
-	for (i32 i = 0; i < folders.count; i++) {
-		char *sz_path = folders[i];
-    	DIR *d = opendir(sz_path);
+    for (i32 i = 0; i < folders.count; i++) {
+        char *sz_path = folders[i];
+        DIR *d = opendir(sz_path);
 
-    	if (!d) {
-        	LOG_ERROR("unable to open directory: %s", sz_path);
-        	continue;
-    	}
+        if (!d) {
+            LOG_ERROR("unable to open directory: %s", sz_path);
+            continue;
+        }
 
-    	struct dirent *it;
-    	while ((it = readdir(d)) != nullptr) {
-        	if (it->d_name[0] == '.') continue;
+        String folder = string(sz_path);
 
-			switch (it->d_type) {
-        	case DT_REG: {
-                if (ext && !ends_with(string(it->d_name), ext)) continue;
+        struct dirent *it;
+        while ((it = readdir(d)) != nullptr) {
+            if (it->d_name[0] == '.') continue;
 
-            	char *fp = join_path(sz_path, it->d_name, mem);
-            	array_add(dst, string(fp));
-				} break;
-        	case DT_DIR:
-        	    if (flags & FILE_LIST_RECURSIVE) {
-                	char *fp = join_path(sz_path, it->d_name, mem);
-                	array_add(&folders, fp);
-            	} break;
-			case DT_UNKNOWN:
-				LOG_ERROR("unknown d_type value from readdir, supposed to fall back to stat");
-				break;
-			default:
-				LOG_INFO("unhandled d_type for %s", it->d_name);
-				break;
-			}
-    	}
+            switch (it->d_type) {
+            case DT_LNK:
+                // TODO(jesper): should I read the target linux address and return that instead?
+            case DT_REG: {
+                String filename = string(it->d_name);
+                if (ext && !ends_with(filename, ext)) continue;
 
-    	closedir(d);
-	}
+                String path;
+                if (flags & FILE_LIST_ABSOLUTE) {
+                    path = join_path(folder, filename, scratch);
+                    path = absolute_path(path, mem);
+                } else {
+                    path = join_path(folder, filename, mem);
+                }
+
+                char *fp = join_path(sz_path, it->d_name, mem);
+                array_add(dst, string(fp));
+            } break;
+            case DT_DIR:
+                if (flags & FILE_LIST_RECURSIVE) {
+                    char *fp = join_path(sz_path, it->d_name, mem);
+                    array_add(&folders, fp);
+                } break;
+            case DT_UNKNOWN:
+                LOG_ERROR("unknown d_type value from readdir, supposed to fall back to stat");
+                break;
+            default:
+                LOG_INFO("unhandled d_type(%d) for %s", it->d_type, it->d_name);
+                break;
+            }
+        }
+
+        closedir(d);
+    }
 }
 
 void list_folders(DynamicArray<String> *dst, String dir, Allocator mem, u32 flags)
