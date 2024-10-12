@@ -120,7 +120,7 @@ bool ini_value(
     return false;
 }
 
-bool ini_value(IniSerializer *ini, String name, String *value) EXPORT
+bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem) EXPORT
 {
     switch (ini->mode) {
     case INI_WRITE_STRING:
@@ -129,7 +129,10 @@ bool ini_value(IniSerializer *ini, String name, String *value) EXPORT
     case INI_PARSE:
         if (is_identifier(ini->lexer.t, name)) {
             if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
-            if (!parse_string(&ini->lexer, value)) return false;
+            String str;
+            if (!parse_string(&ini->lexer, &str)) return false;
+            *value = duplicate_string(str, mem);
+
             next_token(&ini->lexer);
             return true;
         }
