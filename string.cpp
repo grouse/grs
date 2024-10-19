@@ -30,6 +30,12 @@ String string(const char *sz_str, Allocator mem)  EXPORT
     return string(sz_str, (i32)strlen(sz_str), mem);
 }
 
+String string(const char *begin, const char *end) EXPORT
+{
+    if (!begin) return {};
+    return { begin, (i32)(u64)(end-begin) };
+}
+
 String duplicate_string(String other, Allocator mem)
 {
     String str;

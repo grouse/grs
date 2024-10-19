@@ -48,6 +48,16 @@ Token next_token(Lexer *lexer, u32 flags) EXPORT
 
             t.str.length = (i32)(lexer->ptr - t.str.data);
             return t;
+        } else if (auto str = string(lexer->ptr, lexer->end);
+                   starts_with(str, "nan") || starts_with(str, "-nan(ind)"))
+        {
+            t.type = TOKEN_NUMBER;;
+            t.str.data = lexer->ptr;
+            t.str.length = str[0] == '-' ? strlen("-nan(ind)") : strlen("nan");
+
+            lexer->col += t.str.length;
+            lexer->ptr += t.str.length;
+            return t;
         } else if ((*lexer->ptr >= 'a' && *lexer->ptr <= 'z') ||
                    (*lexer->ptr >= 'A' && *lexer->ptr <= 'Z') ||
                     lexer->ptr[0] == '_' ||
