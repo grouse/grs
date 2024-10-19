@@ -51,7 +51,7 @@ Token next_token(Lexer *lexer, u32 flags) EXPORT
         } else if (auto str = string(lexer->ptr, lexer->end);
                    starts_with(str, "nan") || starts_with(str, "-nan(ind)"))
         {
-            t.type = TOKEN_NUMBER;;
+            t.type = TOKEN_NUMBER;
             t.str.data = lexer->ptr;
             t.str.length = str[0] == '-' ? strlen("-nan(ind)") : strlen("nan");
 
