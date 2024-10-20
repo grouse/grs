@@ -6,6 +6,7 @@ using namespace PUBLIC;
 
 extern String string(const char *str, i32 length, Allocator mem);
 extern String string(const char *sz_str, Allocator mem);
+extern String string(const char *begin, const char *end);
 extern String slice(String str, i32 start, i32 end);
 extern String slice(String str, i32 start);
 extern String slice(const char *str, i32 start, i32 end);
