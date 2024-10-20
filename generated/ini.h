@@ -11,8 +11,8 @@ extern bool ini_section_begin(IniSerializer *ini, String name);
 extern bool ini_section_end(IniSerializer *ini);
 extern bool ini_value(IniSerializer *ini, String name, bool *value);
 extern bool ini_value(IniSerializer *ini, String name, i32 *value, int count = 1);
-extern bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem);
 extern bool ini_value(IniSerializer *ini, String name, f32 *value, i32 count = 1);
+extern bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem);
 extern bool ini_in_section(IniSerializer *ini);
 extern bool ini_next(IniSerializer *ini);
 

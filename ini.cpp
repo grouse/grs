@@ -101,7 +101,9 @@ bool ini_value(
 {
     switch (ini->mode) {
     case INI_WRITE_STRING:
-        append_stringf(&ini->out, "%.*s = %d\n", STRFMT(name), *value);
+        append_stringf(&ini->out, "%.*s = %d", STRFMT(name), *value);
+        for (i32 i = 1; i < count; i++) append_stringf(&ini->out, ", %d", value[i]);
+        append_string(&ini->out, "\n");
         return true;
     case INI_PARSE:
         if (is_identifier(ini->lexer.t, name)) {
@@ -119,28 +121,6 @@ bool ini_value(
 
     return false;
 }
-
-bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem) EXPORT
-{
-    switch (ini->mode) {
-    case INI_WRITE_STRING:
-        append_stringf(&ini->out, "%.*s = \"%.*s\"\n", STRFMT(name), STRFMT(*value));
-        return true;
-    case INI_PARSE:
-        if (is_identifier(ini->lexer.t, name)) {
-            if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
-            String str;
-            if (!parse_string(&ini->lexer, &str)) return false;
-            *value = duplicate_string(str, mem);
-
-            next_token(&ini->lexer);
-            return true;
-        }
-        break;
-    }
-    return false;
-}
-
 
 bool ini_value(
     IniSerializer *ini,
@@ -168,6 +148,28 @@ bool ini_value(
 
     return false;
 }
+
+bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem) EXPORT
+{
+    switch (ini->mode) {
+    case INI_WRITE_STRING:
+        append_stringf(&ini->out, "%.*s = \"%.*s\"\n", STRFMT(name), STRFMT(*value));
+        return true;
+    case INI_PARSE:
+        if (is_identifier(ini->lexer.t, name)) {
+            if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
+            String str;
+            if (!parse_string(&ini->lexer, &str)) return false;
+            *value = duplicate_string(str, mem);
+
+            next_token(&ini->lexer);
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
 
 bool ini_in_section(IniSerializer *ini) EXPORT
 {
