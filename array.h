@@ -530,10 +530,7 @@ template<typename T, i32 N>
 struct FixedArray {
     using capacity = std::integral_constant<i32, N>;
 
-private:
     alignas(alignof(T)) u8 storage[sizeof(T)*N];
-
-public:
     i32 count;
 
     constexpr T& operator[](i32 i)
@@ -600,6 +597,8 @@ public:
         for (i32 i = 0; i < arr.count; i++) dst[i] = arr.data[i];
         return *this;
     }
+
+
 };
 
 template<typename T, i32 N>
@@ -626,6 +625,26 @@ i32 array_add(FixedArray<T, N> *arr, T *es, i32 count)
 }
 
 template<typename T, i32 N>
+void array_remove_unsorted(FixedArray<T, N> *arr, i32 index)
+{
+    ASSERT(index >= 0);
+    ASSERT(index < arr->count);
+
+    arr->data[index] = arr->data[arr->count-1];
+    arr->count--;
+}
+
+template<typename T, i32 N>
+void array_remove(FixedArray<T, N> *arr, i32 index)
+{
+    ASSERT(index >= 0);
+    ASSERT(index < arr->count);
+
+    memmove(arr->data(index), arr->data(index+1), (arr->count-index-1)*sizeof(T));
+    arr->count--;
+}
+
+template<typename T, i32 N>
 T array_pop(FixedArray<T, N> *arr)
 {
     ASSERT(arr->count > 0);
@@ -637,6 +656,19 @@ T* array_tail(FixedArray<T, N> &arr)
 {
     if (arr.count == 0) return nullptr;
     return arr.data(arr.count-1);
+}
+
+template<typename T, i32 N>
+i32 array_find_index(FixedArray<T, N> &arr, T &value)
+{
+    for (i32 i = 0; i < arr.count; i++) if (arr[i] == value) return i;
+    return -1;
+}
+
+template<typename T, i32 N>
+void array_reset(FixedArray<T, N> *arr)
+{
+    arr->count = 0;
 }
 
 template<typename T, i32 N>
