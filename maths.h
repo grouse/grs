@@ -204,7 +204,22 @@ struct Rect {
     Rect() = default;
     Rect(Vector2 tl, Vector2 br) : tl(tl), br(br) {}
 
+    constexpr Vector2 pos() const { return tl; }
+    constexpr Vector2 pos(Vector2 pos)
+    {
+        Vector2 size = br-tl;
+        tl = pos;
+        br = tl+size;
+        return tl;
+    }
+
     constexpr Vector2 size() const { return br - tl; }
+    constexpr Vector2 size(Vector2 size)
+    {
+        br = tl+size;
+        return size;
+    }
+
     constexpr Vector2& operator[](i32 i) { return data[i]; }
 };
 
