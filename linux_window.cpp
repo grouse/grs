@@ -6,7 +6,7 @@
 #include "window.h"
 
 #include "memory.h"
-#include "hash_table.h"
+#include "map.h"
 
 #include "linux_glx.h"
 #include "linux_opengl.h"

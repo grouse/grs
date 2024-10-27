@@ -2,14 +2,14 @@
 #define BINREL_H
 
 #include "memory.h"
-#include "hash_table.h"
+#include "map.h"
 
 template<typename T0, typename T1>
 struct OneToMany {
     Allocator alloc = mem_dynamic;
 
-    HashTable<T0, DynamicArray<T1>> left;
-    HashTable<T1, T0> right;
+    DynamicMap<T0, DynamicArray<T1>> left;
+    DynamicMap<T1, T0> right;
 };
 
 template<typename T0, typename T1>
