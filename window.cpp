@@ -1,7 +1,7 @@
 #include "window.h"
 
 #include "array.h"
-#include "hash_table.h"
+#include "map.h"
 #include "string.h"
 
 #include "generated/internal/window.h"
@@ -12,14 +12,14 @@ struct InputMap {
     DynamicArray<InputDesc> by_device[ID_MAX][IT_MAX];
     DynamicArray<InputDesc> by_type[IT_MAX][ID_MAX];
 
-    HashTable<InputId, i32> edges;
-    HashTable<InputId, bool> held;
-    HashTable<InputId, f32[2]> axes;
-    HashTable<InputId, DynamicArray<TextEvent>> text;
+    DynamicMap<InputId, i32> edges;
+    DynamicMap<InputId, bool> held;
+    DynamicMap<InputId, f32[2]> axes;
+    DynamicMap<InputId, DynamicArray<TextEvent>> text;
 };
 
 struct {
-    HashTable<InputType, u8> mouse;
+    DynamicMap<InputType, u8> mouse;
 
     DynamicArray<InputMap> maps;
     DynamicArray<InputMapId> layers;
@@ -433,6 +433,8 @@ bool translate_input_event(
                     axis[1] += event.mouse.dy;
                     insert_axis2d_event(queue, map_id, it.id, it.any.type, (f32[2]){ (f32)event.mouse.dx, (f32)event.mouse.dy });
                     handled = handled || !(it.flags & FALLTHROUGH);
+
+                    if (false) LOG_INFO("[%.*s] mouse move: [%d], final: %d", STRFMT(map->name), it.id, handled);
                 }
             }
             break;

@@ -1,6 +1,6 @@
 #include "window.h"
 
-#include "hash_table.h"
+#include "map.h"
 #include "maths.h"
 #include "array.h"
 
@@ -32,7 +32,7 @@ struct AppWindow {
     } xinput;
 };
 
-HashTable<u64, AppWindow*> windows;
+DynamicMap<u64, AppWindow*> windows;
 
 HWND win32_root_window;
 
