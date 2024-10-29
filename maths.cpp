@@ -2,6 +2,7 @@
 #include "core.h"
 #include "array.h"
 
+
 // -- Vector2
 Vector2 abs(Vector2 v) EXPORT
 {
@@ -12,6 +13,14 @@ Vector2 abs(Vector2 v) EXPORT
 Vector2 vec2_max(Vector2 lhs, Vector2 rhs) EXPORT
 {
     return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y) };
+}
+
+Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size) EXPORT
+{
+    return {
+        calc_center(tl.x, br.x, size.x),
+        calc_center(tl.y, br.y, size.y)
+    };
 }
 
 Vector2 lerp(Vector2 a, Vector2 b, f32 t) EXPORT
@@ -1497,6 +1506,12 @@ bool aabb_intersect_swept_aabb(
         return true;
     }
     return false;
+}
+
+
+f32 calc_center(f32 min, f32 max, f32 size) EXPORT
+{
+    return min + 0.5f*(max-min - size);
 }
 
 

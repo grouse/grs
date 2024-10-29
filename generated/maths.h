@@ -6,6 +6,7 @@ using namespace PUBLIC;
 
 extern Vector2 abs(Vector2 v);
 extern Vector2 vec2_max(Vector2 lhs, Vector2 rhs);
+extern Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size);
 extern Vector2 lerp(Vector2 a, Vector2 b, f32 t);
 extern f32 length(Vector2 v);
 extern f32 length_sq(Vector2 v);
@@ -88,6 +89,7 @@ extern bool aabb_intersect_aabb(Vector2 pos_a, Vector2 extents_a, Vector2 pos_b,
 extern bool aabb_intersect_line(Vector2 pos, Vector2 extents, Vector2 l_p0, Vector2 l_p1, Vector2 *out_intersect_point, Vector2 *out_normal);
 extern bool swept_aabb_intersect_line(Vector2 pos, Vector2 half_size, Vector2 delta, Vector2 l_p0, Vector2 l_p1, Vector2 *out_intersect_point, Vector2 *out_normal);
 extern bool aabb_intersect_swept_aabb(Vector2 pos_a, Vector2 half_size_a, Vector2 pos_b, Vector2 half_size_b, Vector2 delta_b, Vector2 *out_intersect_point, Vector2 *out_normal);
+extern f32 calc_center(f32 min, f32 max, f32 size);
 extern f32 round_to(f32 value, f32 multiple);
 extern Vector2 round_to(Vector2 v, f32 multiple);
 extern f32 lerp(f32 a, f32 b, f32 t);
