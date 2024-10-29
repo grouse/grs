@@ -220,6 +220,17 @@ struct Rect {
         return size;
     }
 
+    constexpr f32 size_x(f32 x)
+    {
+        br.x = tl.x + x;
+        return x;
+    }
+    constexpr f32 size_y(f32 y)
+    {
+        br.y = tl.y + y;
+        return y;
+    }
+
     constexpr Vector2& operator[](i32 i) { return data[i]; }
 };
 
