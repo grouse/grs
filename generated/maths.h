@@ -5,6 +5,7 @@ namespace PUBLIC {}
 using namespace PUBLIC;
 
 extern Vector2 abs(Vector2 v);
+extern Vector2 vec2_max(Vector2 lhs, Vector2 rhs);
 extern Vector2 lerp(Vector2 a, Vector2 b, f32 t);
 extern f32 length(Vector2 v);
 extern f32 length_sq(Vector2 v);

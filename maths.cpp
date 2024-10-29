@@ -9,6 +9,11 @@ Vector2 abs(Vector2 v) EXPORT
     return Vector2{ fabsf(v.x), fabsf(v.y) };
 }
 
+Vector2 vec2_max(Vector2 lhs, Vector2 rhs) EXPORT
+{
+    return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y) };
+}
+
 Vector2 lerp(Vector2 a, Vector2 b, f32 t) EXPORT
 {
     Vector2 r;
