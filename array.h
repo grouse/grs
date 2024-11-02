@@ -10,7 +10,7 @@
 // In honour of Dirk
 #define ANON_ARRAY(fields) struct anon_##__LINE__ { fields; }; Array<anon_##__LINE__>
 
-// -------------------------------------------------------------------------------
+// -- structures
 template<typename T>
 struct Array {
     T *data = nullptr;
@@ -40,6 +40,140 @@ struct Array {
     }
 };
 
+template<typename T>
+struct DynamicArray : Array<T> {
+    i32 capacity = 0;
+    Allocator alloc = {};
+};
+
+template<typename T, i32 N>
+struct FixedArray : Array<T> {
+    using capacity = std::integral_constant<i32, N>;
+    alignas(T) u8 storage[sizeof(T)*N];
+
+    FixedArray() : Array<T>((T*)storage) {}
+
+    FixedArray(const FixedArray<T, N> &other) :
+        Array<T>((T*)this->storage, MIN(N, other.count))
+    {
+        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+    }
+
+    template<i32 M>
+    FixedArray(const FixedArray<T, M> &other) :
+        Array<T>((T*)this->storage, MIN(N, other.count))
+    {
+        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+    }
+
+    FixedArray(const Array<T> &other) :
+        Array<T>((T*)this->storage, MIN(N, other.count))
+    {
+        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+    }
+
+    FixedArray(std::initializer_list<T> list) :
+        Array<T>((T*)this->storage, MIN(N, list.size()))
+    {
+        auto *src = list.begin();
+        for (i32 i = 0; i < this->count; i++) this->data[i] = src[i];
+    }
+
+    FixedArray<T, N>& operator=(const FixedArray<T, N> &other)
+    {
+        this->data = (T*)this->storage;
+        this->count = MIN(N, other.count);
+        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        return *this;
+    }
+
+    template<i32 M>
+    FixedArray<T, N>& operator=(const FixedArray<T, M> &other)
+    {
+        this->data = (T*)this->storage;
+        this->count = MIN(N, other.count);
+        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        return *this;
+    }
+
+    FixedArray<T, N>& operator=(const Array<T> &other)
+    {
+        this->data = (T*)this->storage;
+        this->count = MIN(N, other.count);
+        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        return *this;
+    }
+
+    FixedArray<T, N>& operator=(std::initializer_list<T> list)
+    {
+        this->data = (T*)this->storage;
+        this->count = MIN(N, list.size());
+
+        auto *src = list.begin();
+        for (i32 i = 0; i < this->count; i++) this->data[i] = src[i];
+        return *this;
+    }
+};
+
+template<typename T, i32 N>
+struct StaticArray : Array<T> {
+    T storage[N];
+
+    StaticArray() : Array<T>{ .data = storage, .count = N } {}
+
+    StaticArray(StaticArray<T, N> &other) :
+        Array<T>{ .data = storage, .count = N }
+    {
+        memcpy(storage, other.data, N * sizeof storage[0]);
+    }
+
+    StaticArray(StaticArray<T, N> &&other) :
+        Array<T>{ .data = storage, .count = N }
+    {
+        memcpy(storage, other.data, N * sizeof storage[0]);
+    }
+
+    StaticArray(Array<T> arr) :
+        Array<T>{ .data = storage, .count = N }
+    {
+        memcpy(storage, arr.data, MIN(N, arr.count) * sizeof storage[0]);
+    }
+
+    StaticArray(std::initializer_list<T> list) :
+        Array<T>{ .data = storage, .count = N }
+    {
+        memcpy(storage, list.begin(), MIN(N, list.size()) * sizeof storage[0]);
+    }
+
+
+    StaticArray<T, N>& operator=(StaticArray<T, N> &other)
+    {
+        this->data = this->storage;
+        this->count = N;
+        memcpy(storage, other.data,  N * sizeof storage[0]);
+        return *this;
+    }
+
+    StaticArray<T, N>& operator=(StaticArray<T, N> &&other)
+    {
+        this->data = this->storage;
+        this->count = N;
+        memcpy(storage, other, N * sizeof storage[0]);
+        return *this;
+    }
+
+    StaticArray<T, N>& operator=(Array<T> arr)
+    {
+        this->data = this->storage;
+        this->count = N;
+        memcpy(storage, arr.data, MIN(N, arr.count) * sizeof storage[0]);
+        return *this;
+    }
+};
+
+
+
+// -- iterators
 template<typename T>
 struct ArrayIterator {
     struct iter {
@@ -95,6 +229,7 @@ ArrayIterator<T> iterator(Array<T> arr) { return { .arr = arr }; }
 template<typename T>
 ReverseIterator<T> reverse(Array<T> arr) { return { .arr = arr }; }
 
+// -- array procedures
 template<typename T>
 T array_pop(Array<T> *arr)
 {
@@ -153,6 +288,7 @@ Array<T> slice(Array<T> arr, i32 start, i32 end)
     ASSERT(start <= end);
     ASSERT(start <= arr.count);
     ASSERT(end <= arr.count);
+    ASSERT(start >= 0);
     return { .data = &arr.data[start], .count = end-start };
 }
 
@@ -160,6 +296,7 @@ template<typename T>
 Array<T> slice(Array<T> arr, i32 start)
 {
     ASSERT(start <= arr.count);
+    ASSERT(start >= 0);
     return { .data = &arr.data[start], .count = arr.count-start };
 }
 
@@ -191,7 +328,6 @@ bool array_contains(Array<T> arr, E value)
     return array_find_index(arr, value) >= 0;
 }
 
-
 template<typename T>
 void array_swap(Array<T> arr, i32 a, i32 b)
 {
@@ -212,7 +348,6 @@ void array_swap(Array<T> arr, i32 a, i32 b, Array<K> arr1, Array<Tail>... tail)
     array_swap(arr1, a, b, tail...);
 }
 
-
 template<typename T, typename... Tail>
 void exchange_sort(Array<T> arr, Array<Tail>... tail)
 {
@@ -221,7 +356,6 @@ void exchange_sort(Array<T> arr, Array<Tail>... tail)
             if (arr[i] > arr[j]) array_swap(arr, i, j, tail...);
         }
     }
-
 }
 
 template<typename T, typename... Tail>
@@ -294,13 +428,7 @@ void quick_sort_asc(Array<T> arr, Array<Tail>... tail)
     quick_sort_asc(arr, 0, arr.count-1, tail...);
 }
 
-// -------------------------------------------------------------------------------
-template<typename T>
-struct DynamicArray : Array<T> {
-    i32 capacity = 0;
-    Allocator alloc = {};
-};
-
+// -- dynamic array procedures
 template<typename T>
 void array_grow(DynamicArray<T> *arr, i32 additional_elements)
 {
@@ -525,146 +653,7 @@ T* array_find_emplace(DynamicArray<T> *arr, const E& value)
     return &arr->at(i);
 }
 
-// -------------------------------------------------------------------------------
-template<typename T, i32 N>
-struct FixedArray {
-    using capacity = std::integral_constant<i32, N>;
-
-    alignas(alignof(T)) u8 storage[sizeof(T)*N];
-    i32 count;
-
-    constexpr T& operator[](i32 i)
-    {
-        ASSERT(i < count && i >= 0);
-        return *(T*)&storage[i*sizeof(T)];
-    }
-
-    constexpr T* data(i32 i = 0) { return &((T*)storage)[i]; }
-
-    T* begin() { return (T*)&storage[0]; }
-    T* end()   { return (T*)&storage[count*sizeof(T)]; }
-
-    const T* begin() const { return (const T*)&storage[0]; }
-    const T* end()   const { return (const T*)&storage[count*sizeof(T)]; }
-
-    bool operator==(const FixedArray<T, N> &other) const
-    {
-        if (this->count != other.count) return false;
-        if (this->storage == other.storage) return true;
-
-        auto *lhs = begin();
-        auto *rhs = other.begin();
-        for (i32 i = 0; i < this->count; i++) {
-            if (lhs[i] != rhs[i]) return false;
-        }
-        return true;
-    }
-
-    FixedArray() = default;
-    FixedArray(const FixedArray<T, N> &other) : count(other.count)
-    {
-        auto *dst = begin();
-        auto *src = other.begin();
-        for (i32 i = 0; i < other.count; i++) dst[i] = src[i];
-    }
-
-    FixedArray<T, N>& operator=(const FixedArray<T, N> &other)
-    {
-        this->count = other.count;
-        auto *dst = begin();
-        auto *src = other.begin();
-        for (i32 i = 0; i < count; i++) dst[i] = src[i];
-        return *this;
-    }
-
-    FixedArray(Array<T> arr) : count(MIN(N, arr.count))
-    {
-        auto *dst = begin();
-        for (i32 i = 0; i < count; i++) dst[i] = arr.data[i];
-    }
-
-    FixedArray(std::initializer_list<T> list) : count(MIN(N, list.size()))
-    {
-        auto *dst = begin();
-        auto *src = list.begin();
-        for (i32 i = 0; i < count; i++) dst[i] = src[i];
-    }
-
-    FixedArray<T, N>& operator=(const Array<T> &arr)
-    {
-        this->count = MIN(N, arr.count);
-        auto *dst = begin();
-        for (i32 i = 0; i < arr.count; i++) dst[i] = arr.data[i];
-        return *this;
-    }
-
-
-};
-
-template<typename T, i32 N>
-ArrayIterator<T> iterator(FixedArray<T, N> &arr) { return { { .data = arr.data(), .count = arr.count } }; }
-
-template<typename T, i32 N>
-ReverseIterator<T> reverse(FixedArray<T, N> &arr) { return { { .data = arr.data(), .count = arr.count } }; }
-
-template<typename T, i32 N>
-i32 array_add(FixedArray<T, N> *arr, T e)
-{
-    PANIC_IF(arr->count >= N, "FixedArray overflow");
-    *arr->data(arr->count) = e;
-    return arr->count++;
-}
-
-template<typename T, i32 N>
-i32 array_add(FixedArray<T, N> *arr, T *es, i32 count)
-{
-    PANIC_IF(arr->count+count > N, "FixedArray overflow");
-    memcpy(arr->data(arr->count), es, count*sizeof *es);
-    arr->count += count;
-    return arr->count;
-}
-
-template<typename T, i32 N>
-void array_remove_unsorted(FixedArray<T, N> *arr, i32 index)
-{
-    ASSERT(index >= 0);
-    ASSERT(index < arr->count);
-
-    arr->data[index] = arr->data[arr->count-1];
-    arr->count--;
-}
-
-template<typename T, i32 N>
-void array_remove(FixedArray<T, N> *arr, i32 index)
-{
-    ASSERT(index >= 0);
-    ASSERT(index < arr->count);
-
-    memmove(arr->data(index), arr->data(index+1), (arr->count-index-1)*sizeof(T));
-    arr->count--;
-}
-
-template<typename T, i32 N>
-T array_pop(FixedArray<T, N> *arr)
-{
-    ASSERT(arr->count > 0);
-    return *arr->data(--arr->count);
-}
-
-template<typename T, i32 N>
-T* array_tail(FixedArray<T, N> &arr)
-{
-    if (arr.count == 0) return nullptr;
-    return arr.data(arr.count-1);
-}
-
-template<typename T, i32 N>
-i32 array_find_index(FixedArray<T, N> &arr, T &value)
-{
-    for (i32 i = 0; i < arr.count; i++) if (arr[i] == value) return i;
-    return -1;
-}
-
+// -- fixed array procedures
 template<typename T, i32 N>
 void array_reset(FixedArray<T, N> *arr)
 {
@@ -672,81 +661,25 @@ void array_reset(FixedArray<T, N> *arr)
 }
 
 template<typename T, i32 N>
-Array<T> slice(FixedArray<T, N> &arr, i32 start, i32 end)
+i32 array_add(FixedArray<T, N> *arr, T e)
 {
-    ASSERT(start <= end);
-    ASSERT(start <= arr.count);
-    ASSERT(end <= arr.count);
-    return { .data = arr.data(start), .count = end-start };
+    PANIC_IF(arr->count >= N, "FixedArray overflow");
+    arr->data[arr->count] = e;
+    return arr->count++;
 }
 
 template<typename T, i32 N>
-Array<T> slice(FixedArray<T, N> &arr, i32 start)
+i32 array_add(FixedArray<T, N> *arr, T *es, i32 count)
 {
-    ASSERT(start <= arr.count);
-    return { .data = arr.data(start), .count = arr.count-start };
+    PANIC_IF(arr->count+count > N, "FixedArray overflow");
+    memcpy(&arr->data[arr->count], es, count*sizeof *es);
+    arr->count += count;
+    return arr->count;
 }
 
-
-// -------------------------------------------------------------------------------
-template<typename T, i32 N>
-struct StaticArray : Array<T> {
-    T storage[N];
-
-    StaticArray() : Array<T>{ .data = storage, .count = N } {}
-
-    StaticArray(StaticArray<T, N> &other) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, other.data, N * sizeof storage[0]);
-    }
-
-    StaticArray(StaticArray<T, N> &&other) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, other.data, N * sizeof storage[0]);
-    }
-
-    StaticArray(Array<T> arr) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, arr.data, MIN(N, arr.count) * sizeof storage[0]);
-    }
-
-    StaticArray(std::initializer_list<T> list) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, list.begin(), MIN(N, list.size()) * sizeof storage[0]);
-    }
-
-
-    StaticArray<T, N>& operator=(StaticArray<T, N> &other)
-    {
-        this->data = this->storage;
-        this->count = N;
-        memcpy(storage, other.data,  N * sizeof storage[0]);
-        return *this;
-    }
-
-    StaticArray<T, N>& operator=(StaticArray<T, N> &&other)
-    {
-        this->data = this->storage;
-        this->count = N;
-        memcpy(storage, other, N * sizeof storage[0]);
-        return *this;
-    }
-
-    StaticArray<T, N>& operator=(Array<T> arr)
-    {
-        this->data = this->storage;
-        this->count = N;
-        memcpy(storage, arr.data, MIN(N, arr.count) * sizeof storage[0]);
-        return *this;
-    }
-};
-
-/// test suite
+// -- test suite
 #include "test.h"
+
 static TEST_PROC(indexing, CATEGORY(array))
 {
     i32 data[5] = { 1, 2, 3, 4, 5 };
@@ -777,6 +710,38 @@ static TEST_PROC(find, CATEGORY(array))
     ASSERT(array_find_index(arr, 1) == 0);
     ASSERT(array_find_index(arr, 5) == 4);
     ASSERT(array_find_index(arr, 6) == -1);
+}
+
+static TEST_PROC(iterator, CATEGORY(array))
+{
+    i32 data[5] = { 1, 2, 3, 4, 5 };
+    Array<i32> arr{ .data = data, .count = ARRAY_COUNT(data) };
+
+    {
+        i32 index = 0;
+        for (auto it : arr) {
+            ASSERT(it == arr[index]);
+            index++;
+        }
+    }
+
+    {
+        i32 index = 0;
+        for (auto it : iterator(arr)) {
+            ASSERT(*it == arr[index]);
+            ASSERT(it.index == index);
+            index++;
+        }
+    }
+
+    {
+        i32 index = 0;
+        for (auto it : reverse(arr)) {
+            ASSERT(*it == arr[arr.count-index-1]);
+            ASSERT(it.index == arr.count-index-1);
+            index++;
+        }
+    }
 }
 
 static TEST_PROC(append, CATEGORY(dynamic_array))
@@ -846,5 +811,336 @@ static TEST_PROC(set, CATEGORY(dynamic_array))
     }
 }
 
+static TEST_PROC(basic_construction, CATEGORY(fixed_array))
+{
+    // Test default construction
+    FixedArray<int, 5> arr1;
+    ASSERT(arr1.count == 0);
+    ASSERT(arr1.data == (int*)arr1.storage);
+
+    // Test initialization list construction
+    FixedArray<int, 5> arr2 = {1, 2, 3};
+    ASSERT(arr2.count == 3);
+    ASSERT(arr2.data == (int*)arr2.storage);
+    ASSERT(arr2[0] == 1);
+    ASSERT(arr2[1] == 2);
+    ASSERT(arr2[2] == 3);
+
+    // Test construction from Array
+    int raw_data[] = {4, 5, 6, 7};
+    Array<int> source{raw_data, 4};
+    FixedArray<int, 5> arr3(source);
+    ASSERT(arr3.count == 4);
+    ASSERT(arr3.data == (int*)arr3.storage);
+    for (int i = 0; i < 4; i++) {
+        ASSERT(arr3[i] == raw_data[i]);
+    }
+}
+
+static TEST_PROC(copy_operations, CATEGORY(fixed_array))
+{
+    {
+        FixedArray<int, 5> original = {1, 2, 3};
+        ASSERT(original.data == (int*)original.storage);
+
+        FixedArray<int, 5> copied(original);
+        ASSERT(copied.data == (int*)copied.storage);
+        ASSERT(copied.count == 3);
+
+        for (int i = 0; i < 3; i++) {
+            ASSERT(copied[i] == original[i]);
+        }
+
+        copied[0] = 10;
+        ASSERT(original[0] == 1);
+        ASSERT(copied[0] == 10);
+    }
+
+    {
+        FixedArray<int, 5> original = {1, 2, 3};
+        ASSERT(original.data == (int*)original.storage);
+
+        FixedArray<int, 5> assigned;
+        assigned = original;
+        ASSERT(assigned.data == (int*)assigned.storage);
+        ASSERT(assigned.count == 3);
+
+        for (int i = 0; i < 3; i++) {
+            ASSERT(assigned[i] == original[i]);
+        }
+
+        assigned[0] = 10;
+        ASSERT(original[0] == 1);
+        ASSERT(assigned[0] == 10);
+    }
+}
+
+static TEST_PROC(size_limits, CATEGORY(fixed_array))
+{
+    // Test truncation when source is larger than capacity
+    int raw_data[] = {1, 2, 3, 4, 5, 6};
+    Array<int> large_source{raw_data, 6};
+    FixedArray<int, 4> truncated(large_source);
+    ASSERT(truncated.count == 4);
+    for (int i = 0; i < 4; i++) {
+        ASSERT(truncated[i] == raw_data[i]);
+    }
+
+    // Test initialization list truncation
+    FixedArray<int, 3> truncated_init = {1, 2, 3, 4, 5};
+    ASSERT(truncated_init.count == 3);
+    for (int i = 0; i < 3; i++) {
+        ASSERT(truncated_init[i] == i + 1);
+    }
+}
+
+static TEST_PROC(data_pointer_integrity, CATEGORY(fixed_array))
+{
+    FixedArray<int, 5> arr1 = {1, 2, 3};
+    const int* original_data = arr1.data;
+
+    FixedArray<int, 5> arr2(arr1);
+    ASSERT(arr2.data == (int*)arr2.storage);
+    ASSERT(arr1.data == original_data);
+
+    FixedArray<int, 5> arr3;
+    arr3 = arr1;
+    ASSERT(arr3.data == (int*)arr3.storage);
+    ASSERT(arr1.data == original_data);
+
+    FixedArray<int, 5> arr4;
+    arr4 = arr3 = arr2 = arr1;
+    ASSERT(arr4.data == (int*)arr4.storage);
+    ASSERT(arr3.data == (int*)arr3.storage);
+    ASSERT(arr2.data == (int*)arr2.storage);
+    ASSERT(arr1.data == original_data);
+}
+
+static TEST_PROC(pop, CATEGORY(array))
+{
+    {
+        int data[] = {1, 2, 3, 4};
+        Array<int> arr{data, 4};
+
+        ASSERT(array_pop(&arr) == 4);
+        ASSERT(arr.count == 3);
+        ASSERT(array_pop(&arr) == 3);
+        ASSERT(arr.count == 2);
+    }
+}
+
+static TEST_PROC(tail, CATEGORY(array))
+{
+    // Test basic tail access
+    {
+        int data[] = {1, 2, 3};
+        Array<int> arr{data, 3};
+
+        ASSERT(*array_tail(arr) == 3);
+        arr.count--;
+        ASSERT(*array_tail(arr) == 2);
+    }
+
+    // Test empty array
+    {
+        Array<int> empty{};
+        ASSERT(array_tail(empty) == nullptr);
+    }
+}
+
+static TEST_PROC(create, CATEGORY(array))
+{
+    // Test creation with default allocator
+    {
+        Array<int> arr = array_create<int>(5, mem_dynamic);
+        ASSERT(arr.count == 5);
+        ASSERT(arr.data != nullptr);
+
+        // Test data can be written to
+        for (int i = 0; i < 5; i++) {
+            arr.data[i] = i;
+            ASSERT(arr[i] == i);
+        }
+    }
+}
+
+static TEST_PROC(remove, CATEGORY(array))
+{
+    // Test remove (ordered)
+    {
+        int data[] = {1, 2, 3, 4, 5};
+        Array<int> arr{data, 5};
+
+        array_remove(&arr, 2);
+        ASSERT(arr.count == 4);
+        ASSERT(arr[0] == 1);
+        ASSERT(arr[1] == 2);
+        ASSERT(arr[2] == 4);
+        ASSERT(arr[3] == 5);
+
+        array_remove(&arr, 0);
+        ASSERT(arr.count == 3);
+        ASSERT(arr[0] == 2);
+        ASSERT(arr[1] == 4);
+        ASSERT(arr[2] == 5);
+
+        EXPECT_FAIL(array_remove(&arr, 3)); // Out of bounds
+    }
+
+    // Test remove_unsorted (unordered)
+    {
+        int data[] = {1, 2, 3, 4, 5};
+        Array<int> arr{data, 5};
+
+        array_remove_unsorted(&arr, 2);
+        ASSERT(arr.count == 4);
+        ASSERT(arr[2] == 5);
+
+        array_remove_unsorted(&arr, 0);
+        ASSERT(arr.count == 3);
+
+        EXPECT_FAIL(array_remove_unsorted(&arr, 3)); // Out of bounds
+    }
+}
+
+static TEST_PROC(slice, CATEGORY(array))
+{
+    int data[] = {1, 2, 3, 4, 5};
+    Array<int> arr{data, 5};
+
+    // Test full slice
+    {
+        Array<int> sliced = slice(arr, 0, 5);
+        ASSERT(sliced.count == 5);
+        ASSERT(sliced.data == arr.data);
+    }
+
+    // Test partial slice
+    {
+        Array<int> sliced = slice(arr, 1, 4);
+        ASSERT(sliced.count == 3);
+        ASSERT(sliced.data == &arr.data[1]);
+        ASSERT(sliced[0] == 2);
+        ASSERT(sliced[1] == 3);
+        ASSERT(sliced[2] == 4);
+    }
+
+    // Test single-argument slice
+    {
+        Array<int> sliced = slice(arr, 2);
+        ASSERT(sliced.count == 3);
+        ASSERT(sliced.data == &arr.data[2]);
+    }
+
+    // Test edge cases
+    {
+        Array<int> empty = slice(arr, 5, 5);
+        ASSERT(empty.count == 0);
+
+        EXPECT_FAIL(slice(arr, 2, 1)); // Invalid range
+        EXPECT_FAIL(slice(arr, -1));   // Invalid start
+        EXPECT_FAIL(slice(arr, 0, 6)); // Invalid end
+    }
+}
+
+static TEST_PROC(find, CATEGORY(array))
+{
+    int data[] = {1, 2, 3, 2, 1};
+    Array<int> arr{data, 5};
+
+    // Test array_find_index
+    {
+        ASSERT(array_find_index(arr, 1) == 0); // First occurrence
+        ASSERT(array_find_index(arr, 2) == 1);
+        ASSERT(array_find_index(arr, 4) == -1); // Not found
+    }
+
+    // Test array_find
+    {
+        ASSERT(*array_find(arr, 1) == 1);
+        ASSERT(array_find(arr, 1) == &arr[0]);
+        ASSERT(array_find(arr, 4) == nullptr);
+    }
+
+    // Test array_contains
+    {
+        ASSERT(array_contains(arr, 1));
+        ASSERT(array_contains(arr, 3));
+        ASSERT(!array_contains(arr, 4));
+    }
+}
+
+static TEST_PROC(swap, CATEGORY(array))
+{
+    // Test single array swap
+    {
+        int data[] = {1, 2, 3};
+        Array<int> arr{data, 3};
+
+        array_swap(arr, 0, 2);
+        ASSERT(arr[0] == 3);
+        ASSERT(arr[2] == 1);
+    }
+
+    // Test multi-array swap
+    {
+        int data1[] = {1, 2, 3};
+        char data2[] = {'a', 'b', 'c'};
+        Array<int> arr1{data1, 3};
+        Array<char> arr2{data2, 3};
+
+        array_swap(arr1, 0, 2, arr2);
+        ASSERT(arr1[0] == 3 && arr1[2] == 1);
+        ASSERT(arr2[0] == 'c' && arr2[2] == 'a');
+    }
+}
+
+static TEST_PROC(sort, CATEGORY(array))
+{
+    // Test exchange sort
+    {
+        int data[] = {5, 3, 1, 4, 2};
+        Array<int> arr{data, 5};
+
+        exchange_sort(arr);
+        for (int i = 0; i < arr.count-1; i++) {
+            ASSERT(arr[i] <= arr[i+1]);
+        }
+    }
+
+    // Test quick sort ascending
+    {
+        int data[] = {5, 3, 1, 4, 2};
+        Array<int> arr{data, 5};
+
+        quick_sort_asc(arr);
+        for (int i = 0; i < arr.count-1; i++) {
+            ASSERT(arr[i] <= arr[i+1]);
+        }
+    }
+
+    // Test quick sort descending
+    {
+        int data[] = {1, 3, 5, 4, 2};
+        Array<int> arr{data, 5};
+
+        quick_sort_desc(arr);
+        for (int i = 0; i < arr.count-1; i++) {
+            ASSERT(arr[i] >= arr[i+1]);
+        }
+    }
+
+    // Test sorting with parallel arrays
+    {
+        int keys[] = {5, 3, 1, 4, 2};
+        char values[] = {'a', 'b', 'c', 'd', 'e'};
+        Array<int> key_arr{keys, 5};
+        Array<char> value_arr{values, 5};
+
+        quick_sort_asc(key_arr, value_arr);
+        ASSERT(key_arr[0] == 1 && value_arr[0] == 'c');
+        ASSERT(key_arr[4] == 5 && value_arr[4] == 'a');
+    }
+}
 
 #endif // ARRAY_H
