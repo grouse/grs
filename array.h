@@ -51,30 +51,34 @@ struct FixedArray : Array<T> {
     using capacity = std::integral_constant<i32, N>;
     alignas(T) u8 storage[sizeof(T)*N];
 
-    FixedArray() : Array<T>((T*)storage) {}
+    FixedArray() { this->data = (T*)storage; }
 
-    FixedArray(const FixedArray<T, N> &other) :
-        Array<T>((T*)this->storage, MIN(N, other.count))
+    FixedArray(const FixedArray<T, N> &other)
     {
+        this->data  = (T*)this->storage;
+        this->count = MIN(N, other.count);
         for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
     }
 
     template<i32 M>
-    FixedArray(const FixedArray<T, M> &other) :
-        Array<T>((T*)this->storage, MIN(N, other.count))
+    FixedArray(const FixedArray<T, M> &other)
     {
+        this->data  = (T*)this->storage;
+        this->count = MIN(N, other.count);
         for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
     }
 
-    FixedArray(const Array<T> &other) :
-        Array<T>((T*)this->storage, MIN(N, other.count))
+    FixedArray(const Array<T> &other)
     {
+        this->data = (T*)this->storage;
+        this->count = MIN(N, other.count);
         for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
     }
 
-    FixedArray(std::initializer_list<T> list) :
-        Array<T>((T*)this->storage, MIN(N, list.size()))
+    FixedArray(std::initializer_list<T> list)
     {
+        this->data = (T*)this->storage;
+        this->count = MIN(N, list.size());
         auto *src = list.begin();
         for (i32 i = 0; i < this->count; i++) this->data[i] = src[i];
     }
