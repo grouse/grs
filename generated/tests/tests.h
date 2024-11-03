@@ -2,83 +2,81 @@
 #define TESTS_TEST_H
 
 static void indexing_test0();
-static void removal_test1();
-static void find_test2();
-static void iterator_test3();
-static void append_test4();
-static void insert_test5();
-static void set_test6();
-static void basic_construction_test7();
-static void copy_operations_test8();
-static void size_limits_test9();
-static void data_pointer_integrity_test10();
-static void pop_test11();
-static void tail_test12();
-static void create_test13();
-static void remove_test14();
-static void slice_test15();
-static void find_test16();
-static void swap_test17();
-static void sort_test18();
-extern void operators_test19();
-extern void swizzle_test20();
-extern void operators_test21();
-extern void swizzle_test22();
-extern void operators_test23();
-extern void swizzle_test24();
-extern void constructors_test25();
-extern void swizzle_test26();
-extern void angle_axis_test27();
-extern void euler_test28();
-extern void inverse_test29();
-extern void angle_between_test30();
+static void find_test1();
+static void iterator_test2();
+static void append_test3();
+static void insert_test4();
+static void set_test5();
+static void basic_construction_test6();
+static void copy_operations_test7();
+static void size_limits_test8();
+static void data_pointer_integrity_test9();
+static void pop_test10();
+static void tail_test11();
+static void create_test12();
+static void remove_test13();
+static void slice_test14();
+static void find_test15();
+static void swap_test16();
+static void sort_test17();
+extern void operators_test18();
+extern void swizzle_test19();
+extern void operators_test20();
+extern void swizzle_test21();
+extern void operators_test22();
+extern void swizzle_test23();
+extern void constructors_test24();
+extern void swizzle_test25();
+extern void angle_axis_test26();
+extern void euler_test27();
+extern void inverse_test28();
+extern void angle_between_test29();
 
 TestSuite TESTS_array_tests[] = {
 	{ "indexing", indexing_test0 },
-	{ "removal", removal_test1 },
-	{ "find", find_test2 },
-	{ "iterator", iterator_test3 },
-	{ "pop", pop_test11 },
-	{ "tail", tail_test12 },
-	{ "create", create_test13 },
-	{ "remove", remove_test14 },
-	{ "slice", slice_test15 },
-	{ "find", find_test16 },
-	{ "swap", swap_test17 },
-	{ "sort", sort_test18 },
+	{ "find", find_test1 },
+	{ "iterator", iterator_test2 },
+	{ "pop", pop_test10 },
+	{ "tail", tail_test11 },
+	{ "create", create_test12 },
+	{ "remove", remove_test13 },
+	{ "slice", slice_test14 },
+	{ "find", find_test15 },
+	{ "swap", swap_test16 },
+	{ "sort", sort_test17 },
 };
 TestSuite TESTS_dynamic_array_tests[] = {
-	{ "append", append_test4 },
-	{ "insert", insert_test5 },
-	{ "set", set_test6 },
+	{ "append", append_test3 },
+	{ "insert", insert_test4 },
+	{ "set", set_test5 },
 };
 TestSuite TESTS_fixed_array_tests[] = {
-	{ "basic_construction", basic_construction_test7 },
-	{ "copy_operations", copy_operations_test8 },
-	{ "size_limits", size_limits_test9 },
-	{ "data_pointer_integrity", data_pointer_integrity_test10 },
+	{ "basic_construction", basic_construction_test6 },
+	{ "copy_operations", copy_operations_test7 },
+	{ "size_limits", size_limits_test8 },
+	{ "data_pointer_integrity", data_pointer_integrity_test9 },
 };
 TestSuite TESTS_vector2_tests[] = {
-	{ "operators", operators_test19 },
-	{ "swizzle", swizzle_test20 },
+	{ "operators", operators_test18 },
+	{ "swizzle", swizzle_test19 },
 };
 TestSuite TESTS_vector3_tests[] = {
-	{ "operators", operators_test21 },
-	{ "swizzle", swizzle_test22 },
+	{ "operators", operators_test20 },
+	{ "swizzle", swizzle_test21 },
 };
 TestSuite TESTS_vector4_tests[] = {
-	{ "operators", operators_test23 },
-	{ "swizzle", swizzle_test24 },
+	{ "operators", operators_test22 },
+	{ "swizzle", swizzle_test23 },
 };
 TestSuite TESTS_maths_quaternion_tests[] = {
-	{ "constructors", constructors_test25 },
-	{ "swizzle", swizzle_test26 },
-	{ "angle_axis", angle_axis_test27 },
-	{ "euler", euler_test28 },
-	{ "inverse", inverse_test29 },
+	{ "constructors", constructors_test24 },
+	{ "swizzle", swizzle_test25 },
+	{ "angle_axis", angle_axis_test26 },
+	{ "euler", euler_test27 },
+	{ "inverse", inverse_test28 },
 };
 TestSuite TESTS_maths_misc_tests[] = {
-	{ "angle_between", angle_between_test30 },
+	{ "angle_between", angle_between_test29 },
 };
 TestSuite TESTS_tests[] = {
 	{ "array", nullptr, TESTS_array_tests, sizeof(TESTS_array_tests)/sizeof(TESTS_array_tests[0]) },

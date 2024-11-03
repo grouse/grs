@@ -180,51 +180,103 @@ struct StaticArray : Array<T> {
 // -- iterators
 template<typename T>
 struct ArrayIterator {
-    struct iter {
+    Array<T> arr;
+
+    struct Proxy {
         T *ptr;
         i32 index;
 
         T& elem() { return ptr[index]; }
 
-        operator T*() { return &ptr[index]; }
-        operator T&() { return ptr[index]; }
-        T* operator->() { return &ptr[index]; }
-        iter operator*() { return *this; }
-        bool operator!=(iter other) { return index != other.index; }
+        operator T*()     { return &ptr[index]; }
+        operator T&()     { return ptr[index]; }
+        T* operator->()   { return &ptr[index]; }
+        Proxy operator*() { return *this; }
 
-        iter operator++() { index++; return *this; }
-        iter operator--() { index--; return *this; }
+        bool operator==(Proxy other) { return ptr == other.ptr && index == other.index; }
+        bool operator!=(Proxy other) { return ptr != other.ptr || index != other.index; }
+
+        Proxy& operator++() { index++; return *this; }
+        Proxy& operator--() { index--; return *this; }
     };
 
-    Array<T> arr;
+    Proxy begin() { return { arr.begin(), 0         }; }
+    Proxy end()   { return { arr.begin(), arr.count }; }
+};
 
-    iter begin() { return { .ptr = arr.begin(), .index = 0 }; }
-    iter end() { return { .ptr = arr.begin(), .index = arr.count }; }
+template<typename T>
+struct ArrayIterator<T*> {
+    Array<T*> arr;
+
+    struct Proxy {
+        T **ptr;
+        i32 index;
+
+        T*& elem()        { return ptr[index]; }
+        operator T*()     { return ptr[index]; }
+        operator T&()     { return *ptr[index]; }
+        T* operator->()   { return ptr[index]; }
+        Proxy operator*() { return *this; }
+
+        bool operator==(Proxy other) { return ptr == other.ptr && index == other.index; }
+        bool operator!=(Proxy other) { return ptr != other.ptr || index != other.index; }
+
+        Proxy& operator++() { index++; return *this; }
+        Proxy& operator--() { index--; return *this; }
+    };
+
+    Proxy begin() { return { arr.begin(), 0         }; }
+    Proxy end()   { return { arr.begin(), arr.count }; }
 };
 
 template<typename T>
 struct ReverseIterator {
     Array<T> arr;
 
-    struct iter {
+    struct Proxy {
         T *ptr;
         i32 index;
 
-        T& elem() { return ptr[index]; }
+        T& elem()         { return ptr[index]; }
+        operator T*()     { return &ptr[index]; }
+        operator T&()     { return ptr[index]; }
+        T* operator->()   { return &ptr[index]; }
+        Proxy operator*() { return *this; }
 
-        operator T*() { return &ptr[index]; }
-        operator T&() { return ptr[index]; }
-        T* operator->() { return &ptr[index]; }
-        iter operator*() { return *this; }
-        bool operator!=(iter other) { return index != other.index; }
+        bool operator==(Proxy other) { return ptr == other.ptr && index == other.index; }
+        bool operator!=(Proxy other) { return index != other.index; }
 
-        iter operator++() { index--; return *this; }
-        iter operator--() { index++; return *this; }
-
+        Proxy& operator++() { index--; return *this; }
+        Proxy& operator--() { index++; return *this; }
     };
 
-    iter begin() { return { .ptr = arr.begin(), .index = arr.count-1 }; }
-    iter end() { return { .ptr = arr.begin(), .index = -1 }; }
+    Proxy begin() { return { arr.begin(), arr.count-1 }; }
+    Proxy end()   { return { arr.begin(), -1          }; }
+};
+
+template<typename T>
+struct ReverseIterator<T*> {
+    Array<T*> arr;
+
+    struct Proxy {
+        T **ptr;
+        i32 index;
+
+        T*& elem()        { return ptr[index]; }
+        operator T*()     { return ptr[index]; }
+        operator T&()     { return *ptr[index]; }
+        T* operator->()   { return ptr[index]; }
+        Proxy operator*() { return *this; }
+
+        bool operator==(Proxy other) { return ptr == other.ptr && index == other.index; }
+        bool operator!=(Proxy other) { return index != other.index; }
+
+        Proxy& operator++() { index--; return *this; }
+        Proxy& operator--() { index++; return *this; }
+    };
+
+    Proxy begin() { return { arr.begin(), arr.count-1 }; }
+    Proxy end()   { return { arr.begin(), -1          }; }
 };
 
 template<typename T>
@@ -732,7 +784,7 @@ static TEST_PROC(iterator, CATEGORY(array))
     {
         i32 index = 0;
         for (auto it : iterator(arr)) {
-            ASSERT(*it == arr[index]);
+            ASSERT(it == arr[index]);
             ASSERT(it.index == index);
             index++;
         }
@@ -741,10 +793,55 @@ static TEST_PROC(iterator, CATEGORY(array))
     {
         i32 index = 0;
         for (auto it : reverse(arr)) {
-            ASSERT(*it == arr[arr.count-index-1]);
+            ASSERT(it == arr[arr.count-index-1]);
             ASSERT(it.index == arr.count-index-1);
             index++;
         }
+    }
+
+    {
+        i32 *ptrs[5] = { &data[0], &data[1], &data[2], &data[3], &data[4] };
+        Array<i32*> ptrs_arr{ .data = ptrs, .count = ARRAY_COUNT(ptrs) };
+
+        i32 index = 0;
+        for (auto it : ptrs_arr) {
+            ASSERT(it == ptrs[index]);
+            ASSERT(it == &data[index]);
+            index++;
+        }
+
+    }
+
+    {
+        struct D { i32 x; };
+        D sdata[5] = { { 1 }, { 2 }, { 3 }, { 4 }, { 5 } };
+        D *ptrs[5] = { &sdata[0], &sdata[1], &sdata[2], &sdata[3], &sdata[4] };
+        Array<D*> ptrs_arr{ .data = ptrs, .count = ARRAY_COUNT(ptrs) };
+
+        i32 index = 0;
+        for (auto it : ptrs_arr) {
+            ASSERT(it == ptrs[index]);
+            ASSERT(it == &sdata[index]);
+            ASSERT(it->x == sdata[index].x);
+            index++;
+        }
+    }
+
+    {
+        struct D { i32 x; };
+        D sdata[5] = { { 1 }, { 2 }, { 3 }, { 4 }, { 5 } };
+        D *ptrs[5] = { &sdata[0], &sdata[1], &sdata[2], &sdata[3], &sdata[4] };
+        Array<D*> ptrs_arr{ .data = ptrs, .count = ARRAY_COUNT(ptrs) };
+
+        i32 index = 0;
+        for (auto it : iterator(ptrs_arr)) {
+            ASSERT(it.index == index);
+            ASSERT(it == ptrs[index]);
+            ASSERT(it == &sdata[index]);
+            ASSERT(it->x == sdata[index].x);
+            index++;
+        }
+
     }
 }
 
