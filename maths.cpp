@@ -1177,8 +1177,8 @@ Contact aabb_intersect_line(
     Vector2 l_p0,
     Vector2 l_p1) EXPORT
 {
-    StaticArray<Line2, 4> aabb_lines;
-    calc_aabb_lines(aabb_lines.storage, pos_a, extents_a);
+    FixedArray<Line2, 4> aabb_lines; aabb_lines.count = 4;
+    calc_aabb_lines(aabb_lines.data, pos_a, extents_a);
 
     Contact contact = INVALID_CONTACT;
     for (auto l : aabb_lines) {
@@ -1335,8 +1335,8 @@ bool aabb_intersect_line(
     Vector2 *out_intersect_point,
     Vector2 *out_normal) EXPORT
 {
-    StaticArray<Line2, 4> aabb_lines;
-    calc_aabb_lines(aabb_lines.storage, pos, extents);
+    FixedArray<Line2, 4> aabb_lines; aabb_lines.count = 4;
+    calc_aabb_lines(aabb_lines.data, pos, extents);
 
     for (auto l : aabb_lines) {
         if (line_intersect_line(

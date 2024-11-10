@@ -119,63 +119,6 @@ struct FixedArray : Array<T> {
     }
 };
 
-template<typename T, i32 N>
-struct StaticArray : Array<T> {
-    T storage[N];
-
-    StaticArray() : Array<T>{ .data = storage, .count = N } {}
-
-    StaticArray(StaticArray<T, N> &other) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, other.data, N * sizeof storage[0]);
-    }
-
-    StaticArray(StaticArray<T, N> &&other) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, other.data, N * sizeof storage[0]);
-    }
-
-    StaticArray(Array<T> arr) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, arr.data, MIN(N, arr.count) * sizeof storage[0]);
-    }
-
-    StaticArray(std::initializer_list<T> list) :
-        Array<T>{ .data = storage, .count = N }
-    {
-        memcpy(storage, list.begin(), MIN(N, list.size()) * sizeof storage[0]);
-    }
-
-
-    StaticArray<T, N>& operator=(StaticArray<T, N> &other)
-    {
-        this->data = this->storage;
-        this->count = N;
-        memcpy(storage, other.data,  N * sizeof storage[0]);
-        return *this;
-    }
-
-    StaticArray<T, N>& operator=(StaticArray<T, N> &&other)
-    {
-        this->data = this->storage;
-        this->count = N;
-        memcpy(storage, other, N * sizeof storage[0]);
-        return *this;
-    }
-
-    StaticArray<T, N>& operator=(Array<T> arr)
-    {
-        this->data = this->storage;
-        this->count = N;
-        memcpy(storage, arr.data, MIN(N, arr.count) * sizeof storage[0]);
-        return *this;
-    }
-};
-
-
 
 // -- iterators
 template<typename T>
