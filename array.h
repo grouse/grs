@@ -31,6 +31,9 @@ struct Array {
     T* begin() { return &data[0]; }
     T* end() { return &data[count]; }
 
+    const T* begin() const { return &data[0]; }
+    const T* end() const { return &data[count]; }
+
     bool operator==(const Array<T> &other) const
     {
         if (this->count != other.count) return false;
