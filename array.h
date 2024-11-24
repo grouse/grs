@@ -436,7 +436,14 @@ void array_grow(DynamicArray<T> *arr, i32 additional_elements)
 
     i32 old_capacity = arr->capacity;
     arr->capacity = MAX(arr->count+additional_elements, arr->capacity*2);
-    arr->data = REALLOC_ARR(arr->alloc, T, arr->data, old_capacity, arr->capacity);
+    T *nptr = EXTEND_ARR(arr->alloc, T, arr->data, old_capacity, arr->capacity);
+
+    if (nptr != arr->data) {
+        for (i32 i = 0; i < arr->count; i++) nptr[i] = arr->data[i];
+        FREE(arr->alloc, arr->data);
+    }
+
+    arr->data = nptr;
 }
 
 template<typename T>
@@ -450,8 +457,8 @@ template<typename T>
 void array_resize(DynamicArray<T> *arr, i32 count)
 {
     if (!arr->alloc.proc) arr->alloc = mem_dynamic;
-    arr->count = count;
     array_reserve(arr, count);
+    arr->count = count;
 }
 
 template<typename T>
@@ -480,8 +487,12 @@ DynamicArray<T> array_duplicate(Array<T> src, Allocator mem)
 template<typename T>
 void array_reset(DynamicArray<T> *arr, i32 reserve_capacity = 0)
 {
+    if (arr->data) {
+        FREE(arr->alloc, arr->data);
+        arr->data = nullptr;
+    }
+
     arr->count = arr->capacity = 0;
-    arr->data = nullptr;
 
     if (reserve_capacity > 0) array_reserve(arr, reserve_capacity);
 }

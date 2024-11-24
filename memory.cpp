@@ -101,7 +101,6 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_si
         return ptr;
         }
     case M_FREE:
-        LOG_ERROR("free called on linear allocator, unsupported");
         return nullptr;
     case M_REALLOC: {
         if (size == 0) return nullptr;
@@ -113,6 +112,17 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_si
 
         void *ptr = tl_linear_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
         if (old_size > 0) memcpy(ptr, old_ptr, old_size);
+        return ptr;
+        }
+    case M_EXTEND: {
+        if (size == 0) return nullptr;
+
+        if (old_ptr && state->last == old_ptr) {
+            state->current += size-old_size;
+            return (void*)old_ptr;
+        }
+
+        void *ptr = tl_linear_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
         return ptr;
         }
     case M_RESET:
@@ -142,7 +152,6 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
         return ptr;
         }
     case M_FREE:
-        LOG_ERROR("free called on linear allocator, unsupported");
         return nullptr;
     case M_REALLOC: {
         if (size == 0) return nullptr;
@@ -167,6 +176,28 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
 
         return ptr;
         }
+    case M_EXTEND: {
+        if (size == 0) return nullptr;
+
+        u8 *ptr;
+        GUARD_MUTEX(state->mutex) {
+            if (old_ptr && state->last == old_ptr) {
+                state->current += size-old_size;
+
+                // NOTE(jesper): manual unlocking before return because the GUARD_MUTEX macro does not automatically unlock the mutex if we break out of the scope manually
+                unlock_mutex(state->mutex);
+                return (void*)old_ptr;
+            }
+
+            ptr = (u8*)align_ptr(state->current, alignment, 0);
+            PANIC_IF(ptr+size > state->end, "allocator does not have enough memory for allocation: %lld", size);
+
+            state->current = ptr+size;
+            state->last = ptr;
+        }
+
+        return ptr;
+        }
     case M_RESET:
         GUARD_MUTEX(state->mutex) {
             state->last = nullptr;
@@ -176,7 +207,7 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
     }
 }
 
-void* malloc_alloc(void */*v_state*/, M_Proc cmd, const void *old_ptr, i64 /*old_size*/, i64 size, u8 alignment)
+void* malloc_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment)
 {
     struct Header {
         u8 offset;
@@ -220,6 +251,8 @@ void* malloc_alloc(void */*v_state*/, M_Proc cmd, const void *old_ptr, i64 /*old
 
         return aligned_ptr;
         }
+    case M_EXTEND:
+        return malloc_alloc(v_state, M_ALLOC, old_ptr, old_size, size, alignment);
     case M_RESET:
         LOG_ERROR("reset called on malloc allocator, unsupported");
         return nullptr;
@@ -375,19 +408,27 @@ void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_
             LOG_INFO("freed [%p]", old_ptr);
 #endif
 
-        } break;
+    } break;
     case M_REALLOC: {
-            if (size == 0) return nullptr;
+        if (size == 0) return nullptr;
 
-            // TODO(jesper): if size < old_size, shrink the allocation and push the free block to the list
-            // TODO(jesper): we should check if the current allocation can be expanded
-            void *nptr = vm_freelist_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
-            if (old_ptr == nullptr) return nptr;
+        // TODO(jesper): if size < old_size, shrink the allocation and push the free block to the list
+        // TODO(jesper): we should check if the current allocation can be expanded
+        void *nptr = vm_freelist_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
+        if (old_ptr == nullptr) return nptr;
 
-            memcpy(nptr, old_ptr, old_size);
-            vm_freelist_alloc(v_state, M_FREE, old_ptr, 0, 0, 0);
-            return nptr;
-        } break;
+        memcpy(nptr, old_ptr, old_size);
+        vm_freelist_alloc(v_state, M_FREE, old_ptr, 0, 0, 0);
+        return nptr;
+    } break;
+    case M_EXTEND: {
+        if (size == 0) return nullptr;
+
+        // TODO(jesper): if size < old_size, shrink the allocation and push the free block to the list
+        // TODO(jesper): we should check if the current allocation can be expanded
+        void *nptr = vm_freelist_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
+        return nptr;
+    } break;
     case M_RESET:
         LOG_ERROR("unsupported command called for vm_freelist_allocator: reset");
         break;

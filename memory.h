@@ -20,7 +20,7 @@ extern "C" void* memmove(void *destination, const void *source, size_t num) NOTH
 #define M_SCRATCH_ARENAS 4
 #define M_DEFAULT_ALIGN 16
 
-enum M_Proc { M_ALLOC, M_FREE, M_REALLOC, M_RESET, };
+enum M_Proc { M_ALLOC, M_FREE, M_EXTEND, M_REALLOC, M_RESET, };
 typedef void* allocate_t(void *state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment);
 
 struct Allocator {
@@ -57,6 +57,10 @@ extern Allocator mem_dynamic;
 #define REALLOC_ARR_A(alloc, T, old_ptr, old_count, new_count, alignment)\
     (T*)ALLOC_PROC(alloc, M_REALLOC, old_ptr, sizeof(T)*(old_count), sizeof(T)*(new_count), alignment)
 
+#define EXTEND_ARR(alloc, T, old_ptr, old_count, new_count)\
+    (T*)ALLOC_PROC(alloc, M_EXTEND, old_ptr, sizeof(T)*(old_count), sizeof(T)*(new_count), alignof(T))
+#define EXTEND_ARR_A(alloc, T, old_ptr, old_count, new_count, alignment)\
+    (T*)ALLOC_PROC(alloc, M_EXTEND, old_ptr, sizeof(T)*(old_count), sizeof(T)*(new_count), alignment)
 
 void init_default_allocators();
 
