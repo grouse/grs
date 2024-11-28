@@ -438,7 +438,7 @@ void array_grow(DynamicArray<T> *arr, i32 additional_elements)
     if (arr->capacity >= arr->count+additional_elements) return;
 
     i32 old_capacity = arr->capacity;
-    arr->capacity = MAX(arr->count+additional_elements, arr->capacity*2);
+    arr->capacity = MAX(arr->count+additional_elements, old_capacity*2);
     T *nptr = EXTEND_ARR(arr->alloc, T, arr->data, old_capacity, arr->capacity);
 
     if (nptr != arr->data) {
@@ -453,7 +453,7 @@ template<typename T>
 void array_reserve(DynamicArray<T> *arr, i32 capacity)
 {
     if (!arr->alloc.proc) arr->alloc = mem_dynamic;
-    if (arr->capacity < capacity) array_grow(arr, capacity-arr->capacity);
+    if (arr->capacity < capacity) array_grow(arr, capacity-arr->count);
 }
 
 template<typename T>
@@ -867,6 +867,72 @@ static TEST_PROC(set, CATEGORY(dynamic_array))
         ASSERT(arr[2] == 0);
         ASSERT(arr[3] == 2);
     }
+}
+
+static TEST_PROC(reserve, CATEGORY(dynamic_array))
+{
+    DynamicArray<i32> arr{};
+    ASSERT(arr.count == 0);
+    ASSERT(arr.capacity == 0);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_reserve(&arr, 4);
+    ASSERT(arr.count == 0);
+    ASSERT(arr.capacity >= 4);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_reserve(&arr, 2);
+    ASSERT(arr.count == 0);
+    ASSERT(arr.capacity > 2);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_reserve(&arr, 16);
+    ASSERT(arr.count == 0);
+    ASSERT(arr.capacity >= 16);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_add(&arr, 1);
+    array_add(&arr, 2);
+    ASSERT(arr.count == 2);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_reserve(&arr, 32);
+    ASSERT(arr.count == 2);
+    ASSERT(arr.capacity >= 32);
+    ASSERT(arr.capacity >= arr.count);
+}
+
+static TEST_PROC(resize, CATEGORY(dynamic_array))
+{
+    DynamicArray<i32> arr{};
+    ASSERT(arr.count == 0);
+    ASSERT(arr.capacity == 0);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_resize(&arr, 4);
+    ASSERT(arr.count == 4);
+    ASSERT(arr.capacity >= 4);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_resize(&arr, 2);
+    ASSERT(arr.count == 2);
+    ASSERT(arr.capacity > 2);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_resize(&arr, 16);
+    ASSERT(arr.count == 16);
+    ASSERT(arr.capacity >= 16);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_add(&arr, 1);
+    array_add(&arr, 2);
+    ASSERT(arr.count == 18);
+    ASSERT(arr.capacity >= arr.count);
+
+    array_resize(&arr, 32);
+    ASSERT(arr.count == 32);
+    ASSERT(arr.capacity >= 32);
+    ASSERT(arr.capacity >= arr.count);
 }
 
 static TEST_PROC(basic_construction, CATEGORY(fixed_array))
