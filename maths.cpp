@@ -350,40 +350,48 @@ Vector3 operator/(Vector3 lhs, Vector3 rhs)
     return v;
 }
 
-Vector3 operator/=(Vector3 &lhs, Vector3 rhs)
+Vector3 operator/=(Vector3 &a, Vector3 b)
 {
-    lhs.x /= rhs.x;
-    lhs.y /= rhs.y;
-    lhs.z /= rhs.z;
-    return lhs;
+    a.x /= b.x;
+    a.y /= b.y;
+    a.z /= b.z;
+    return a;
 }
 
-Vector3 operator/(Vector3 v, f32 scalar)
+Vector3 operator/(Vector3 v, f32 s)
 {
     Vector3 r;
-    r.x = v.x/scalar;
-    r.y = v.y/scalar;
-    r.z = v.z/scalar;
+    r.x = v.x/s;
+    r.y = v.y/s;
+    r.z = v.z/s;
     return r;
 }
 
-Vector3 operator/=(Vector3 &v, f32 scalar)
+Vector3 operator/=(Vector3 &v, f32 s)
 {
-    v.x /= scalar;
-    v.y /= scalar;
-    v.z /= scalar;
+    v.x /= s;
+    v.y /= s;
+    v.z /= s;
     return v;
 }
 
-f32 dot(Vector3 lhs, Vector3 rhs) EXPORT { return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z; }
-
-Vector3 cross(Vector3 lhs, Vector3 rhs) EXPORT
+f32 dot(Vector3 a, Vector3 b) EXPORT
 {
-    Vector3 r;
-    r.x = lhs.y * rhs.z - lhs.z * rhs.y;
-    r.y = lhs.z * rhs.x - lhs.x * rhs.z;
-    r.z = lhs.x * rhs.y - lhs.y * rhs.x;
-    return r;
+    return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
+f32 triple_prod(Vector3 a, Vector3 b, Vector3 c) EXPORT
+{
+    return dot(cross(a, b), c);
+}
+
+Vector3 cross(Vector3 a, Vector3 b) EXPORT
+{
+    return {
+        a.y*b.z - a.z*b.y,
+        a.z*b.x - a.x*b.z,
+        a.x*b.y - a.y*b.x,
+    };
 }
 
 
@@ -412,109 +420,110 @@ Vector4 normalise(Vector4 v) EXPORT
     return r;
 }
 
-Vector4 operator*(Vector4 v, f32 scalar)
+Vector4 operator*(Vector4 v, f32 s)
 {
     Vector4 r;
-    r.x = v.x*scalar;
-    r.y = v.y*scalar;
-    r.z = v.z*scalar;
-    r.w = v.w*scalar;
+    r.x = v.x*s;
+    r.y = v.y*s;
+    r.z = v.z*s;
+    r.w = v.w*s;
     return r;
 }
 
-Vector4 operator*(f32 scalar, Vector4 v)
+Vector4 operator*(f32 s, Vector4 v)
 {
     Vector4 r;
-    r.x = v.x*scalar;
-    r.y = v.y*scalar;
-    r.z = v.z*scalar;
-    r.w = v.w*scalar;
+    r.x = v.x*s;
+    r.y = v.y*s;
+    r.z = v.z*s;
+    r.w = v.w*s;
     return r;
 }
 
-Vector4 operator*(Vector4 lhs, Vector4 rhs)
+Vector4 operator*(Vector4 a, Vector4 b)
 {
     Vector4 r;
-    r.x = lhs.x * rhs.x;
-    r.y = lhs.y * rhs.y;
-    r.z = lhs.z * rhs.z;
-    r.w = lhs.w * rhs.w;
+    r.x = a.x * b.x;
+    r.y = a.y * b.y;
+    r.z = a.z * b.z;
+    r.w = a.w * b.w;
     return r;
 }
 
-Vector4 operator+(Vector4 lhs, Vector4 rhs)
+Vector4 operator+(Vector4 a, Vector4 b)
 {
     Vector4 r;
-    r.x = lhs.x + rhs.x;
-    r.y = lhs.y + rhs.y;
-    r.z = lhs.z + rhs.z;
-    r.w = lhs.w + rhs.w;
+    r.x = a.x + b.x;
+    r.y = a.y + b.y;
+    r.z = a.z + b.z;
+    r.w = a.w + b.w;
     return r;
 }
 
-Vector4 operator+(Vector4 v, f32 scalar)
+Vector4 operator+(Vector4 v, f32 s)
 {
     Vector4 r;
-    r.x = v.x + scalar;
-    r.y = v.y + scalar;
-    r.z = v.z + scalar;
-    r.w = v.w + scalar;
+    r.x = v.x + s;
+    r.y = v.y + s;
+    r.z = v.z + s;
+    r.w = v.w + s;
     return r;
 }
 
-Vector4 operator-(Vector4 lhs, Vector4 rhs)
+Vector4 operator-(Vector4 a, Vector4 b)
 {
     Vector4 r;
-    r.x = lhs.x - rhs.x;
-    r.y = lhs.y - rhs.y;
-    r.z = lhs.z - rhs.z;
-    r.w = lhs.w - rhs.w;
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
+    r.z = a.z - b.z;
+    r.w = a.w - b.w;
     return r;
 }
 
-Vector4 operator-(Vector4 lhs, f32 scalar)
+Vector4 operator-(Vector4 v, f32 s)
 {
     Vector4 r;
-    r.x = lhs.x - scalar;
-    r.y = lhs.y - scalar;
-    r.z = lhs.z - scalar;
-    r.w = lhs.w - scalar;
+    r.x = v.x - s;
+    r.y = v.y - s;
+    r.z = v.z - s;
+    r.w = v.w - s;
     return r;
 }
 
-Vector4 operator*(Matrix4 m, Vector4 v)
+Vector4 operator*(Matrix4 M, Vector4 v)
+{
+    return {
+        M.m00*v.x + M.m01*v.y + M.m02*v.z + M.m03 * v.w,
+        M.m10*v.x + M.m11*v.y + M.m12*v.z + M.m13 * v.w,
+        M.m20*v.x + M.m21*v.y + M.m22*v.z + M.m23 * v.w,
+        M.m30*v.x + M.m31*v.y + M.m32*v.z + M.m33 * v.w,
+    };
+}
+
+Vector4 operator/(Vector4 a, Vector4 b)
 {
     Vector4 r;
-    r[0] = m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z + m[3][0]*v.w;
-    r[1] = m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z + m[3][1]*v.w;
-    r[2] = m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z + m[3][2]*v.w;
-    r[3] = m[0][3] * v.x + m[1][3] * v.y + m[2][3] * v.z + m[3][3]*v.w;
+    r.x = a.x / b.x;
+    r.y = a.y / b.y;
+    r.z = a.z / b.z;
+    r.w = a.w / b.w;
     return r;
 }
 
-Vector4 operator/(Vector4 lhs, Vector4 rhs)
+Vector4 operator/(Vector4 v, f32 s)
 {
     Vector4 r;
-    r.x = lhs.x / rhs.x;
-    r.y = lhs.y / rhs.y;
-    r.z = lhs.z / rhs.z;
-    r.w = lhs.w / rhs.w;
+    r.x = v.x/s;
+    r.y = v.y/s;
+    r.z = v.z/s;
+    r.w = v.w/s;
     return r;
 }
 
-Vector4 operator/(Vector4 v, f32 scalar)
-{
-    Vector4 r;
-    r.x = v.x/scalar;
-    r.y = v.y/scalar;
-    r.z = v.z/scalar;
-    r.w = v.w/scalar;
-    return r;
-}
 
-f32 dot(Vector4 lhs, Vector4 rhs) EXPORT
+f32 dot(Vector4 a, Vector4 b) EXPORT
 {
-    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w;
+    return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
 }
 
 
@@ -848,16 +857,15 @@ Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
     // right-handed perspective projection
     // zero-to-one depth range
 
-    Matrix4 r{};
-
     f32 tan_half_fov = tanf(fov/2);
-    r[0][0] = 1 / (aspect * tan_half_fov);
-    r[1][1] = 1 / tan_half_fov;
-    r[2][2] = far_z/(near_z-far_z);
-    r[2][3] = -1;
-    r[3][2] = -(far_z * near_z)/(far_z - near_z);
 
-    return r;
+    Matrix4 M{};
+    M[0][0] = 1 / (aspect * tan_half_fov);
+    M[1][1] = 1 / tan_half_fov;
+    M[2][2] = far_z/(near_z-far_z);
+    M[2][3] = -1;
+    M[3][2] = -(far_z * near_z)/(far_z - near_z);
+    return M;
 }
 
 Matrix4 mat4_inv_transform(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
@@ -866,111 +874,100 @@ Matrix4 mat4_inv_transform(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
     Vector3 X = normalise(cross(Z, up));
     Vector3 Y = cross(X, Z);
 
-    Matrix4 r;
-    r[0] = { X[0], Y[0], Z[0], 0 };
-    r[1] = { X[1], Y[1], Z[1], 0 };
-    r[2] = { X[2], Y[2], Z[2], 0 };
-    r[3] = { -dot(X, eye), -dot(Y, eye), -dot(Z, eye), 1 };
-    return r;
+    Matrix4 M;
+    M[0] = { X[0], Y[0], Z[0], 0 };
+    M[1] = { X[1], Y[1], Z[1], 0 };
+    M[2] = { X[2], Y[2], Z[2], 0 };
+    M[3] = { -dot(X, eye), -dot(Y, eye), -dot(Z, eye), 1 };
+    return M;
 }
 
-Matrix4 mat4_transpose(Matrix4 m) EXPORT
+Matrix4 mat4_transpose(Matrix4 m0) EXPORT
+{
+    Matrix4 M;
+    M[0][0] = m0[0][0];
+    M[0][1] = m0[1][0];
+    M[0][2] = m0[2][0];
+    M[0][3] = m0[3][0];
+
+    M[1][0] = m0[0][1];
+    M[1][1] = m0[1][1];
+    M[1][2] = m0[2][1];
+    M[1][3] = m0[3][1];
+
+    M[2][0] = m0[0][2];
+    M[2][1] = m0[1][2];
+    M[2][2] = m0[2][2];
+    M[2][3] = m0[3][2];
+
+    M[3][0] = m0[0][3];
+    M[3][1] = m0[1][3];
+    M[3][2] = m0[2][3];
+    M[3][3] = m0[3][3];
+    return M;
+}
+
+Matrix4 mat4_inverse(Matrix4 M) EXPORT
+{
+    Vector3 a = M[0].xyz, b = M[1].xyz, c = M[2].xyz, d = M[3].xyz;
+    f32     x = M.m30,    y = M.m31,    z = M.m32,    w = M.m33;
+
+    Vector3 s = cross(a, b);
+    Vector3 t = cross(c, d);
+    Vector3 u = a*y - b*x;
+    Vector3 v = c*w - d*z;
+
+    f32 inv_det = 1 / (dot(s,v) + dot(t, u));
+    s *= inv_det;
+    t *= inv_det;
+    u *= inv_det;
+    v *= inv_det;
+
+    Vector3 r0 = cross(b, v) + t*y;
+    Vector3 r1 = cross(v, a) - t*x;
+    Vector3 r2 = cross(d, u) + s*w;
+    Vector3 r3 = cross(u, c) - s*z;
+
+    return { .columns = {
+        {  r0.x,      r1.x,       r2.x,      r3.x },
+        {  r0.y,      r1.y,       r2.y,      r3.y },
+        {  r0.z,      r1.z,       r2.z,      r3.z },
+        { -dot(b, t), dot(a, t), -dot(d, s), dot(c, s) },
+    }};
+}
+
+Matrix4 operator*(Matrix4 A, Matrix4 B) EXPORT
+{
+    Matrix4 M{};
+    M.m00 = A.m00*B.m00 + A.m01*B.m10 + A.m02*B.m20 + A.m03*B.m30;
+    M.m01 = A.m00*B.m01 + A.m01*B.m11 + A.m02*B.m21 + A.m03*B.m31;
+    M.m02 = A.m00*B.m02 + A.m01*B.m12 + A.m02*B.m22 + A.m03*B.m32;
+    M.m03 = A.m00*B.m03 + A.m01*B.m13 + A.m02*B.m23 + A.m03*B.m33;
+
+    M.m10 = A.m10*B.m00 + A.m11*B.m10 + A.m12*B.m20 + A.m13*B.m30;
+    M.m11 = A.m10*B.m01 + A.m11*B.m11 + A.m12*B.m21 + A.m13*B.m31;
+    M.m12 = A.m10*B.m02 + A.m11*B.m12 + A.m12*B.m22 + A.m13*B.m32;
+    M.m13 = A.m10*B.m03 + A.m11*B.m13 + A.m12*B.m23 + A.m13*B.m33;
+
+    M.m20 = A.m20*B.m00 + A.m21*B.m10 + A.m22*B.m20 + A.m23*B.m30;
+    M.m21 = A.m20*B.m01 + A.m21*B.m11 + A.m22*B.m21 + A.m23*B.m31;
+    M.m22 = A.m20*B.m02 + A.m21*B.m12 + A.m22*B.m22 + A.m23*B.m32;
+    M.m23 = A.m20*B.m03 + A.m21*B.m13 + A.m22*B.m23 + A.m23*B.m33;
+
+    M.m30 = A.m30*B.m00 + A.m31*B.m10 + A.m32*B.m20 + A.m33*B.m30;
+    M.m31 = A.m30*B.m01 + A.m31*B.m11 + A.m32*B.m21 + A.m33*B.m31;
+    M.m32 = A.m30*B.m02 + A.m31*B.m12 + A.m32*B.m22 + A.m33*B.m32;
+    M.m33 = A.m30*B.m03 + A.m31*B.m13 + A.m32*B.m23 + A.m33*B.m33;
+    return M;
+}
+
+Matrix4 operator*(Matrix4 M, f32 s) EXPORT
 {
     Matrix4 r;
-    r[0][0] = m[0][0];
-    r[0][1] = m[1][0];
-    r[0][2] = m[2][0];
-    r[0][3] = m[3][0];
-
-    r[1][0] = m[0][1];
-    r[1][1] = m[1][1];
-    r[1][2] = m[2][1];
-    r[1][3] = m[3][1];
-
-    r[2][0] = m[0][2];
-    r[2][1] = m[1][2];
-    r[2][2] = m[2][2];
-    r[2][3] = m[3][2];
-
-    r[3][0] = m[0][3];
-    r[3][1] = m[1][3];
-    r[3][2] = m[2][3];
-    r[3][3] = m[3][3];
-    return r;
-}
-
-Matrix4 mat4_inverse(Matrix4 m) EXPORT
-{
-    f32 c00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
-    f32 c02 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
-    f32 c03 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
-
-    f32 c04 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
-    f32 c06 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
-    f32 c07 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
-
-    f32 c08 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
-    f32 c10 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
-    f32 c11 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
-
-    f32 c12 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
-    f32 c14 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
-    f32 c15 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
-
-    f32 c16 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
-    f32 c18 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
-    f32 c19 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
-
-    f32 c20 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
-    f32 c22 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
-    f32 c23 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
-
-    Vector4 f0{ c00, c00, c02, c03 };
-    Vector4 f1{ c04, c04, c06, c07 };
-    Vector4 f2{ c08, c08, c10, c11 };
-    Vector4 f3{ c12, c12, c14, c15 };
-    Vector4 f4{ c16, c16, c18, c19 };
-    Vector4 f6{ c20, c20, c22, c23 };
-
-    Vector4 v0{ m[1][0], m[0][0], m[0][0], m[0][0] };
-    Vector4 v1{ m[1][1], m[0][1], m[0][1], m[0][1] };
-    Vector4 v2{ m[1][2], m[0][2], m[0][2], m[0][2] };
-    Vector4 v3{ m[1][3], m[0][3], m[0][3], m[0][3] };
-
-    Vector4 inv0{ v1 * f0 - v2 * f1 + v3 * f2 };
-    Vector4 inv1{ v0 * f0 - v2 * f3 + v3 * f4 };
-    Vector4 inv2{ v0 * f1 - v1 * f3 + v3 * f6 };
-    Vector4 inv3{ v0 * f2 - v1 * f4 + v2 * f6 };
-
-    Vector4 sign_a{ +1, -1, +1, -1 };
-    Vector4 sign_b{ -1, +1, -1, +1 };
-    Matrix4 inv{ inv0 * sign_a, inv1 * sign_b, inv2 * sign_a, inv3 * sign_b };
-
-    Vector4 row0{ inv[0][0], inv[1][0], inv[2][0], inv[3][0] };
-    Vector4 d0{ m[0] * row0 };
-    f32 d1 = (d0.x + d0.y) + (d0.z + d0.w);
-
-    f32 inv_det = 1 / d1;
-    return inv * inv_det;
-}
-
-Matrix4 operator*(Matrix4 lhs, Matrix4 rhs) EXPORT
-{
-    Matrix4 m{};
-    m[0] = lhs[0]*rhs[0][0] + lhs[1]*rhs[0][1] + lhs[2]*rhs[0][2] + lhs[3]*rhs[0][3];
-    m[1] = lhs[0]*rhs[1][0] + lhs[1]*rhs[1][1] + lhs[2]*rhs[1][2] + lhs[3]*rhs[1][3];
-    m[2] = lhs[0]*rhs[2][0] + lhs[1]*rhs[2][1] + lhs[2]*rhs[2][2] + lhs[3]*rhs[2][3];
-    m[3] = lhs[0]*rhs[3][0] + lhs[1]*rhs[3][1] + lhs[2]*rhs[3][2] + lhs[3]*rhs[3][3];
-    return m;
-}
-
-Matrix4 operator*(Matrix4 m, f32 scalar) EXPORT
-{
-    Matrix4 r;
-    r[0] = m[0] * scalar;
-    r[1] = m[1] * scalar;
-    r[2] = m[2] * scalar;
-    r[3] = m[3] * scalar;
+    r[0] = M[0] * s;
+    r[1] = M[1] * s;
+    r[2] = M[2] * s;
+    r[3] = M[3] * s;
     return r;
 }
 
