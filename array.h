@@ -689,7 +689,7 @@ i32 array_add(FixedArray<T, N> *arr, T *es, i32 count)
 // -- test suite
 #include "test.h"
 
-static TEST_PROC(indexing, CATEGORY(array))
+static TEST_PROC(array__indexing)
 {
     i32 data[5] = { 1, 2, 3, 4, 5 };
     Array<i32> arr{ .data = data, .count = ARRAY_COUNT(data)-1 };
@@ -702,26 +702,7 @@ static TEST_PROC(indexing, CATEGORY(array))
     ASSERT(array_tail(arr) == &data[3]);
 }
 
-static TEST_PROC(find, CATEGORY(array))
-{
-    i32 data[5] = { 1, 2, 3, 4, 5 };
-    Array<i32> arr{ .data = data, .count = ARRAY_COUNT(data) };
-
-    ASSERT(*array_find(arr, 1) == 1);
-    ASSERT(*array_find(arr, 5) == 5);
-    ASSERT(array_find(arr, 6) == nullptr);
-
-    ASSERT(array_find(arr, 1) == &data[0]);
-    ASSERT(array_find(arr, 1) == &arr[0]);
-    ASSERT(array_find(arr, 5) == &data[4]);
-    ASSERT(array_find(arr, 5) == &arr[4]);
-
-    ASSERT(array_find_index(arr, 1) == 0);
-    ASSERT(array_find_index(arr, 5) == 4);
-    ASSERT(array_find_index(arr, 6) == -1);
-}
-
-static TEST_PROC(iterator, CATEGORY(array))
+static TEST_PROC(array__iterator)
 {
     i32 data[5] = { 1, 2, 3, 4, 5 };
     Array<i32> arr{ .data = data, .count = ARRAY_COUNT(data) };
@@ -798,7 +779,7 @@ static TEST_PROC(iterator, CATEGORY(array))
     }
 }
 
-static TEST_PROC(append, CATEGORY(dynamic_array))
+static TEST_PROC(dynamic_array__append)
 {
     DynamicArray<i32> arr{};
     ASSERT(arr.alloc.proc == nullptr);
@@ -820,7 +801,7 @@ static TEST_PROC(append, CATEGORY(dynamic_array))
     ASSERT(arr[4] == 5);
 }
 
-static TEST_PROC(insert, CATEGORY(dynamic_array))
+static TEST_PROC(dynamic_array__insert)
 {
     DynamicArray<i32> arr{};
     ASSERT(arr.alloc.proc == nullptr);
@@ -846,7 +827,7 @@ static TEST_PROC(insert, CATEGORY(dynamic_array))
     ASSERT(arr[3] == 1);
 }
 
-static TEST_PROC(set, CATEGORY(dynamic_array))
+static TEST_PROC(dynamic_array__set)
 {
     {
         DynamicArray<i32> arr{};
@@ -865,7 +846,7 @@ static TEST_PROC(set, CATEGORY(dynamic_array))
     }
 }
 
-static TEST_PROC(reserve, CATEGORY(dynamic_array))
+static TEST_PROC(dynamic_array__reserve)
 {
     DynamicArray<i32> arr{};
     ASSERT(arr.count == 0);
@@ -898,7 +879,7 @@ static TEST_PROC(reserve, CATEGORY(dynamic_array))
     ASSERT(arr.capacity >= arr.count);
 }
 
-static TEST_PROC(resize, CATEGORY(dynamic_array))
+static TEST_PROC(dynamic_array__resize)
 {
     DynamicArray<i32> arr{};
     ASSERT(arr.count == 0);
@@ -931,7 +912,7 @@ static TEST_PROC(resize, CATEGORY(dynamic_array))
     ASSERT(arr.capacity >= arr.count);
 }
 
-static TEST_PROC(basic_construction, CATEGORY(fixed_array))
+static TEST_PROC(fixed_array__basic_construction)
 {
     // Test default construction
     FixedArray<int, 5> arr1;
@@ -957,7 +938,7 @@ static TEST_PROC(basic_construction, CATEGORY(fixed_array))
     }
 }
 
-static TEST_PROC(copy_operations, CATEGORY(fixed_array))
+static TEST_PROC(fixed_array__copy_operations)
 {
     {
         FixedArray<int, 5> original = {1, 2, 3};
@@ -995,7 +976,7 @@ static TEST_PROC(copy_operations, CATEGORY(fixed_array))
     }
 }
 
-static TEST_PROC(size_limits, CATEGORY(fixed_array))
+static TEST_PROC(fixed_array__size_limits)
 {
     // Test truncation when source is larger than capacity
     int raw_data[] = {1, 2, 3, 4, 5, 6};
@@ -1014,7 +995,7 @@ static TEST_PROC(size_limits, CATEGORY(fixed_array))
     }
 }
 
-static TEST_PROC(data_pointer_integrity, CATEGORY(fixed_array))
+static TEST_PROC(fixed_array__data_pointer_integrity)
 {
     FixedArray<int, 5> arr1 = {1, 2, 3};
     const int* original_data = arr1.data;
@@ -1036,7 +1017,7 @@ static TEST_PROC(data_pointer_integrity, CATEGORY(fixed_array))
     ASSERT(arr1.data == original_data);
 }
 
-static TEST_PROC(pop, CATEGORY(array))
+static TEST_PROC(array__pop)
 {
     {
         int data[] = {1, 2, 3, 4};
@@ -1049,7 +1030,7 @@ static TEST_PROC(pop, CATEGORY(array))
     }
 }
 
-static TEST_PROC(tail, CATEGORY(array))
+static TEST_PROC(array__tail)
 {
     // Test basic tail access
     {
@@ -1068,7 +1049,7 @@ static TEST_PROC(tail, CATEGORY(array))
     }
 }
 
-static TEST_PROC(create, CATEGORY(array))
+static TEST_PROC(array__create)
 {
     // Test creation with default allocator
     {
@@ -1084,7 +1065,7 @@ static TEST_PROC(create, CATEGORY(array))
     }
 }
 
-static TEST_PROC(remove, CATEGORY(array))
+static TEST_PROC(array__remove)
 {
     // Test remove (ordered)
     {
@@ -1123,7 +1104,7 @@ static TEST_PROC(remove, CATEGORY(array))
     }
 }
 
-static TEST_PROC(slice, CATEGORY(array))
+static TEST_PROC(array__slice)
 {
     int data[] = {1, 2, 3, 4, 5};
     Array<int> arr{data, 5};
@@ -1163,7 +1144,7 @@ static TEST_PROC(slice, CATEGORY(array))
     }
 }
 
-static TEST_PROC(find, CATEGORY(array))
+static TEST_PROC(array__find)
 {
     int data[] = {1, 2, 3, 2, 1};
     Array<int> arr{data, 5};
@@ -1188,9 +1169,27 @@ static TEST_PROC(find, CATEGORY(array))
         ASSERT(array_contains(arr, 3));
         ASSERT(!array_contains(arr, 4));
     }
+
+    {
+        i32 data[5] = { 1, 2, 3, 4, 5 };
+        Array<i32> arr{ .data = data, .count = ARRAY_COUNT(data) };
+
+        ASSERT(*array_find(arr, 1) == 1);
+        ASSERT(*array_find(arr, 5) == 5);
+        ASSERT(array_find(arr, 6) == nullptr);
+
+        ASSERT(array_find(arr, 1) == &data[0]);
+        ASSERT(array_find(arr, 1) == &arr[0]);
+        ASSERT(array_find(arr, 5) == &data[4]);
+        ASSERT(array_find(arr, 5) == &arr[4]);
+
+        ASSERT(array_find_index(arr, 1) == 0);
+        ASSERT(array_find_index(arr, 5) == 4);
+        ASSERT(array_find_index(arr, 6) == -1);
+    }
 }
 
-static TEST_PROC(swap, CATEGORY(array))
+static TEST_PROC(array__swap)
 {
     // Test single array swap
     {
@@ -1215,7 +1214,7 @@ static TEST_PROC(swap, CATEGORY(array))
     }
 }
 
-static TEST_PROC(sort, CATEGORY(array))
+static TEST_PROC(array__sort)
 {
     // Test exchange sort
     {

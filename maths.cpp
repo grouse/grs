@@ -1969,7 +1969,7 @@ Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
 
 /// test suite
 #include "test.h"
-TEST_PROC(operators, CATEGORY(vector2))
+TEST_PROC(maths__vector2__operators)
 {
     {
         Vector2 a{ 1, 2 };
@@ -2032,7 +2032,7 @@ TEST_PROC(operators, CATEGORY(vector2))
     }
 }
 
-TEST_PROC(swizzle, CATEGORY(vector2))
+TEST_PROC(maths__vector2__swizzle)
 {
     {
         Vector2 a{ 1, 2 };
@@ -2053,7 +2053,7 @@ TEST_PROC(swizzle, CATEGORY(vector2))
     }
 }
 
-TEST_PROC(operators, CATEGORY(vector3))
+TEST_PROC(maths__vector3__operators)
 {
     {
         Vector3 a{ 1, 2, 3 };
@@ -2158,7 +2158,7 @@ TEST_PROC(operators, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(vec_mul_vec_equals_component_wise_mul, CATEGORY(vector3))
+TEST_PROC(maths__vector3__vec_mul_vec_equals_component_wise_mul)
 {
     {
         Vector3 a{ 1, 2, 3 };
@@ -2179,7 +2179,7 @@ TEST_PROC(vec_mul_vec_equals_component_wise_mul, CATEGORY(vector3))
 
 }
 
-TEST_PROC(vec_div_vec_equals_component_wise_div, CATEGORY(vector3))
+TEST_PROC(maths__vector3__vec_div_vec_equals_component_wise_div)
 {
     {
         Vector3 a{ 1, 2, 4 };
@@ -2200,7 +2200,7 @@ TEST_PROC(vec_div_vec_equals_component_wise_div, CATEGORY(vector3))
 }
 
 
-TEST_PROC(swizzle, CATEGORY(vector3))
+TEST_PROC(maths__vector3__swizzle)
 {
     {
         Vector3 a{ 1, 2, 3 };
@@ -2231,7 +2231,7 @@ TEST_PROC(swizzle, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(dot_of_orthogonal_vectors_is_0, CATEGORY(vector3))
+TEST_PROC(maths__vector3__dot_of_orthogonal_vectors_is_0)
 {
     Vector3 i{ 1, 0, 0 };
     Vector3 j{ 0, 1, 0 };
@@ -2242,7 +2242,7 @@ TEST_PROC(dot_of_orthogonal_vectors_is_0, CATEGORY(vector3))
     ASSERT(dot(k, i) == 0);
 }
 
-TEST_PROC(cross_of_orthogonal_ijk_is_plus_minus_kji, CATEGORY(vector3))
+TEST_PROC(maths__vector3__cross_of_orthogonal_ijk_is_plus_minus_kji)
 {
     Vector3 i{ 1, 0, 0 };
     Vector3 j{ 0, 1, 0 };
@@ -2256,7 +2256,7 @@ TEST_PROC(cross_of_orthogonal_ijk_is_plus_minus_kji, CATEGORY(vector3))
     ASSERT(cross(i, k) == -j);
 }
 
-TEST_PROC(cross_of_zero_vector_is_always_zero, CATEGORY(vector3))
+TEST_PROC(maths__vector3__cross_of_zero_vector_is_always_zero)
 {
     {
         Vector3 a{ 0, 0, 0 };
@@ -2273,7 +2273,7 @@ TEST_PROC(cross_of_zero_vector_is_always_zero, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(cross_is_anti_commutative, CATEGORY(vector3))
+TEST_PROC(maths__vector3__cross_is_anti_commutative)
 {
     { // Basic orthogonal vectors
         Vector3 a{ 1, 0, 0 };
@@ -2298,7 +2298,7 @@ TEST_PROC(cross_is_anti_commutative, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(cross_distributive_law, CATEGORY(vector3))
+TEST_PROC(maths__vector3__cross_distributive_law)
 {
     { // Basic distributive test
         Vector3 a{ 1, 2, 3 };
@@ -2314,7 +2314,7 @@ TEST_PROC(cross_distributive_law, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(cross_scalar_factorisation, CATEGORY(vector3))
+TEST_PROC(maths__vector3__cross_scalar_factorisation)
 {
     { // Scalar multiplication
         Vector3 a{ 1, 2, 3 };
@@ -2330,7 +2330,7 @@ TEST_PROC(cross_scalar_factorisation, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(vector_triple_product_abc_is_bac_minus_cab, CATEGORY(vector3))
+TEST_PROC(maths__vector3__vector_triple_product_abc_is_bac_minus_cab)
 {
     { // Basic test case
         Vector3 a{ 1, 2, 3 };
@@ -2347,7 +2347,7 @@ TEST_PROC(vector_triple_product_abc_is_bac_minus_cab, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(a_cross_b_squared_is_lagranges_identity, CATEGORY(vector3))
+TEST_PROC(maths__vector3__a_cross_b_squared_is_lagranges_identity)
 {
     { // Basic test case
         Vector3 a{ 1, 2, 3 };
@@ -2374,7 +2374,7 @@ TEST_PROC(a_cross_b_squared_is_lagranges_identity, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(scalar_triple_product_of_ijk_is_1, CATEGORY(vector3))
+TEST_PROC(maths__vector3__scalar_triple_product_of_ijk_is_1)
 {
     Vector3 i{ 1, 0, 0 };
     Vector3 j{ 0, 1, 0 };
@@ -2386,7 +2386,7 @@ TEST_PROC(scalar_triple_product_of_ijk_is_1, CATEGORY(vector3))
     ASSERT(triple_prod(i, j, k) == dot(cross(k, i), j));
 }
 
-TEST_PROC(a_plus_b_satisfies_triangle_inequality, CATEGORY(vector3))
+TEST_PROC(maths__vector3__a_plus_b_satisfies_triangle_inequality)
 {
     { // Basic triangle with positive sides
         Vector3 a{ 3, 0, 0 };
@@ -2413,7 +2413,7 @@ TEST_PROC(a_plus_b_satisfies_triangle_inequality, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(a_minus_b_satisfies_reverse_triangle_inequality, CATEGORY(vector3))
+TEST_PROC(maths__vector3__a_minus_b_satisfies_reverse_triangle_inequality)
 {
     { // Basic triangle with positive sides
         Vector3 a{ 3, 0, 0 };
@@ -2437,7 +2437,7 @@ TEST_PROC(a_minus_b_satisfies_reverse_triangle_inequality, CATEGORY(vector3))
     }
 }
 
-TEST_PROC(operators, CATEGORY(vector4))
+TEST_PROC(maths__vector4__operators)
 {
     {
         Vector4 a{ 1, 2, 3, 5 };
@@ -2498,7 +2498,7 @@ TEST_PROC(operators, CATEGORY(vector4))
     }
 }
 
-TEST_PROC(vec_mul_vec_equals_component_wise_mul, CATEGORY(vector4))
+TEST_PROC(maths__vector4__vec_mul_vec_equals_component_wise_mul)
 {
     {
         Vector4 a{ 1, 2, 3, 5 };
@@ -2511,7 +2511,7 @@ TEST_PROC(vec_mul_vec_equals_component_wise_mul, CATEGORY(vector4))
     }
 }
 
-TEST_PROC(vec_div_vec_equals_component_wise_div, CATEGORY(vector4))
+TEST_PROC(maths__vector4__vec_div_vec_equals_component_wise_div)
 {
     {
         Vector4 a{ 1, 2, 4, 8 };
@@ -2524,7 +2524,7 @@ TEST_PROC(vec_div_vec_equals_component_wise_div, CATEGORY(vector4))
     }
 }
 
-TEST_PROC(swizzle, CATEGORY(vector4))
+TEST_PROC(maths__vector4__swizzle)
 {
     {
         Vector4 a{ 1, 2, 3, 5 };
@@ -2553,7 +2553,7 @@ TEST_PROC(swizzle, CATEGORY(vector4))
     }
 }
 
-TEST_PROC(rotate_x, CATEGORY(maths_mat3))
+TEST_PROC(maths__mat3__rotate_x)
 {
     { // 0 degree rotation
         Matrix3 m = mat3_rotate_x(0.0f);
@@ -2617,7 +2617,7 @@ TEST_PROC(rotate_x, CATEGORY(maths_mat3))
 
 }
 
-TEST_PROC(rotate_y, CATEGORY(maths_mat3))
+TEST_PROC(maths__mat3__rotate_y)
 {
     { // 0 degree rotation
         Matrix3 m = mat3_rotate_y(0.0f);
@@ -2665,7 +2665,7 @@ TEST_PROC(rotate_y, CATEGORY(maths_mat3))
     }
 }
 
-TEST_PROC(rotate_z, CATEGORY(maths_mat3))
+TEST_PROC(maths__mat3__rotate_z)
 {
     { // 0 degree rotation
         Matrix3 m = mat3_rotate_z(0.0f);
@@ -2713,7 +2713,7 @@ TEST_PROC(rotate_z, CATEGORY(maths_mat3))
     }
 }
 
-TEST_PROC(rotate_axis, CATEGORY(maths_mat3))
+TEST_PROC(maths__mat3__rotate_axis)
 {
     { // rotation around x-axis (same as mat3_rotate_x)
         Vector3 x_axis = {1.0f, 0.0f, 0.0f};
@@ -2770,14 +2770,14 @@ TEST_PROC(rotate_axis, CATEGORY(maths_mat3))
     }
 }
 
-TEST_PROC(determinant_of_identity_is_1, CATEGORY(maths_mat3))
+TEST_PROC(maths__mat3__determinant_of_identity_is_1)
 {
     Matrix3 M = mat3_identity();
     ASSERT(almost_equal(mat3_determinant(M), 1, 0.0001f));
 }
 
 
-TEST_PROC(determinant_of_M_equals_determinant_of_M_transposed, CATEGORY(maths_mat3))
+TEST_PROC(maths__mat3__determinant_of_M_equals_determinant_of_M_transposed)
 {
     {
         Matrix3 M = mat3_identity();
@@ -2798,7 +2798,7 @@ TEST_PROC(determinant_of_M_equals_determinant_of_M_transposed, CATEGORY(maths_ma
     }
 }
 
-TEST_PROC(M_times_M_inverse_equals_identity, CATEGORY(maths_mat3))
+TEST_PROC(maths__mat3__M_times_M_inverse_equals_identity)
 {
     {
         Matrix3 M = mat3_identity();
@@ -2820,7 +2820,7 @@ TEST_PROC(M_times_M_inverse_equals_identity, CATEGORY(maths_mat3))
 
 }
 
-TEST_PROC(M_times_M_inverse_equals_identity, CATEGORY(maths_mat4))
+TEST_PROC(maths__mat4__M_times_M_inverse_equals_identity)
 {
     {
         Matrix4 M = mat4_identity();
@@ -2836,7 +2836,7 @@ TEST_PROC(M_times_M_inverse_equals_identity, CATEGORY(maths_mat4))
 
 }
 
-TEST_PROC(constructors, CATEGORY(maths_quaternion))
+TEST_PROC(maths__quaternion__constructors)
 {
     {
         Quaternion q{};
@@ -2871,7 +2871,7 @@ TEST_PROC(constructors, CATEGORY(maths_quaternion))
     }
 }
 
-TEST_PROC(swizzle, CATEGORY(maths_quaternion))
+TEST_PROC(maths__quaternion__swizzle)
 {
     {
         Quaternion q{ 1, 2, 3, 4 };
@@ -2889,7 +2889,7 @@ TEST_PROC(swizzle, CATEGORY(maths_quaternion))
     }
 }
 
-TEST_PROC(angle_axis, CATEGORY(maths_quaternion))
+TEST_PROC(maths__quaternion__angle_axis)
 {
     {
         Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
@@ -2916,7 +2916,7 @@ TEST_PROC(angle_axis, CATEGORY(maths_quaternion))
     }
 }
 
-TEST_PROC(euler, CATEGORY(maths_quaternion))
+TEST_PROC(maths__quaternion__euler)
 {
     {
         Quaternion q = quat_euler(0, 0, 0);
@@ -2971,7 +2971,7 @@ TEST_PROC(euler, CATEGORY(maths_quaternion))
     }
 }
 
-TEST_PROC(inverse, CATEGORY(maths_quaternion))
+TEST_PROC(maths__quaternion__inverse)
 {
     {
         Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
@@ -3019,7 +3019,7 @@ TEST_PROC(inverse, CATEGORY(maths_quaternion))
     }
 }
 
-TEST_PROC(angle_between, CATEGORY(maths_misc))
+TEST_PROC(maths__misc__angle_between)
 {
     {
         Vector3 up = { 0, 1, 0 };
