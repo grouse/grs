@@ -2212,6 +2212,160 @@ TEST_PROC(swizzle, CATEGORY(vector3))
     }
 }
 
+TEST_PROC(dot_of_orthogonal_vectors_is_0, CATEGORY(vector3))
+{
+    Vector3 i{ 1, 0, 0 };
+    Vector3 j{ 0, 1, 0 };
+    Vector3 k{ 0, 0, 1 };
+
+    ASSERT(dot(i, j) == 0);
+    ASSERT(dot(j, k) == 0);
+    ASSERT(dot(k, i) == 0);
+}
+
+TEST_PROC(cross_of_orthogonal_ijk_is_plus_minus_kji, CATEGORY(vector3))
+{
+    Vector3 i{ 1, 0, 0 };
+    Vector3 j{ 0, 1, 0 };
+    Vector3 k{ 0, 0, 1 };
+
+    ASSERT(cross(i, j) ==  k);
+    ASSERT(cross(j, i) == -k);
+    ASSERT(cross(j, k) ==  i);
+    ASSERT(cross(k, j) == -i);
+    ASSERT(cross(k, i) ==  j);
+    ASSERT(cross(i, k) == -j);
+}
+
+TEST_PROC(cross_of_zero_vector_is_always_zero, CATEGORY(vector3))
+{
+    {
+        Vector3 a{ 0, 0, 0 };
+        Vector3 b{ 1, 2, 3 };
+        ASSERT(cross(a, b) == Vector3{ 0, 0, 0 });
+        ASSERT(cross(b, a) == Vector3{ 0, 0, 0 });
+    }
+
+    {
+        Vector3 a{ 0, 0, 0 };
+        Vector3 b{ 0, 0, 0 };
+        ASSERT(cross(a, b) == Vector3{ 0, 0, 0 });
+        ASSERT(cross(b, a) == Vector3{ 0, 0, 0 });
+    }
+}
+
+TEST_PROC(cross_is_anti_commutative, CATEGORY(vector3))
+{
+    { // Basic orthogonal vectors
+        Vector3 a{ 1, 0, 0 };
+        Vector3 b{ 0, 1, 0 };
+        ASSERT(cross(a, b) == -cross(b, a));
+        ASSERT(cross(a, b) !=  cross(b, a));
+    }
+
+    { // Non-orthogonal vectors
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 4, 5, 6 };
+        ASSERT(cross(a, b) == -cross(b, a));
+        ASSERT(cross(a, b) !=  cross(b, a));
+    }
+
+    { // Zero vector case is commutative because it is always zero
+        Vector3 a{ 0, 0, 0 };
+        Vector3 b{ 1, 2, 3 };
+        ASSERT(cross(a, b) == Vector3{ 0, 0, 0 });
+        ASSERT(cross(a, b) == -cross(b, a));
+        ASSERT(cross(a, b) ==  cross(b, a));
+    }
+}
+
+TEST_PROC(cross_distributive_law, CATEGORY(vector3))
+{
+    { // Basic distributive test
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 4, 5, 6 };
+        Vector3 c{ 7, 8, 9 };
+        ASSERT(cross(a, b + c) == cross(a, b) + cross(a, c));
+    }
+    { // With zero vector
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 0, 0, 0 };
+        Vector3 c{ 4, 5, 6 };
+        ASSERT(cross(a, b + c) == cross(a, b) + cross(a, c));
+    }
+}
+
+TEST_PROC(cross_scalar_factorisation, CATEGORY(vector3))
+{
+    { // Scalar multiplication
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 4, 5, 6 };
+        float k = 2.0f;
+        ASSERT(cross(k * a, b) == k * cross(a, b));
+    }
+    { // Zero scalar
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 4, 5, 6 };
+        float k = 0.0f;
+        ASSERT(cross(k * a, b) == k * cross(a, b));
+    }
+}
+
+TEST_PROC(vector_triple_product_abc_is_bac_minus_cab, CATEGORY(vector3))
+{
+    { // Basic test case
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 4, 5, 6 };
+        Vector3 c{ 7, 8, 9 };
+        ASSERT(cross(a, cross(b, c)) == b*dot(a, c) - c*dot(a, b));
+    }
+
+    { // With zero vector
+        Vector3 a{ 0, 0, 0 };
+        Vector3 b{ 4, 5, 6 };
+        Vector3 c{ 7, 8, 9 };
+        ASSERT(cross(a, cross(b, c)) == b*dot(a, c) - c*dot(a, b));
+    }
+}
+
+TEST_PROC(a_cross_b_squared_is_lagranges_identity, CATEGORY(vector3))
+{
+    { // Basic test case
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 4, 5, 6 };
+        f32 cross_squared = dot(cross(a, b), cross(a, b));
+        f32 expected = dot(a, a) * dot(b, b) - dot(a, b) * dot(a, b);
+        ASSERT(almost_equal(cross_squared, expected, 1e-6f));
+    }
+
+    { // Perpendicular vectors
+        Vector3 a{ 1, 0, 0 };
+        Vector3 b{ 0, 1, 0 };
+        f32 cross_squared = dot(cross(a, b), cross(a, b));
+        f32 expected = dot(a, a) * dot(b, b) - dot(a, b) * dot(a, b);
+        ASSERT(almost_equal(cross_squared, expected, 1e-6f));
+    }
+
+    { // One zero vector
+        Vector3 a{ 0, 0, 0 };
+        Vector3 b{ 1, 2, 3 };
+        f32 cross_squared = dot(cross(a, b), cross(a, b));
+        f32 expected = dot(a, a) * dot(b, b) - dot(a, b) * dot(a, b);
+        ASSERT(almost_equal(cross_squared, expected, 1e-6f));
+    }
+}
+
+TEST_PROC(scalar_triple_product_of_ijk_is_1, CATEGORY(vector3))
+{
+    Vector3 i{ 1, 0, 0 };
+    Vector3 j{ 0, 1, 0 };
+    Vector3 k{ 0, 0, 1 };
+
+    ASSERT(triple_prod(i, j, k) == 1);
+    ASSERT(triple_prod(i, j, k) == dot(cross(i, j), k));
+    ASSERT(triple_prod(i, j, k) == dot(cross(j, k), i));
+    ASSERT(triple_prod(i, j, k) == dot(cross(k, i), j));
+}
 TEST_PROC(operators, CATEGORY(vector4))
 {
     {
