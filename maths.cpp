@@ -656,6 +656,14 @@ Matrix3 mat3_identity() EXPORT
     return r;
 }
 
+Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2) EXPORT
+{
+    return { .columns = {
+        { r0.x, r1.x, r2.x },
+        { r0.y, r1.y, r2.y },
+        { r0.z, r1.z, r2.z },
+    }};
+}
 Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
 {
     Matrix3 M = mat3_identity();
