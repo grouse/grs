@@ -650,27 +650,27 @@ Matrix3 mat3_transpose(Matrix3 m) EXPORT
     return r;
 }
 
-Matrix3 mat3_inverse(Matrix3 m) EXPORT
+Matrix3 mat3_inverse(Matrix3 M) EXPORT
 {
-    f32 det =
-        m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
-        m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2]) +
-        m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]);
+    Vector3 c0 = M[0], c1 = M[1], c2 = M[2];
+    Vector3 r0 = cross(c1, c2);
+    Vector3 r1 = cross(c2, c0);
+    Vector3 r2 = cross(c0, c1);
 
-    f32 inv_det = 1/det;
+    f32 inv_det = 1 / dot(r2, c2);
+    return { .columns = {
+        { r0.x*inv_det, r1.x*inv_det, r2.x*inv_det },
+        { r0.y*inv_det, r1.y*inv_det, r2.y*inv_det },
+        { r0.z*inv_det, r1.z*inv_det, r2.z*inv_det },
+    }};
+}
 
-    Matrix3 r;
-    r[0][0] = + (m[1][1] * m[2][2] - m[2][1] * m[1][2]) * inv_det;
-    r[1][0] = - (m[1][0] * m[2][2] - m[2][0] * m[1][2]) * inv_det;
-    r[2][0] = + (m[1][0] * m[2][1] - m[2][0] * m[1][1]) * inv_det;
-    r[0][1] = - (m[0][1] * m[2][2] - m[2][1] * m[0][2]) * inv_det;
-    r[1][1] = + (m[0][0] * m[2][2] - m[2][0] * m[0][2]) * inv_det;
-    r[2][1] = - (m[0][0] * m[2][1] - m[2][0] * m[0][1]) * inv_det;
-    r[0][2] = + (m[0][1] * m[1][2] - m[1][1] * m[0][2]) * inv_det;
-    r[1][2] = - (m[0][0] * m[1][2] - m[1][0] * m[0][2]) * inv_det;
-    r[2][2] = + (m[0][0] * m[1][1] - m[1][0] * m[0][1]) * inv_det;
-
-    return r;
+f32 mat3_determinant(Matrix3 M) EXPORT
+{
+    return
+        M.m00*M.m11*M.m22 - M.m12*M.m21 +
+        M.m01*M.m12*M.m20 - M.m10*M.m22 +
+        M.m02*M.m10*M.m21 - M.m11*M.m20;
 }
 
 Vector3 operator*(Matrix3 m, Vector3 v)
@@ -2159,6 +2159,70 @@ TEST_PROC(swizzle, CATEGORY(vector4))
     }
 }
 
+TEST_PROC(determinant_of_identity_is_1, CATEGORY(maths_mat3))
+{
+    Matrix3 M = mat3_identity();
+    ASSERT(almost_equal(mat3_determinant(M), 1, 0.0001f));
+}
+
+TEST_PROC(determinant_of_M_equals_determinant_of_M_transposed, CATEGORY(maths_mat3))
+{
+    {
+        Matrix3 M = mat3_identity();
+        Matrix3 Mt = mat3_transpose(M);
+        ASSERT(almost_equal(mat3_determinant(M), mat3_determinant(Mt), 0.0001f));
+    }
+
+    {
+        Matrix3 M = mat3_orthographic(-1, 1, 1, -1);
+        Matrix3 Mt = mat3_transpose(M);
+        ASSERT(almost_equal(mat3_determinant(M), mat3_determinant(Mt), 0.0001f));
+    }
+
+    {
+        Matrix3 M = mat3_orthographic(-5, 5, 3, -2);
+        Matrix3 Mt = mat3_transpose(M);
+        ASSERT(almost_equal(mat3_determinant(M), mat3_determinant(Mt), 0.0001f));
+    }
+}
+
+TEST_PROC(M_times_M_inverse_equals_identity, CATEGORY(maths_mat3))
+{
+    {
+        Matrix3 M = mat3_identity();
+        Matrix3 Mi = mat3_inverse(M);
+        ASSERT(almost_equal(M*Mi, mat3_identity(), 0.0001f));
+    }
+
+    {
+        Matrix3 M = mat3_orthographic(-1, 1, 1, -1);
+        Matrix3 Mi = mat3_inverse(M);
+        ASSERT(almost_equal(M*Mi, mat3_identity(), 0.0001f));
+    }
+
+    {
+        Matrix3 M = mat3_orthographic(-5, 5, 3, -2);
+        Matrix3 Mi = mat3_inverse(M);
+        ASSERT(almost_equal(M*Mi, mat3_identity(), 0.0001f));
+    }
+
+}
+
+TEST_PROC(M_times_M_inverse_equals_identity, CATEGORY(maths_mat4))
+{
+    {
+        Matrix4 M = mat4_identity();
+        Matrix4 Mi = mat4_inverse(M);
+        ASSERT(almost_equal(M*Mi, mat4_identity(), 0.0001f));
+    }
+
+    {
+        Matrix4 M = mat4_orthographic(-5, 5, 3, -2, 0.0001f, 100.0f);
+        Matrix4 Mi = mat4_inverse(M);
+        ASSERT(almost_equal(M*Mi, mat4_identity(), 0.0001f));
+    }
+
+}
 TEST_PROC(constructors, CATEGORY(maths_quaternion))
 {
     {
