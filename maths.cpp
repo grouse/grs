@@ -205,6 +205,29 @@ Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat) EXPORT
     return d_perp + d_parallel;
 }
 
+// Gram-Schmidt process
+void orthogonalise(Vector3 *v0, Vector3 *v1, Vector3 *v2) EXPORT
+{
+    Vector3 u0 = *v0;
+    Vector3 u1 = *v1 - project(*v1, u0);
+    Vector3 u2 = *v2 - project(*v2, u0) - project(*v2, u1);
+
+    *v0 = u0;
+    *v1 = u1;
+    *v2 = u2;
+}
+
+// Gram-Schmidt process
+void orthonormalize(Vector3 *v0, Vector3 *v1, Vector3 *v2) EXPORT
+{
+    Vector3 u0 = *v0;
+    Vector3 u1 = *v1 - project(*v1, u0);
+    Vector3 u2 = *v2 - project(*v2, u0) - project(*v2, u1);
+
+    *v0 = normalise(u0);
+    *v1 = normalise(u1);
+    *v2 = normalise(u2);
+}
 Vector3 operator-(Vector3 v) { return { -v.x, -v.y, -v.z }; }
 
 Vector3 operator+(Vector3 lhs, Vector3 rhs)
