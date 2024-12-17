@@ -831,6 +831,15 @@ Matrix4 mat4_identity() EXPORT
     return r;
 }
 
+Matrix4 mat4_transform_mat3(const Matrix3 &m0) EXPORT
+{
+    Matrix4 M = mat4_identity();
+    M[0].xy = m0[0].xy;
+    M[1].xy = m0[1].xy;
+    M[3].xy = m0[2].xy;
+    return M;
+}
+
 Matrix4 mat4_rotate(Quaternion q) EXPORT
 {
     f32 xx = q.x*q.x;
