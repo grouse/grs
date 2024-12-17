@@ -2460,15 +2460,6 @@ TEST_PROC(operators, CATEGORY(vector4))
 
     {
         Vector4 a{ 1, 2, 3, 5 };
-        Vector4 b{ 7, 9, 11, 13 };
-        Vector4 c = a * b;
-        ASSERT(c.x == 7);
-        ASSERT(c.y == 18);
-        ASSERT(c.z == 33);
-        ASSERT(c.w == 65);
-    }
-    {
-        Vector4 a{ 1, 2, 3, 5 };
         f32 s = 7;
         Vector4 c = a * s;
         ASSERT(c.x == 7);
@@ -2479,21 +2470,38 @@ TEST_PROC(operators, CATEGORY(vector4))
 
     {
         Vector4 a{ 1, 2, 4, 8 };
-        Vector4 b{ 8, 16, 32, 64 };
-        Vector4 c = a / b;
-        ASSERT(c.x == 0.125f);
-        ASSERT(c.y == 0.125f);
-        ASSERT(c.z == 0.125f);
-        ASSERT(c.w == 0.125f);
-    }
-    {
-        Vector4 a{ 1, 2, 4, 8 };
         f32 s = 16;
         Vector4 c = a / s;
         ASSERT(c.x == 0.0625f);
         ASSERT(c.y == 0.125f);
         ASSERT(c.z == 0.25f);
         ASSERT(c.w == 0.5f);
+    }
+}
+
+TEST_PROC(vec_mul_vec_equals_component_wise_mul, CATEGORY(vector4))
+{
+    {
+        Vector4 a{ 1, 2, 3, 5 };
+        Vector4 b{ 7, 9, 11, 13 };
+        Vector4 c = a * b;
+        ASSERT(c.x == 7);
+        ASSERT(c.y == 18);
+        ASSERT(c.z == 33);
+        ASSERT(c.w == 65);
+    }
+}
+
+TEST_PROC(vec_div_vec_equals_component_wise_div, CATEGORY(vector4))
+{
+    {
+        Vector4 a{ 1, 2, 4, 8 };
+        Vector4 b{ 8, 16, 32, 64 };
+        Vector4 c = a / b;
+        ASSERT(c.x == 0.125f);
+        ASSERT(c.y == 0.125f);
+        ASSERT(c.z == 0.125f);
+        ASSERT(c.w == 0.125f);
     }
 }
 
