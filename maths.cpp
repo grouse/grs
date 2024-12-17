@@ -2106,23 +2106,6 @@ TEST_PROC(operators, CATEGORY(vector3))
 
     {
         Vector3 a{ 1, 2, 3 };
-        Vector3 b{ 5, 7, 11 };
-        Vector3 c = a * b;
-        ASSERT(c.x == 5);
-        ASSERT(c.y == 14);
-        ASSERT(c.z == 33);
-    }
-    {
-        Vector3 a{ 1, 2, 3 };
-        Vector3 b{ 5, 7, 11 };
-        a *= b;
-        ASSERT(a.x == 5);
-        ASSERT(a.y == 14);
-        ASSERT(a.z == 33);
-    }
-
-    {
-        Vector3 a{ 1, 2, 3 };
         f32 s = 5;
         Vector3 c = a * s;
         ASSERT(c.x == 5);
@@ -2136,23 +2119,6 @@ TEST_PROC(operators, CATEGORY(vector3))
         ASSERT(a.x == 5);
         ASSERT(a.y == 10);
         ASSERT(a.z == 15);
-    }
-
-    {
-        Vector3 a{ 1, 2, 4 };
-        Vector3 b{ 8, 16, 32};
-        Vector3 c = a / b;
-        ASSERT(c.x == 0.125f);
-        ASSERT(c.y == 0.125f);
-        ASSERT(c.z == 0.125f);
-    }
-    {
-        Vector3 a{ 1, 2, 4 };
-        Vector3 b{ 8, 16, 32};
-        a /= b;
-        ASSERT(a.x == 0.125f);
-        ASSERT(a.y == 0.125f);
-        ASSERT(a.z == 0.125f);
     }
 
     {
@@ -2172,6 +2138,48 @@ TEST_PROC(operators, CATEGORY(vector3))
         ASSERT(a.z == 0.5f);
     }
 }
+
+TEST_PROC(vec_mul_vec_equals_component_wise_mul, CATEGORY(vector3))
+{
+    {
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        Vector3 c = a * b;
+        ASSERT(c.x == 5);
+        ASSERT(c.y == 14);
+        ASSERT(c.z == 33);
+    }
+    {
+        Vector3 a{ 1, 2, 3 };
+        Vector3 b{ 5, 7, 11 };
+        a *= b;
+        ASSERT(a.x == 5);
+        ASSERT(a.y == 14);
+        ASSERT(a.z == 33);
+    }
+
+}
+
+TEST_PROC(vec_div_vec_equals_component_wise_div, CATEGORY(vector3))
+{
+    {
+        Vector3 a{ 1, 2, 4 };
+        Vector3 b{ 8, 16, 32};
+        Vector3 c = a / b;
+        ASSERT(c.x == 0.125f);
+        ASSERT(c.y == 0.125f);
+        ASSERT(c.z == 0.125f);
+    }
+    {
+        Vector3 a{ 1, 2, 4 };
+        Vector3 b{ 8, 16, 32};
+        a /= b;
+        ASSERT(a.x == 0.125f);
+        ASSERT(a.y == 0.125f);
+        ASSERT(a.z == 0.125f);
+    }
+}
+
 
 TEST_PROC(swizzle, CATEGORY(vector3))
 {
