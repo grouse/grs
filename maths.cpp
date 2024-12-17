@@ -658,14 +658,14 @@ Matrix3 mat3_identity() EXPORT
 
 Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
 {
-    Matrix3 r = mat3_identity();
+    Matrix3 M = mat3_identity();
+    M[0][0] = 2 / (right-left);
+    M[1][1] = (2 / (top-bottom)) * ratio;
+    M[2][0] = -(right+left) / (right-left);
+    M[2][1] = (-(top+bottom) / (top-bottom)) * ratio;
+    return M;
 
-    r[0][0] = 2 / (right-left);
-    r[1][1] = (2 / (top-bottom)) * ratio;
-    r[2][0] = -(right+left) / (right-left);
-    r[2][1] = (-(top+bottom) / (top-bottom)) * ratio;
 
-    return r;
 }
 
 Matrix3 mat3_translate(Matrix3 m, Vector3 v) EXPORT
