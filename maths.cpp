@@ -2,6 +2,9 @@
 #include "core.h"
 #include "array.h"
 
+#ifndef ASSERT_UNIT_LENGTH
+#define ASSERT_UNIT_LENGTH(v) do { ASSERT(almost_equal(length(v), 0, 0.0001f)); } while(0)
+#endif
 
 // -- Vector2
 Vector2 abs(Vector2 v) EXPORT
