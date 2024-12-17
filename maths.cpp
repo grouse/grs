@@ -1648,10 +1648,38 @@ f32 degf(f32 rad) EXPORT
     return rad * 180.0f / f32_PI;
 }
 
-f32 almost_equal(f32 a, f32 b, f32 epsilon) EXPORT
+bool almost_equal(f32 a, f32 b, f32 epsilon /*=1e-6f*/) EXPORT
 {
     return fabsf(a-b) < epsilon;
 }
+
+bool almost_equal(Vector3 a, Vector3 b, f32 epsilon /*=1e-6f*/) EXPORT
+{
+    return almost_equal(a.x, b.x, epsilon) &&
+        almost_equal(a.y, b.y, epsilon) &&
+        almost_equal(a.z, b.z, epsilon);
+}
+
+bool almost_equal(Matrix3 A, Matrix3 B, f32 epsilon /*=1e-6f*/) EXPORT
+{
+    for (i32 i = 0; i < ARRAY_COUNT(A.data); i++) {
+        if (!almost_equal(A.data[i], B.data[i], epsilon)) return false;
+    }
+
+
+    return true;
+}
+
+bool almost_equal(Matrix4 A, Matrix4 B, f32 epsilon) EXPORT
+{
+    for (i32 i = 0; i < ARRAY_COUNT(A.data); i++) {
+        if (!almost_equal(A.data[i], B.data[i], epsilon)) return false;
+    }
+
+    return true;
+}
+
+
 
 f32 angle_between(Vector3 v0, Vector3 v1) EXPORT
 {
