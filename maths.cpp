@@ -2366,6 +2366,58 @@ TEST_PROC(scalar_triple_product_of_ijk_is_1, CATEGORY(vector3))
     ASSERT(triple_prod(i, j, k) == dot(cross(j, k), i));
     ASSERT(triple_prod(i, j, k) == dot(cross(k, i), j));
 }
+
+TEST_PROC(a_plus_b_satisfies_triangle_inequality, CATEGORY(vector3))
+{
+    { // Basic triangle with positive sides
+        Vector3 a{ 3, 0, 0 };
+        Vector3 b{ 4, 0, 0 };
+        ASSERT(length(a) + length(b) >= length(a + b));
+    }
+
+    { // Sides that form a degenerate triangle (almost inline)
+        Vector3 a{ 1, 0, 0 };
+        Vector3 b{ 2, 0, 0 };
+        ASSERT(length(a) + length(b) >= length(a + b));
+    }
+
+    { // Zero vector case
+        Vector3 a{ 0, 0, 0 };
+        Vector3 b{ 5, 0, 0 };
+        ASSERT(length(a) + length(b) >= length(a + b));
+    }
+
+    { // Non-colinear vectors
+        Vector3 a{ 3, 4, 0 };
+        Vector3 b{ 1, 2, 2 };
+        ASSERT(length(a) + length(b) > length(a + b));
+    }
+}
+
+TEST_PROC(a_minus_b_satisfies_reverse_triangle_inequality, CATEGORY(vector3))
+{
+    { // Basic triangle with positive sides
+        Vector3 a{ 3, 0, 0 };
+        Vector3 b{ 1, 0, 0 };
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+    }
+    { // Almost same length vectors
+        Vector3 a{ 5, 0, 0 };
+        Vector3 b{ 4, 0, 0 };
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+    }
+    { // Zero vector case
+        Vector3 a{ 5, 0, 0 };
+        Vector3 b{ 0, 0, 0 };
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+    }
+    { // Non-colinear vectors
+        Vector3 a{ 3, 4, 0 };
+        Vector3 b{ 1, 2, 2 };
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+    }
+}
+
 TEST_PROC(operators, CATEGORY(vector4))
 {
     {
