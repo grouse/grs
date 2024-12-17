@@ -923,16 +923,35 @@ void mat4_trs_decompose(
     *rot = quat_from_mat4(trs);
 }
 
-Matrix4 mat4_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
+Matrix4 mat4_look_at(Vector3 eye, Vector3 center, Vector3 up) EXPORT
 {
-    Matrix4 r = mat4_identity();
+    Vector3 f = normalise(center - eye);
+    Vector3 r = normalise(cross(f, up));
+    Vector3 u = cross(r, f);
 
-    r[0][0] = 2 / (right-left);
-    r[1][1] = (2 / (top-bottom)) * ratio;
-    r[3][0] = -(right+left) / (right-left);
-    r[3][1] = (-(top+bottom) / (top-bottom)) * ratio;
+    Matrix4 M = mat4_identity();
+    M[0].xyz = { r.x, u.x, -f.x };
+    M[1].xyz = { r.y, u.y, -f.y };
+    M[2].xyz = { r.z, u.z, -f.z };
+    M[3].xyz = { -dot(r, eye), -dot(u, eye), dot(f, eye) };
+    return M;
+}
 
-    return r;
+Matrix4 mat4_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 near_z, f32 far_z) EXPORT
+{
+    // right-handed orthographic projection
+    // zero-to-one depth range
+
+    float rl = 1.0f / (right - left);
+    float tb = 1.0f / (top - bottom);
+    float fn = 1.0f / (far_z - near_z);
+
+    Matrix4 M = mat4_identity();
+    M[0].x = 2.0f * rl;
+    M[1].y = 2.0f * tb;
+    M[2].z = -1.0f * fn;
+    M[3].xyz = { -(right+left) * rl, -(top+bottom) * tb, -near_z * fn };
+    return M;
 }
 
 Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
