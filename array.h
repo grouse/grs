@@ -7,6 +7,10 @@
 #include <type_traits>
 #include <initializer_list>
 
+#ifndef ASSERT_BOUNDS
+#define ASSERT_BOUNDS(i, min, max) do { ASSERT(i <= max); ASSERT(i >= min); } while(0)
+#endif
+
 // In honour of Dirk
 #define ANON_ARRAY(fields) struct anon_##__LINE__ { fields; }; Array<anon_##__LINE__>
 
@@ -18,13 +22,13 @@ struct Array {
 
     constexpr T& operator[](i32 i)
     {
-        ASSERT(i < count && i >= 0);
+        ASSERT_BOUNDS(i, 0, count-1);
         return data[i];
     }
 
     T& at(i32 i)
     {
-        ASSERT(i < count && i >= 0);
+        ASSERT_BOUNDS(i, 0, count-1);
         return data[i];
     }
 
@@ -235,7 +239,7 @@ ReverseIterator<T> reverse(Array<T> arr) { return { .arr = arr }; }
 template<typename T>
 T array_pop(Array<T> *arr)
 {
-    ASSERT(arr->count > 0);
+    ASSERT_BOUNDS(arr->count, 1, arr->count);
     return arr->data[--arr->count];
 }
 
@@ -267,9 +271,7 @@ Array<T> array_create(i32 count, Allocator mem)
 template<typename T>
 void array_remove_unsorted(Array<T> *arr, i32 index)
 {
-    ASSERT(index >= 0);
-    ASSERT(index < arr->count);
-
+    ASSERT_BOUNDS(index, 0, arr->count-1);
     arr->data[index] = arr->data[arr->count-1];
     arr->count--;
 }
@@ -277,9 +279,7 @@ void array_remove_unsorted(Array<T> *arr, i32 index)
 template<typename T>
 void array_remove(Array<T> *arr, i32 index)
 {
-    ASSERT(index >= 0);
-    ASSERT(index < arr->count);
-
+    ASSERT_BOUNDS(index, 0, arr->count-1);
     memmove(&arr->data[index], &arr->data[index+1], (arr->count-index-1)*sizeof(T));
     arr->count--;
 }
@@ -287,18 +287,15 @@ void array_remove(Array<T> *arr, i32 index)
 template<typename T>
 Array<T> slice(Array<T> arr, i32 start, i32 end)
 {
-    ASSERT(start <= end);
-    ASSERT(start <= arr.count);
-    ASSERT(end <= arr.count);
-    ASSERT(start >= 0);
+    ASSERT_BOUNDS(start, 0, end);
+    ASSERT_BOUNDS(end, 0, arr.count);
     return { .data = &arr.data[start], .count = end-start };
 }
 
 template<typename T>
 Array<T> slice(Array<T> arr, i32 start)
 {
-    ASSERT(start <= arr.count);
-    ASSERT(start >= 0);
+    ASSERT_BOUNDS(start, 0, arr.count);
     return { .data = &arr.data[start], .count = arr.count-start };
 }
 
@@ -579,7 +576,7 @@ void array_copy(DynamicArray<T> *dst, const Array<T> src)
 template<typename T>
 i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T& e)
 {
-    ASSERT(insert_at <= arr->count);
+    ASSERT_BOUNDS(insert_at, 0, arr->count);
     array_grow(arr, 1);
 
     for (i32 i = arr->count; i > insert_at; i--) arr->data[i] = arr->data[i-1];
@@ -591,7 +588,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T& e)
 template<typename T>
 i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T *es, i32 count)
 {
-    ASSERT(insert_at <= arr->count);
+    ASSERT_BOUNDS(insert_at, 0, arr->count);
     array_grow(arr, count);
 
     for (i32 i = arr->count+count-1, j = insert_at;
@@ -611,8 +608,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T *es, i32 count)
 template<typename T>
 i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const Array<T> es)
 {
-    ASSERT(insert_at >= 0);
-    ASSERT(insert_at <= arr->count);
+    ASSERT_BOUNDS(insert_at, 0, arr->count);
     array_grow(arr, es.count);
 
     for (i32 i = arr->count+es.count-1; i > insert_at; i--) arr->data[i] = arr->data[i-1];
@@ -625,8 +621,8 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const Array<T> es)
 template<typename T>
 i32 array_replace(DynamicArray<T> *arr, i32 start, i32 end, const Array<T> values)
 {
-    ASSERT(start >= 0);
-    ASSERT(end >= 0);
+    ASSERT_BOUNDS(start, 0, arr->count);
+    ASSERT_BOUNDS(end, 0, arr->count);
 
     i32 remove_count = end-start;
 
