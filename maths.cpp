@@ -664,6 +664,7 @@ Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2) EXPORT
         { r0.z, r1.z, r2.z },
     }};
 }
+
 Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
 {
     Matrix3 M = mat3_identity();
@@ -672,8 +673,63 @@ Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*
     M[2][0] = -(right+left) / (right-left);
     M[2][1] = (-(top+bottom) / (top-bottom)) * ratio;
     return M;
+}
 
+Matrix3 mat3_rotate_x(f32 theta) EXPORT
+{
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
 
+    return { .columns = {
+        { 1, 0,      0     },
+        { 0,  cos_t, sin_t },
+        { 0, -sin_t, cos_t }
+    }};
+}
+
+Matrix3 mat3_rotate_y(f32 theta) EXPORT
+{
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
+
+    return { .columns = {
+        { cos_t, 0, -sin_t },
+        { 0,     1,  0     },
+        { sin_t, 0,  cos_t },
+    }};
+}
+
+Matrix3 mat3_rotate_z(f32 theta) EXPORT
+{
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
+
+    return { .columns = {
+        {  cos_t, sin_t, 0 },
+        { -sin_t, cos_t, 0 },
+        {  0,      0,    1 },
+    }};
+}
+
+Matrix3 mat3_rotate(Vector3 axis, f32 theta) EXPORT
+{
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
+    f32 d = 1 - cos_t;
+
+    f32 x = axis.x*d;
+    f32 y = axis.y*d;
+    f32 z = axis.z*d;
+
+    f32 axay = x*axis.y;
+    f32 axaz = x*axis.z;
+    f32 ayaz = y*axis.z;
+
+    return { .columns = {
+        { cos_t +     x*axis.x, axay  + sin_t*axis.z, axaz  - sin_t*axis.y },
+        { axay  - sin_t*axis.z, cos_t +     y*axis.y, ayaz  + sin_t*axis.x },
+        { axaz  + sin_t*axis.y, ayaz  - sin_t*axis.x, cos_t +     z*axis.z }
+    }};
 }
 
 Matrix3 mat3_translate(Matrix3 m, Vector3 v) EXPORT
@@ -2247,11 +2303,229 @@ TEST_PROC(swizzle, CATEGORY(vector4))
     }
 }
 
+TEST_PROC(rotate_x, CATEGORY(maths_mat3))
+{
+    { // 0 degree rotation
+        Matrix3 m = mat3_rotate_x(0.0f);
+        ASSERT(m.m00 == 1.0f);
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(m.m02 == 0.0f);
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(almost_equal(m.m11, 1.0f));
+        ASSERT(almost_equal(m.m12, 0.0f));
+
+        ASSERT(m.m20 == 0.0f);
+        ASSERT(almost_equal(m.m21, 0.0f));
+        ASSERT(almost_equal(m.m22, 1.0f));
+    }
+
+    { // 90 degree rotation
+        Matrix3 m = mat3_rotate_x(f32_PI/2);
+        ASSERT(m.m00 == 1.0f);
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(m.m02 == 0.0f);
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(almost_equal(m.m11,  0.0f));
+        ASSERT(almost_equal(m.m12, -1.0f));
+
+        ASSERT(m.m20 == 0.0f);
+        ASSERT(almost_equal(m.m21, 1.0f));
+        ASSERT(almost_equal(m.m22, 0.0f));
+    }
+
+    { // 180 degree rotation
+        Matrix3 m = mat3_rotate_x(f32_PI);
+        ASSERT(m.m00 == 1.0f);
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(m.m02 == 0.0f);
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(almost_equal(m.m11, -1.0f));
+        ASSERT(almost_equal(m.m12,  0.0f));
+
+        ASSERT(m.m20 == 0.0f);
+        ASSERT(almost_equal(m.m21,  0.0f));
+        ASSERT(almost_equal(m.m22, -1.0f));
+    }
+
+    { // 360 degree rotation
+        Matrix3 m = mat3_rotate_x(2*f32_PI);
+        ASSERT(m.m00 == 1.0f);
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(m.m02 == 0.0f);
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(almost_equal(m.m11, 1.0f));
+        ASSERT(almost_equal(m.m12, 0.0f));
+
+        ASSERT(m.m20 == 0.0f);
+        ASSERT(almost_equal(m.m21, 0.0f));
+        ASSERT(almost_equal(m.m22, 1.0f));
+    }
+
+}
+
+TEST_PROC(rotate_y, CATEGORY(maths_mat3))
+{
+    { // 0 degree rotation
+        Matrix3 m = mat3_rotate_y(0.0f);
+        ASSERT(almost_equal(m.m00, 1.0f));
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(almost_equal(m.m02, 0.0f));
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(m.m11 == 1.0f);
+        ASSERT(m.m12 == 0.0f);
+
+        ASSERT(almost_equal(m.m20, 0.0f));
+        ASSERT(m.m21 == 0.0f);
+        ASSERT(almost_equal(m.m22, 1.0f));
+    }
+
+    { // 90 degree rotation
+        Matrix3 m = mat3_rotate_y(f32_PI/2);
+        ASSERT(almost_equal(m.m00,  0.0f));
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(almost_equal(m.m02, 1.0f));
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(m.m11 == 1.0f);
+        ASSERT(m.m12 == 0.0f);
+
+        ASSERT(almost_equal(m.m20, -1.0f));
+        ASSERT(m.m21 == 0.0f);
+        ASSERT(almost_equal(m.m22, 0.0f));
+    }
+
+    { // 180 degree rotation
+        Matrix3 m = mat3_rotate_y(f32_PI);
+        ASSERT(almost_equal(m.m00, -1.0f));
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(almost_equal(m.m02,  0.0f));
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(m.m11 == 1.0f);
+        ASSERT(m.m12 == 0.0f);
+
+        ASSERT(almost_equal(m.m20, 0.0f));
+        ASSERT(m.m21 == 0.0f);
+        ASSERT(almost_equal(m.m22, -1.0f));
+    }
+}
+
+TEST_PROC(rotate_z, CATEGORY(maths_mat3))
+{
+    { // 0 degree rotation
+        Matrix3 m = mat3_rotate_z(0.0f);
+        ASSERT(m.m00 == 1.0f);
+        ASSERT(m.m01 == 0.0f);
+        ASSERT(m.m02 == 0.0f);
+
+        ASSERT(m.m10 == 0.0f);
+        ASSERT(m.m11 == 1.0f);
+        ASSERT(m.m12 == 0.0f);
+
+        ASSERT(m.m20 == 0.0f);
+        ASSERT(m.m21 == 0.0f);
+        ASSERT(m.m22 == 1.0f);
+    }
+
+    { // 90 degree rotation
+        Matrix3 m = mat3_rotate_z(f32_PI/2);
+        ASSERT(almost_equal(m.m00,  0.0f));
+        ASSERT(almost_equal(m.m01, -1.0f));
+        ASSERT(m.m02 == 0.0f);
+
+        ASSERT(almost_equal(m.m10,  1.0f));
+        ASSERT(almost_equal(m.m11,  0.0f));
+        ASSERT(m.m12 == 0.0f);
+
+        ASSERT(m.m20 == 0.0f);
+        ASSERT(m.m21 == 0.0f);
+        ASSERT(m.m22 == 1.0f);
+    }
+
+    { // 180 degree rotation
+        Matrix3 m = mat3_rotate_z(f32_PI);
+        ASSERT(almost_equal(m.m00, -1.0f));
+        ASSERT(almost_equal(m.m01,  0.0f));
+        ASSERT(m.m02 == 0.0f);
+
+        ASSERT(almost_equal(m.m10,  0.0f));
+        ASSERT(almost_equal(m.m11, -1.0f));
+        ASSERT(m.m12 == 0.0f);
+
+        ASSERT(m.m20 == 0.0f);
+        ASSERT(m.m21 == 0.0f);
+        ASSERT(m.m22 == 1.0f);
+    }
+}
+
+TEST_PROC(rotate_axis, CATEGORY(maths_mat3))
+{
+    { // rotation around x-axis (same as mat3_rotate_x)
+        Vector3 x_axis = {1.0f, 0.0f, 0.0f};
+        Matrix3 m = mat3_rotate(x_axis, f32_PI/2);
+        ASSERT(almost_equal(m, mat3_rotate_x(f32_PI/2)));
+
+        ASSERT(almost_equal(m.m00, 1.0f));
+        ASSERT(almost_equal(m.m01, 0.0f));
+        ASSERT(almost_equal(m.m02, 0.0f));
+
+        ASSERT(almost_equal(m.m10,  0.0f));
+        ASSERT(almost_equal(m.m11,  0.0f));
+        ASSERT(almost_equal(m.m12, -1.0f));
+
+        ASSERT(almost_equal(m.m20, 0.0f));
+        ASSERT(almost_equal(m.m21, 1.0f));
+        ASSERT(almost_equal(m.m22, 0.0f));
+    }
+
+    { // rotation around y-axis (same as mat3_rotate_y)
+        Vector3 y_axis = {0.0f, 1.0f, 0.0f};
+        Matrix3 m = mat3_rotate(y_axis, f32_PI/2);
+        ASSERT(almost_equal(m, mat3_rotate_y(f32_PI/2)));
+
+        ASSERT(almost_equal(m.m00, 0.0f));
+        ASSERT(almost_equal(m.m01, 0.0f));
+        ASSERT(almost_equal(m.m02, 1.0f));
+
+        ASSERT(almost_equal(m.m10, 0.0f));
+        ASSERT(almost_equal(m.m11, 1.0f));
+        ASSERT(almost_equal(m.m12, 0.0f));
+
+        ASSERT(almost_equal(m.m20, -1.0f));
+        ASSERT(almost_equal(m.m21,  0.0f));
+        ASSERT(almost_equal(m.m22,  0.0f));
+    }
+
+    { // rotation around z-axis (same as mat3_rotate_z)
+        Vector3 z_axis = {0.0f, 0.0f, 1.0f};
+        Matrix3 m = mat3_rotate(z_axis, f32_PI/2);
+        ASSERT(almost_equal(m, mat3_rotate_z(f32_PI/2)));
+
+        ASSERT(almost_equal(m.m00,  0.0f));
+        ASSERT(almost_equal(m.m01, -1.0f));
+        ASSERT(almost_equal(m.m02,  0.0f));
+
+        ASSERT(almost_equal(m.m10, 1.0f));
+        ASSERT(almost_equal(m.m11, 0.0f));
+        ASSERT(almost_equal(m.m12, 0.0f));
+
+        ASSERT(almost_equal(m.m20, 0.0f));
+        ASSERT(almost_equal(m.m21, 0.0f));
+        ASSERT(almost_equal(m.m22, 1.0f));
+    }
+}
+
 TEST_PROC(determinant_of_identity_is_1, CATEGORY(maths_mat3))
 {
     Matrix3 M = mat3_identity();
     ASSERT(almost_equal(mat3_determinant(M), 1, 0.0001f));
 }
+
 
 TEST_PROC(determinant_of_M_equals_determinant_of_M_transposed, CATEGORY(maths_mat3))
 {
@@ -2311,6 +2585,7 @@ TEST_PROC(M_times_M_inverse_equals_identity, CATEGORY(maths_mat4))
     }
 
 }
+
 TEST_PROC(constructors, CATEGORY(maths_quaternion))
 {
     {
