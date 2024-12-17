@@ -173,6 +173,28 @@ Vector3 normalise(Vector3 v) EXPORT
     return r;
 }
 
+// projection of a onto b
+// the components of a that are parallel to b
+// project(a, b) = a∥b
+// project(a, b) = length(a)*cos(theta)
+Vector3 project(Vector3 a, Vector3 b) EXPORT { return b * (dot(a, b) / dot(b, b)); }
+Vector3 project_unit(Vector3 a, Vector3 b) EXPORT
+{
+    ASSERT_UNIT_LENGTH(b);
+    return b * dot(a, b);
+}
+
+// rejection of a from b
+// remove the components of a that are parallel to b, resulting in the components that are perpendicular
+// reject(a, b) = a⟂ b
+// reject(a, b) = length(a)*sin(theta)
+Vector3 reject(Vector3 a, Vector3 b)  EXPORT { return a - b * (dot(a, b) / dot(b, b)); }
+Vector3 reject_unit(Vector3 a, Vector3 b) EXPORT
+{
+    ASSERT_UNIT_LENGTH(b);
+    return a - b * dot(a,b);
+}
+
 Vector3 reflect(Vector3 v, Vector3 n) EXPORT { return v - 2.0f*dot(v, n)*n; }
 
 Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat) EXPORT
