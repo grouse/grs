@@ -142,6 +142,9 @@ Vector2 operator/(Vector2 lhs, Vector2 rhs)
     return { lhs.x / rhs.x, lhs.y / rhs.y };
 }
 
+bool operator==(const Vector2 &a, const Vector2 &b) { return a.x == b.x && a.y == b.y; }
+bool operator!=(const Vector2 &a, const Vector2 &b) { return a.x != b.x || a.y != b.y; }
+
 f32 dot(Vector2 lhs, Vector2 rhs) EXPORT { return lhs.x * rhs.x + lhs.y * rhs.y; }
 
 
@@ -228,6 +231,7 @@ void orthonormalize(Vector3 *v0, Vector3 *v1, Vector3 *v2) EXPORT
     *v1 = normalise(u1);
     *v2 = normalise(u2);
 }
+
 Vector3 operator-(Vector3 v) { return { -v.x, -v.y, -v.z }; }
 
 Vector3 operator+(Vector3 lhs, Vector3 rhs)
@@ -375,6 +379,9 @@ Vector3 operator/=(Vector3 &v, f32 s)
     return v;
 }
 
+bool operator==(const Vector3 &a, const Vector3 &b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
+bool operator!=(const Vector3 &a, const Vector3 &b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
+
 f32 dot(Vector3 a, Vector3 b) EXPORT
 {
     return a.x*b.x + a.y*b.y + a.z*b.z;
@@ -519,6 +526,9 @@ Vector4 operator/(Vector4 v, f32 s)
     r.w = v.w/s;
     return r;
 }
+
+bool operator==(const Vector4 &a, const Vector4 &b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
+bool operator!=(const Vector4 &a, const Vector4 &b) { return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w; }
 
 
 f32 dot(Vector4 a, Vector4 b) EXPORT

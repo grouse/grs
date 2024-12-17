@@ -53,8 +53,8 @@ extern "C" CRTIMP float fmodf( float x, float y ) NOTHROW;
     R operator/=(T_l &lhs, T_r rhs)
 
 #define M_CMP_OPS(T)\
-    inline bool operator==(const T &lhs, const T &rhs) { return memcmp(lhs.data, rhs.data, sizeof lhs.data) == 0; }\
-    inline bool operator!=(const T &lhs, const T &rhs) { return memcmp(lhs.data, rhs.data, sizeof lhs.data) != 0; }\
+    bool operator==(const T &lhs, const T &rhs);\
+    bool operator!=(const T &lhs, const T &rhs)
 
 #define M_UNARY_OPS(T)\
     T operator-(T v);\
