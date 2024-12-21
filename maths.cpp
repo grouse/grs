@@ -758,32 +758,32 @@ Matrix3 mat3_rotate(Vector3 axis, f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_translate(Matrix3 m, Vector3 v) EXPORT
+Matrix3 mat3_translate(Vector2 v) EXPORT
 {
-    Matrix3 r = m;
-    r[2] = m[0]*v[0] + m[1]*v[1] + m[2]*v[2];
-    return r;
+    Matrix3 M = mat3_identity();
+    M[2].xy = v;
+    return M;
 }
 
-Matrix3 mat3_scale(Matrix3 m, f32 scalar) EXPORT
+Matrix3 mat3_scale(f32 scalar) EXPORT
 {
-    Matrix3 r;
-    r[0] = m[0] * scalar;
-    r[1] = m[1] * scalar;
-    r[2] = m[2] * scalar;
-    return r;
+    Matrix3 M{};
+    M.m00 = scalar;
+    M.m11 = scalar;
+    M.m22 = scalar;
+    return M;
 }
 
 Matrix3 mat3_transform(Matrix3 projection, Vector2 position) EXPORT
 {
-    Matrix3 view = mat3_translate(mat3_identity(), { .xy = -position, 1 });
+    Matrix3 view = mat3_translate(-position);
     return projection*view;
 }
 
 Matrix3 mat3_transform(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
 {
-    Matrix3 mview = mat3_translate(mat3_identity(), { .xy = -position, 1 });
-    Matrix3 mscale = mat3_scale(mat3_identity(), uni_scale);
+    Matrix3 mview = mat3_translate(-position);
+    Matrix3 mscale = mat3_scale(uni_scale);
     return projection*mview*mscale;
 }
 
