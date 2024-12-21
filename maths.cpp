@@ -538,6 +538,9 @@ f32 dot(Vector4 a, Vector4 b) EXPORT
 
 
 // Quaternion
+f32 length(Quaternion q) EXPORT { return sqrtf(dot(q.xyzw, q.xyzw)); }
+f32 length_sq(Quaternion q) EXPORT { return dot(q.xyzw, q.xyzw); }
+
 Quaternion quat_identity() EXPORT { return { 0, 0, 0, 1 }; }
 
 Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
@@ -617,13 +620,23 @@ Quaternion quat_inverse(Quaternion q) EXPORT
     return quat_conjugate(q) / dot(q.xyzw, q.xyzw);
 }
 
-Quaternion operator*(Quaternion p, Quaternion q) EXPORT
+Quaternion operator+(Quaternion p, Quaternion q) EXPORT
+{
+    return { p.x+q.x, p.y+q.y, p.z+q.z, p.w+q.w };
+}
+
+Quaternion operator-(Quaternion p, Vector3 v) EXPORT
+{
+    return { .xyz = p.xyz - v, p.w };
+}
+
+Quaternion operator*(Quaternion q1, Quaternion q2) EXPORT
 {
     Quaternion r;
-    r.x = p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y;
-    r.y = p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x;
-    r.z = p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w;
-    r.w = p.w*q.w - p.x*q.x - p.y*q.y - p.z*q.z;
+    r.x = q1.w*q2.x + q1.x*q2.w + q1.y*q2.z - q1.z*q2.y;
+    r.y = q1.w*q2.y - q1.x*q2.z + q1.y*q2.w + q1.z*q2.x;
+    r.z = q1.w*q2.z + q1.x*q2.y - q1.y*q2.x + q1.z*q2.w;
+    r.w = q1.w*q2.w - q1.x*q2.x - q1.y*q2.y - q1.z*q2.z;
     return r;
 }
 
@@ -639,10 +652,23 @@ Vector3 operator*(Vector3 v, Quaternion q) EXPORT
     return v + q.w*t + cross(q.xyz, t);
 }
 
+Quaternion operator*(Quaternion q, f32 scalar) EXPORT
+{
+    return { .v = q.v * scalar, q.s * scalar };
+}
+
+Quaternion operator*(f32 scalar, Quaternion q) EXPORT
+{
+    return { .v = q.v * scalar, q.s * scalar };
+}
+
 Quaternion operator/(Quaternion q, f32 scalar) EXPORT
 {
     return { .xyzw = q.xyzw / scalar };
 }
+
+bool operator==(const Quaternion &a, const Quaternion &b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
+bool operator!=(const Quaternion &a, const Quaternion &b) { return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w; }
 
 
 
@@ -1802,6 +1828,14 @@ bool almost_equal(Vector3 a, Vector3 b, f32 epsilon /*=1e-6f*/) EXPORT
     return almost_equal(a.x, b.x, epsilon) &&
         almost_equal(a.y, b.y, epsilon) &&
         almost_equal(a.z, b.z, epsilon);
+}
+
+bool almost_equal(Quaternion q1, Quaternion q2, f32 epsilon /*=1e-6f*/) EXPORT
+{
+    return almost_equal(q1.x, q2.x, epsilon) &&
+        almost_equal(q1.y, q2.y, epsilon) &&
+        almost_equal(q1.z, q2.z, epsilon);
+        almost_equal(q1.w, q2.w, epsilon);
 }
 
 bool almost_equal(Matrix3 A, Matrix3 B, f32 epsilon /*=1e-6f*/) EXPORT
@@ -3017,6 +3051,100 @@ TEST_PROC(maths__quaternion__inverse)
         ASSERT(almost_equal(r.y, v.y, 0.0001f));
         ASSERT(almost_equal(r.z, v.z, 0.0001f));
     }
+}
+
+TEST_PROC(maths__quaternion__add_is_componentwise)
+{
+    Quaternion p{ 1, 2, 3, 4 };
+    Quaternion q{ 5, 6, 7, 8 };
+    ASSERT(p+q == Quaternion{ 6, 8, 10, 12 });
+}
+
+TEST_PROC(maths__quaternion__add_is_associative)
+{
+    Quaternion q1 = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+    Quaternion q2 = quat_angle_axis(f32_PI/2.0f, { 1, 0, 0 });
+    Quaternion q3 = quat_angle_axis(f32_PI/2.0f, { 0, 1, 0 });
+
+    ASSERT((q1 + q2) + q3 == q1 + (q2 + q3));
+}
+
+TEST_PROC(maths__quaternion__add_is_commutative)
+{
+    Quaternion q1 = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+    Quaternion q2 = quat_angle_axis(f32_PI/2.0f, { 1, 0, 0 });
+
+    ASSERT(q1 + q2 == q2 + q1);
+}
+
+TEST_PROC(maths__quaternion__scalar_mul_quat_is_distributive)
+{
+    {
+        Quaternion p = quat_angle_axis(f32_PI/2.0f, { 1, 0, 0 });
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+        f32 t = 2;
+        ASSERT(t*(p+q) == t*p + t*q);
+    }
+
+    {
+        Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+        f32 s = 2, t = 3;
+        ASSERT((s+t)*q == s*q + t*q);
+    }
+}
+
+TEST_PROC(maths__quaternion__mul_is_associative)
+{
+    Quaternion q1 = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+    Quaternion q2 = quat_angle_axis(f32_PI/2.0f, { 1, 0, 0 });
+    Quaternion q3 = quat_angle_axis(f32_PI/2.0f, { 0, 1, 0 });
+
+    ASSERT(q1*q2*q3 == (q1*q2)*q3);
+    ASSERT(q1*q2*q3 == q1*(q2*q3));
+}
+
+TEST_PROC(maths__quaternion__mul_is_distributive)
+{
+    Quaternion q1 = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+    Quaternion q2 = quat_angle_axis(f32_PI/2.0f, { 1, 0, 0 });
+    Quaternion q3 = quat_angle_axis(f32_PI/2.0f, { 0, 1, 0 });
+    ASSERT(q1*(q2+q3) == q1*q2 + q1*q3);
+    ASSERT((q1+q2)*q3 == q1*q3 + q2*q3);
+}
+
+TEST_PROC(maths__quaternion__q2_mul_q1_equals_q1q2_minus_2v1_cross_v2)
+{
+    {
+        Quaternion q1 = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+        Quaternion q2 = quat_angle_axis(f32_PI/2.0f, { 0, 1, 0 });
+        ASSERT(almost_equal(q2*q1, q1*q2 - 2*cross(q1.xyz, q2.xyz)));
+    }
+
+    { // when the vector parts are parallel, the quaternion multiplication is commutative
+        Quaternion q1 = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+        Quaternion q2 = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+        ASSERT(almost_equal(q2*q1, q1*q2 - 2*cross(q1.xyz, q2.xyz)));
+        ASSERT(almost_equal(q2*q1, q1*q2));
+    }
+}
+TEST_PROC(maths__quaternion__q_mul_q_conj_is_commutative)
+{
+    Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+    Quaternion r1 = quat_conjugate(q)*q;
+    Quaternion r2 = q*quat_conjugate(q);
+    ASSERT(almost_equal(r1, r2));
+}
+
+TEST_PROC(maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq)
+{
+    Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+    Quaternion qs = quat_conjugate(q);
+    Quaternion r = q*qs;
+    ASSERT(almost_equal(r.w, length_sq(q)));
+    ASSERT(almost_equal(r.w, dot(q.v, q.v) + q.s*q.s));
+    ASSERT(almost_equal(r.x, 0));
+    ASSERT(almost_equal(r.y, 0));
+    ASSERT(almost_equal(r.z, 0));
 }
 
 TEST_PROC(maths__misc__angle_between)

@@ -187,6 +187,8 @@ struct Quaternion {
 
     M_SUBSCRIPT_OPS(f32, data);
 };
+M_CMP_OPS(Quaternion);
+M_ADD_OPS(Quaternion, Quaternion, Quaternion);
 M_DIV_OPS(Quaternion, Quaternion, f32);
 
 struct Rect {
