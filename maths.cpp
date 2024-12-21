@@ -774,6 +774,52 @@ Matrix3 mat3_scale(f32 scalar) EXPORT
     return M;
 }
 
+Matrix3 mat3_scale_axis(Vector3 axis, f32 scalar) EXPORT
+{
+    scalar -= 1.0f;
+    f32 x = axis.x*scalar;
+    f32 y = axis.y*scalar;
+    f32 z = axis.z*scalar;
+
+    f32 axay = x*axis.y;
+    f32 axaz = x*axis.z;
+    f32 ayaz = y*axis.z;
+
+    return mat3_rows(
+        { x*axis.x + 1.0f, axay,            axaz },
+        { axay,            y*axis.y + 1.0f, ayaz },
+        { axaz,            ayaz,            z*axis.z + 1.0f });
+}
+
+Matrix3 mat3_skew(f32 t, Vector3 a, Vector3 b) EXPORT
+{
+    t = tan(t);
+    f32 x = a.x*t;
+    f32 y = a.y*t;
+    f32 z = a.z*t;
+
+    return mat3_rows(
+        { x*b.x + 1.0f, x*b.y,        x*b.z },
+        { y*b.x,        y*b.y + 1.0f, y*b.z },
+        { z*b.x,        z*b.y,        z*b.z + 1.0f });
+}
+
+Matrix3 mat3_reflect(Vector3 a) EXPORT
+{
+    f32 x = -2.0f*a.x;
+    f32 y = -2.0f*a.y;
+    f32 z = -2.0f*a.z;
+
+    f32 axay = x*a.y;
+    f32 axaz = x*a.z;
+    f32 ayaz = y*a.z;
+
+    return mat3_rows(
+        { x*a.x + 1.0f, axay,         axaz },
+        { axay,         y*a.y + 1.0f, ayaz },
+        { axaz,         ayaz,         z*a.z + 1.0f });
+}
+
 Matrix3 mat3_transform(Matrix3 projection, Vector2 position) EXPORT
 {
     Matrix3 view = mat3_translate(-position);
