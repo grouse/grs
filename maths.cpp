@@ -620,6 +620,12 @@ Quaternion quat_inverse(Quaternion q) EXPORT
     return quat_conjugate(q) / dot(q.xyzw, q.xyzw);
 }
 
+Vector3 quat_rotate(Quaternion q, Vector3 v) EXPORT
+{
+    f32 b2 = dot(q.v, q.v);
+    return v*(q.w*q.w - b2) + q.v*dot(v, q.v)*2 + cross(q.v, v)*q.w*2;
+}
+
 Quaternion operator+(Quaternion p, Quaternion q) EXPORT
 {
     return { p.x+q.x, p.y+q.y, p.z+q.z, p.w+q.w };
