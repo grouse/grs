@@ -1110,6 +1110,31 @@ Matrix4 mat4_inverse(Matrix4 M) EXPORT
     }};
 }
 
+Matrix4 mat34_inverse(Matrix4 M) EXPORT
+{
+    Vector3 a = M[0].xyz, b = M[1].xyz, c = M[2].xyz, d = M[3].xyz;
+
+    Vector3 s = cross(a, b);
+    Vector3 t = cross(c, d);
+    Vector3 v = c;
+
+    f32 inv_det = 1.0f / dot(s, c);
+
+    s *= inv_det;
+    t *= inv_det;
+    v *= inv_det;
+
+    Vector3 r0 = cross(b, v);
+    Vector3 r1 = cross(v, a);
+
+    return { .columns = {
+        {  r0.x,      r1.x,       s.x,       0 },
+        {  r0.y,      r1.y,       s.y,       0 },
+        {  r0.z,      r1.z,       s.z,       0 },
+        { -dot(b, t), dot(a, t), -dot(d, s), 1 }
+    }};
+}
+
 Matrix4 operator*(Matrix4 A, Matrix4 B) EXPORT
 {
     Matrix4 M{};
