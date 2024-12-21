@@ -54,6 +54,15 @@ extern void maths__quaternion__swizzle_test();
 extern void maths__quaternion__angle_axis_test();
 extern void maths__quaternion__euler_test();
 extern void maths__quaternion__inverse_test();
+extern void maths__quaternion__add_is_componentwise_test();
+extern void maths__quaternion__add_is_associative_test();
+extern void maths__quaternion__add_is_commutative_test();
+extern void maths__quaternion__scalar_mul_quat_is_distributive_test();
+extern void maths__quaternion__mul_is_associative_test();
+extern void maths__quaternion__mul_is_distributive_test();
+extern void maths__quaternion__q2_mul_q1_equals_q1q2_minus_2v1_cross_v2_test();
+extern void maths__quaternion__q_mul_q_conj_is_commutative_test();
+extern void maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq_test();
 extern void maths__misc__angle_between_test();
 
 TestSuite TESTS_array_tests[] = {
@@ -126,6 +135,15 @@ TestSuite TESTS_maths__quaternion_tests[] = {
 	{ "angle_axis_test", maths__quaternion__angle_axis_test },
 	{ "euler_test", maths__quaternion__euler_test },
 	{ "inverse_test", maths__quaternion__inverse_test },
+	{ "add_is_componentwise_test", maths__quaternion__add_is_componentwise_test },
+	{ "add_is_associative_test", maths__quaternion__add_is_associative_test },
+	{ "add_is_commutative_test", maths__quaternion__add_is_commutative_test },
+	{ "scalar_mul_quat_is_distributive_test", maths__quaternion__scalar_mul_quat_is_distributive_test },
+	{ "mul_is_associative_test", maths__quaternion__mul_is_associative_test },
+	{ "mul_is_distributive_test", maths__quaternion__mul_is_distributive_test },
+	{ "q2_mul_q1_equals_q1q2_minus_2v1_cross_v2_test", maths__quaternion__q2_mul_q1_equals_q1q2_minus_2v1_cross_v2_test },
+	{ "q_mul_q_conj_is_commutative_test", maths__quaternion__q_mul_q_conj_is_commutative_test },
+	{ "q_mul_q_conj_equals_v_sq_plus_s_sq_test", maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq_test },
 };
 TestSuite TESTS_maths__misc_tests[] = {
 	{ "angle_between_test", maths__misc__angle_between_test },
