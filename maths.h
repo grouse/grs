@@ -22,18 +22,12 @@ extern "C" CRTIMP float copysignf(float x, float y) NOTHROW;
 extern "C" CRTIMP float fmodf( float x, float y ) NOTHROW;
 
 #ifndef M_BOUNDS_CHECK
-#define M_BOUNDS_CHECK 0
+#define M_BOUNDS_CHECK(i, min, max) do { ASSERT(i <= max); ASSERT(i >= min); } while(0)
 #endif
 
-#if M_BOUNDS_CHECK
 #define M_SUBSCRIPT_OPS(T, values)\
-    constexpr T& operator[](i32 i) { ASSERT((i) < ARRAY_COUNT((values))); return values[i]; }\
-    constexpr const T& operator[](i32 i) const { ASSERT((i) < ARRAY_COUNT((values))); return values[i]; }
-#else
-#define M_SUBSCRIPT_OPS(T, values)\
-    constexpr T& operator[](i32 i) { return values[i]; }\
-    constexpr const T& operator[](i32 i) const { return values[i]; }
-#endif
+    constexpr T& operator[](i32 i) { M_BOUNDS_CHECK(i, 0, ARRAY_COUNT((values))-1); return values[i]; }\
+    constexpr const T& operator[](i32 i) const { M_BOUNDS_CHECK(i, 0, ARRAY_COUNT((values))-1); return values[i]; }\
 
 
 #define M_ADD_OPS(R, T_l, T_r)\
