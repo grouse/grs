@@ -63,6 +63,7 @@ extern void maths__quaternion__mul_is_distributive_test();
 extern void maths__quaternion__q2_mul_q1_equals_q1q2_minus_2v1_cross_v2_test();
 extern void maths__quaternion__q_mul_q_conj_is_commutative_test();
 extern void maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq_test();
+extern void maths__quaternion__q_inverse_equals_q_conj_if_q_unit_test();
 extern void maths__misc__angle_between_test();
 
 TestSuite TESTS_array_tests[] = {
@@ -144,6 +145,7 @@ TestSuite TESTS_maths__quaternion_tests[] = {
 	{ "q2_mul_q1_equals_q1q2_minus_2v1_cross_v2_test", maths__quaternion__q2_mul_q1_equals_q1q2_minus_2v1_cross_v2_test },
 	{ "q_mul_q_conj_is_commutative_test", maths__quaternion__q_mul_q_conj_is_commutative_test },
 	{ "q_mul_q_conj_equals_v_sq_plus_s_sq_test", maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq_test },
+	{ "q_inverse_equals_q_conj_if_q_unit_test", maths__quaternion__q_inverse_equals_q_conj_if_q_unit_test },
 };
 TestSuite TESTS_maths__misc_tests[] = {
 	{ "angle_between_test", maths__misc__angle_between_test },

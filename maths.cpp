@@ -3224,6 +3224,13 @@ TEST_PROC(maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq)
     ASSERT(almost_equal(r.z, 0));
 }
 
+TEST_PROC(maths__quaternion__q_inverse_equals_q_conj_if_q_unit)
+{
+    Quaternion q = quat_angle_axis(f32_PI/2.0f, { 0, 0, 1 });
+    ASSERT(almost_equal(length(q), 1));
+    ASSERT(almost_equal(quat_conjugate(q), quat_inverse(q)));
+}
+
 TEST_PROC(maths__misc__angle_between)
 {
     {

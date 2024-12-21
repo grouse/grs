@@ -48,6 +48,7 @@ extern Quaternion quat_from_mat4(Matrix4 trs);
 extern Quaternion normalise(Quaternion q);
 extern Quaternion quat_conjugate(Quaternion q);
 extern Quaternion quat_inverse(Quaternion q);
+extern Vector3 quat_rotate(Quaternion q, Vector3 v);
 extern Quaternion operator+(Quaternion p, Quaternion q);
 extern Quaternion operator-(Quaternion p, Vector3 v);
 extern Quaternion operator*(Quaternion q1, Quaternion q2);
