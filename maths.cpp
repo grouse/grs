@@ -703,8 +703,8 @@ Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*
 
 Matrix3 mat3_rotate_x(f32 theta) EXPORT
 {
-    f32 cos_t = cos(theta);
-    f32 sin_t = sin(theta);
+    f32 cos_t = cosf(theta);
+    f32 sin_t = sinf(theta);
 
     return { .columns = {
         { 1, 0,      0     },
@@ -715,8 +715,8 @@ Matrix3 mat3_rotate_x(f32 theta) EXPORT
 
 Matrix3 mat3_rotate_y(f32 theta) EXPORT
 {
-    f32 cos_t = cos(theta);
-    f32 sin_t = sin(theta);
+    f32 cos_t = cosf(theta);
+    f32 sin_t = sinf(theta);
 
     return { .columns = {
         { cos_t, 0, -sin_t },
@@ -727,8 +727,8 @@ Matrix3 mat3_rotate_y(f32 theta) EXPORT
 
 Matrix3 mat3_rotate_z(f32 theta) EXPORT
 {
-    f32 cos_t = cos(theta);
-    f32 sin_t = sin(theta);
+    f32 cos_t = cosf(theta);
+    f32 sin_t = sinf(theta);
 
     return { .columns = {
         {  cos_t, sin_t, 0 },
@@ -739,8 +739,8 @@ Matrix3 mat3_rotate_z(f32 theta) EXPORT
 
 Matrix3 mat3_rotate(Vector3 axis, f32 theta) EXPORT
 {
-    f32 cos_t = cos(theta);
-    f32 sin_t = sin(theta);
+    f32 cos_t = cosf(theta);
+    f32 sin_t = sinf(theta);
     f32 d = 1 - cos_t;
 
     f32 x = axis.x*d;
@@ -793,7 +793,7 @@ Matrix3 mat3_scale_axis(Vector3 axis, f32 scalar) EXPORT
 
 Matrix3 mat3_skew(f32 t, Vector3 a, Vector3 b) EXPORT
 {
-    t = tan(t);
+    t = tanf(t);
     f32 x = a.x*t;
     f32 y = a.y*t;
     f32 z = a.z*t;
