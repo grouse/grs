@@ -566,34 +566,38 @@ Quaternion quat_yaw(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 1, 0 
 Quaternion quat_pitch(f32 theta) EXPORT { return quat_angle_axis(theta, { 1, 0, 0 }); }
 Quaternion quat_roll(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 0, 1 }); }
 
-Quaternion quat_from_mat4(Matrix4 trs) EXPORT
+Quaternion quat_from_mat4(Matrix4 M) EXPORT
 {
     Quaternion q;
-    f32 trace = trs.m00 + trs.m11 + trs.m22;
-    if (trace > 0) {
-        f32 s = 2*sqrtf(trace + 1.0f);
-        q.w = 0.25f*s;
-        q.x = (trs.m21 - trs.m12) / s;
-        q.y = (trs.m02 - trs.m20) / s;
-        q.z = (trs.m10 - trs.m01) / s;
-    } else if (trs.m00 > trs.m11 && trs.m00 > trs.m22) {
-        f32 s = 2.0f * sqrtf(1.0f + trs.m00 - trs.m11 - trs.m22);
-        q.w = (trs.m21 - trs.m12) / s;
-        q.x = 0.25f * s;
-        q.y = (trs.m01 + trs.m10) / s;
-        q.z = (trs.m02 + trs.m20) / s;
-    } else if (trs.m11 > trs.m22) {
-        f32 s = 2.0f * sqrtf(1.0f + trs.m11 - trs.m00 - trs.m22);
-        q.w = (trs.m02 - trs.m20) / s;
-        q.x = (trs.m01 + trs.m10) / s;
-        q.y = 0.25f * s;
-        q.z = (trs.m12 + trs.m21) / s;
+
+    if (f32 sum = M.m00 + M.m11 + M.m22; sum > 0) {
+        f32 s = sqrtf(sum + 1.0f);
+        f32 f = 0.25f / s;
+        q.x = (M.m21 - M.m12) * f;
+        q.y = (M.m02 - M.m20) * f;
+        q.z = (M.m10 - M.m01) * f;
+        q.w = s;
+    } else if (M.m00 > M.m11 && M.m00 > M.m22) {
+        f32 s = sqrtf(M.m00 - M.m11 - M.m22 + 1.0f) * 0.5f;
+        f32 f = 0.25f / s;
+        q.x = s;
+        q.y = (M.m01 + M.m10) * f;
+        q.z = (M.m02 + M.m20) * f;
+        q.w = (M.m21 - M.m12) * f;
+    } else if (M.m11 > M.m22) {
+        f32 s = sqrtf(M.m11 - M.m00 - M.m22 + 1.0f) * 0.5f;
+        f32 f = 0.25f / s;
+        q.x = (M.m01 + M.m10) * f;
+        q.y = s;
+        q.z = (M.m12 + M.m21) * f;
+        q.w = (M.m02 - M.m20) * f;
     } else {
-        f32 s = 2.0f * sqrtf(1.0f + trs.m22 - trs.m00 - trs.m11);
-        q.w = (trs.m10 - trs.m01) / s;
-        q.x = (trs.m02 + trs.m20) / s;
-        q.y = (trs.m12 + trs.m21) / s;
-        q.z = 0.25f * s;
+        f32 s = sqrtf(M.m22 - M.m00 - M.m11 + 1.0f) * 0.5f;
+        f32 f = 0.25f / s;
+        q.x = (M.m02 + M.m20) * f;
+        q.y = (M.m12 + M.m21) * f;
+        q.z = s;
+        q.w = (M.m10 - M.m01) * f;
     }
 
     return q;
