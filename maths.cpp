@@ -768,6 +768,26 @@ Matrix3 mat3_rotate(Vector3 axis, f32 theta) EXPORT
     }};
 }
 
+Matrix3 mat3_rotate_quat(Quaternion q) EXPORT
+{
+    f32 xx = q.x*q.x;
+    f32 yy = q.y*q.y;
+    f32 zz = q.z*q.z;
+
+    f32 xy = q.x*q.y;
+    f32 xz = q.x*q.z;
+    f32 yz = q.y*q.z;
+    f32 wx = q.w*q.x;
+    f32 wy = q.w*q.y;
+    f32 wz = q.w*q.z;
+
+    return { .columns = {
+        { 1 - 2*(yy+zz),     2*(xy+wz),     2*(xz-wy) },
+        {     2*(xy-wz), 1 - 2*(xx+zz),     2*(yz+wx) },
+        {     2*(xz+wy),     2*(yz-wx), 1 - 2*(xx+yy) },
+    }};
+}
+
 Matrix3 mat3_translate(Vector2 v) EXPORT
 {
     Matrix3 M = mat3_identity();
@@ -922,11 +942,12 @@ Matrix4 mat4_transform_mat3(const Matrix3 &m0) EXPORT
     return M;
 }
 
-Matrix4 mat4_rotate(Quaternion q) EXPORT
+Matrix4 mat4_rotate_quat(Quaternion q) EXPORT
 {
     f32 xx = q.x*q.x;
     f32 yy = q.y*q.y;
     f32 zz = q.z*q.z;
+
     f32 xy = q.x*q.y;
     f32 xz = q.x*q.z;
     f32 yz = q.y*q.z;
@@ -934,24 +955,12 @@ Matrix4 mat4_rotate(Quaternion q) EXPORT
     f32 wy = q.w*q.y;
     f32 wz = q.w*q.z;
 
-    Matrix4 r;
-    r[0][0] = 1 - 2*(yy + zz);
-    r[0][1] = 2*(xy + wz);
-    r[0][2] = 2*(xz - wy);
-    r[0][3] = 0;
-
-    r[1][0] = 2*(xy - wz);
-    r[1][1] = 1 - 2*(xx + zz);
-    r[1][2] = 2*(yz + wx);
-    r[1][3] = 0;
-
-    r[2][0] = 2*(xz + wy);
-    r[2][1] = 2*(yz - wx);
-    r[2][2] = 1 - 2*(xx + yy);
-    r[2][3] = 0;
-
-    r[3] = { 0, 0, 0, 1 };
-    return r;
+    return { .columns = {
+        { 1 - 2*(yy+zz),     2*(xy+wz),     2*(xz-wy), 0 },
+        {     2*(xy-wz), 1 - 2*(xx+zz),     2*(yz+wx), 0 },
+        {     2*(xz+wy),     2*(yz-wx), 1 - 2*(xx+yy), 0 },
+        { 0,             0,             0,             1 },
+    }};
 }
 
 Matrix4 mat4_translate(Vector3 v) EXPORT
@@ -973,7 +982,7 @@ Matrix4 mat4_scale(Vector3 v) EXPORT
 Matrix4 mat4_transform(Quaternion rotation, Vector3 position) EXPORT
 {
     Matrix4 T = mat4_translate(position);
-    Matrix4 R = mat4_rotate(rotation);
+    Matrix4 R = mat4_rotate_quat(rotation);
     return T*R;
 }
 
@@ -983,7 +992,7 @@ Matrix4 mat4_transform(
     Vector3 scale) EXPORT
 {
     Matrix4 T = mat4_translate(position);
-    Matrix4 R = mat4_rotate(rotation);
+    Matrix4 R = mat4_rotate_quat(rotation);
     Matrix4 S = mat4_scale(scale);
     return T*R*S;
 }
