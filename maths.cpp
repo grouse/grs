@@ -883,13 +883,13 @@ f32 mat3_determinant(Matrix3 M) EXPORT
         M.m02*M.m10*M.m21 - M.m11*M.m20;
 }
 
-Vector3 operator*(Matrix3 m, Vector3 v)
+Vector3 operator*(Matrix3 M, Vector3 v)
 {
-    Vector3 r;
-    r[0] = m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z;
-    r[1] = m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z;
-    r[2] = m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z;
-    return r;
+    return {
+        M.m00*v.x + M.m01*v.y + M.m02*v.z,
+        M.m10*v.x + M.m11*v.y + M.m12*v.z,
+        M.m20*v.x + M.m21*v.y + M.m22*v.z,
+    };
 }
 
 Matrix3 operator*(Matrix3 lhs, Matrix3 rhs)
