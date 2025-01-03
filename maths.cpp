@@ -550,21 +550,11 @@ Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
     return { v.x*s, v.y*s, v.z*s, cosf(half_theta) };
 }
 
-Quaternion quat_euler(f32 pitch, f32 yaw, f32 roll) EXPORT
+Quaternion quat_euler(f32 x_angle, f32 y_angle, f32 z_angle) EXPORT
 {
-    Quaternion q = quat_yaw(yaw) * quat_pitch(pitch) * quat_roll(roll);
+    Quaternion q = quat_angle_axis(y_angle, { 0, 1, 0 }) * quat_angle_axis(x_angle, { 1, 0, 0 }) * quat_angle_axis(z_angle, { 0, 0, 1 });
     return normalise(q);
 }
-
-Quaternion quat_euler(Vector3 euler) EXPORT
-{
-    Quaternion q = quat_yaw(euler.y) * quat_pitch(euler.x) * quat_roll(euler.z);
-    return normalise(q);
-}
-
-Quaternion quat_yaw(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 1, 0 }); }
-Quaternion quat_pitch(f32 theta) EXPORT { return quat_angle_axis(theta, { 1, 0, 0 }); }
-Quaternion quat_roll(f32 theta) EXPORT { return quat_angle_axis(theta, { 0, 0, 1 }); }
 
 Quaternion quat_from_mat4(Matrix4 M) EXPORT
 {
