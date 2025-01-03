@@ -86,6 +86,9 @@ extern void mat4_trs_decompose(Matrix4 trs, Vector3 *pos, Quaternion *rot, Vecto
 extern Matrix4 mat4_look_at(Vector3 eye, Vector3 center, Vector3 up);
 extern Matrix4 mat4_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 near_z, f32 far_z);
 extern Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z);
+extern Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon =1e-5);
+extern Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z);
+extern Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon =1e-5);
 extern Matrix4 mat4_inv_transform(Vector3 eye, Vector3 forward, Vector3 up);
 extern Matrix4 mat4_transpose(Matrix4 m0);
 extern Matrix4 mat4_inverse(Matrix4 M);

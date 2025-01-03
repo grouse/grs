@@ -1047,18 +1047,61 @@ Matrix4 mat4_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 near_z, 
 
 Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
 {
-    // right-handed perspective projection
     // zero-to-one depth range
-
     f32 tan_half_fov = tanf(fov/2);
+    f32 g = 1/tan_half_fov;
+    f32 k = far_z/(far_z-near_z);
 
-    Matrix4 M{};
-    M[0][0] = 1 / (aspect * tan_half_fov);
-    M[1][1] = 1 / tan_half_fov;
-    M[2][2] = far_z/(near_z-far_z);
-    M[2][3] = -1;
-    M[3][2] = -(far_z * near_z)/(far_z - near_z);
-    return M;
+    return { .columns = {
+        { g/aspect, 0, 0,         0 },
+        { 0,        g, 0,         0 },
+        { 0,        0, k,         1 },
+        { 0,        0, -near_z*k, 0 }
+    }};
+}
+
+Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/) EXPORT
+{
+    // zero-to-infinite depth range
+    f32 tan_half_fov = tanf(fov/2);
+    f32 g = 1/tan_half_fov;
+    f32 e = 1.0f-epsilon;
+
+    return { .columns = {
+        { g/aspect, 0, 0,         0 },
+        { 0,        g, 0,         0 },
+        { 0,        0, e,         1 },
+        { 0,        0, -near_z*e, 0 },
+    }};
+}
+
+Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
+{
+    // one-to-zero depth range
+    f32 tan_half_fov = tanf(fov/2);
+    f32 g = 1/tan_half_fov;
+    f32 k = near_z/(near_z-far_z);
+
+    return { .columns = {
+        { g/aspect, 0, 0,        0 },
+        { 0,        g, 0,        0 },
+        { 0,        0, k,        1 },
+        { 0,        0, -far_z*k, 0 }
+    }};
+}
+
+Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/) EXPORT
+{
+    // one-to-infinite depth range
+    f32 tan_half_fov = tanf(fov/2);
+    f32 g = 1/tan_half_fov;
+
+    return { .columns = {
+        { g/aspect, 0, 0,                     0 },
+        { 0,        g, 0,                     0 },
+        { 0,        0, epsilon,               1 },
+        { 0,        0, near_z*(1.0f-epsilon), 0 },
+    }};
 }
 
 Matrix4 mat4_inv_transform(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
