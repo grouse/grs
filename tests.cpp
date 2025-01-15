@@ -1,8 +1,8 @@
 #define TEST_H_IMPL
 #include "test.h"
 
-#include "maths.cpp"
 #include "core.cpp"
+#include "maths.cpp"
 #include "string.cpp"
 #include "memory.cpp"
 #include "thread.cpp"
