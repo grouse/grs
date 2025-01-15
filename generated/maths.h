@@ -39,6 +39,7 @@ extern f32 length(Quaternion q);
 extern f32 length_sq(Quaternion q);
 extern Quaternion quat_identity();
 extern Quaternion quat_angle_axis(f32 theta, Vector3 v);
+extern Quaternion quat_axis_angle(Vector3 v, f32 theta);
 extern Quaternion quat_euler(f32 x_angle, f32 y_angle, f32 z_angle);
 extern Quaternion quat_from_mat4(Matrix4 M);
 extern Quaternion normalise(Quaternion q);

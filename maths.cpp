@@ -550,6 +550,8 @@ Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
     return { v.x*s, v.y*s, v.z*s, cosf(half_theta) };
 }
 
+Quaternion quat_axis_angle(Vector3 v, f32 theta) EXPORT { return quat_angle_axis(theta, v); }
+
 Quaternion quat_euler(f32 x_angle, f32 y_angle, f32 z_angle) EXPORT
 {
     Quaternion q = quat_angle_axis(y_angle, { 0, 1, 0 }) * quat_angle_axis(x_angle, { 1, 0, 0 }) * quat_angle_axis(z_angle, { 0, 0, 1 });
