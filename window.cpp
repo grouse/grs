@@ -685,7 +685,7 @@ bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id /*= INPUT_MAP_ANY*
     if (map_id == -1) return false;
     InputMap *map = &input.maps[map_id];
     auto *axis = map_find(&map->axes, id);
-    if (!axis) return false;
+    if (!axis || axis[0] == 0.0f) return false;
 
     dst[0] = axis[0];
     return true;
@@ -701,7 +701,7 @@ bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_AN
     if (map_id == -1) return false;
     InputMap *map = &input.maps[map_id];
     auto *axis = map_find(&map->axes, id);
-    if (!axis) return false;
+    if (!axis || (axis[0] == 0.0f && axis[1] == 0.0f)) return false;
 
     dst[0] = axis[0];
     dst[1] = axis[1];
@@ -718,7 +718,7 @@ bool get_input_edge(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
     if (map_id == -1) return false;
     InputMap *map = &input.maps[map_id];
     i32 *value = map_find(&map->edges, id);
-    if (!value) return false;
+    if (!value || *value == 0) return false;
 
     return (*value)-- > 0;
 }
