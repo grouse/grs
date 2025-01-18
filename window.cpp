@@ -638,11 +638,11 @@ bool translate_input_event(
         (*map_find_emplace(&input.mouse, EDGE_UP, u8(0))) |= event.mouse.button;
         (*map_find_emplace(&input.mouse, HOLD, u8(0))) &= ~event.mouse.button;
 
-        if (input.active_map) reset_mouse_held(&input.maps[input.active_map], event);
+        if (input.active_map != INPUT_MAP_INVALID) reset_mouse_held(&input.maps[input.active_map], event);
         for (auto map_id : input.layers) reset_mouse_held(&input.maps[map_id], event);
         break;
     case WE_KEY_RELEASE:
-        if (input.active_map) reset_key_held(&input.maps[input.active_map], event);
+        if (input.active_map != INPUT_MAP_INVALID) reset_key_held(&input.maps[input.active_map], event);
         for (auto map_id : input.layers) reset_key_held(&input.maps[map_id], event);
         break;
     default: break;
@@ -653,7 +653,7 @@ bool translate_input_event(
 
 bool text_input_enabled() EXPORT
 {
-    if (input.active_map != -1 && input.maps[input.active_map].by_type[TEXT][0].count) return true;
+    if (input.active_map != INPUT_MAP_INVALID && input.maps[input.active_map].by_type[TEXT][0].count) return true;
     for (auto it : input.layers) if (input.maps[it].by_type[TEXT][0].count) return true;
     return false;
 }
@@ -665,7 +665,7 @@ bool get_input_text(InputId id, TextEvent *dst, InputMapId map_id) EXPORT
         map_id = input.active_map;
     }
 
-    if (map_id == -1) return false;
+    if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
     auto *text = map_find(&map->text, id);
     if (!text || text->count == 0) return false;
@@ -682,7 +682,7 @@ bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id /*= INPUT_MAP_ANY*
         map_id = input.active_map;
     }
 
-    if (map_id == -1) return false;
+    if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
     auto *axis = map_find(&map->axes, id);
     if (!axis || axis[0] == 0.0f) return false;
@@ -698,7 +698,7 @@ bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_AN
         map_id = input.active_map;
     }
 
-    if (map_id == -1) return false;
+    if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
     auto *axis = map_find(&map->axes, id);
     if (!axis || (axis[0] == 0.0f && axis[1] == 0.0f)) return false;
@@ -715,7 +715,7 @@ bool get_input_edge(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
         map_id = input.active_map;
     }
 
-    if (map_id == -1) return false;
+    if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
     i32 *value = map_find(&map->edges, id);
     if (!value || *value == 0) return false;
@@ -731,7 +731,7 @@ bool get_input_held(InputId id, InputMapId map_id) EXPORT
         map_id = input.active_map;
     }
 
-    if (map_id == -1) return false;
+    if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
     bool *value = map_find(&map->held, id);
     if (!value) return false;
