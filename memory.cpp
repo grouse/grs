@@ -45,7 +45,8 @@ void init_default_allocators()
     PANIC_IF(mem_sys.proc != nullptr, "default allocators already initialized");
 
     mem_sys = malloc_allocator();
-    mem_dynamic = vm_freelist_allocator(16*GiB);
+    // TODO(jesper): disabled vm_freelist_allocator due to memory leak issues observed in mimir
+    mem_dynamic = malloc_allocator();//vm_freelist_allocator(16*GiB);
 }
 
 MArena tl_scratch_arena(Allocator conflict)
