@@ -204,7 +204,7 @@ Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat) EXPORT
 {
     f32 cos_theta = MIN(dot(-v, n), 1.0f);
     Vector3 d_perp = etai_over_etat * (v + cos_theta*n);
-    Vector3 d_parallel = -sqrtf(fabs(1.0f-dot(d_perp, d_perp))) * n;
+    Vector3 d_parallel = -sqrtf(fabsf(1.0f-dot(d_perp, d_perp))) * n;
     return d_perp + d_parallel;
 }
 
@@ -2577,22 +2577,22 @@ TEST_PROC(maths__vector3__a_minus_b_satisfies_reverse_triangle_inequality)
     { // Basic triangle with positive sides
         Vector3 a{ 3, 0, 0 };
         Vector3 b{ 1, 0, 0 };
-        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
     }
     { // Almost same length vectors
         Vector3 a{ 5, 0, 0 };
         Vector3 b{ 4, 0, 0 };
-        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
     }
     { // Zero vector case
         Vector3 a{ 5, 0, 0 };
         Vector3 b{ 0, 0, 0 };
-        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
     }
     { // Non-colinear vectors
         Vector3 a{ 3, 4, 0 };
         Vector3 b{ 1, 2, 2 };
-        ASSERT(abs(length(a) - length(b)) <= length(a - b));
+        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
     }
 }
 
