@@ -130,7 +130,8 @@ struct FixedArray : Array<T> {
 // -- iterators
 template<typename T>
 struct ArrayIterator {
-    Array<T> arr;
+    T* arr;
+    i32 count;
 
     struct Proxy {
         T *ptr;
@@ -150,13 +151,14 @@ struct ArrayIterator {
         Proxy& operator--() { index--; return *this; }
     };
 
-    Proxy begin() { return { arr.begin(), 0         }; }
-    Proxy end()   { return { arr.begin(), arr.count }; }
+    Proxy begin() { return { arr, 0 }; }
+    Proxy end()   { return { arr, count }; }
 };
 
 template<typename T>
 struct ArrayIterator<T*> {
-    Array<T*> arr;
+    T** arr;
+    i32 count;
 
     struct Proxy {
         T **ptr;
@@ -175,13 +177,14 @@ struct ArrayIterator<T*> {
         Proxy& operator--() { index--; return *this; }
     };
 
-    Proxy begin() { return { arr.begin(), 0         }; }
-    Proxy end()   { return { arr.begin(), arr.count }; }
+    Proxy begin() { return { arr, 0 }; }
+    Proxy end()   { return { arr, count }; }
 };
 
 template<typename T>
 struct ReverseIterator {
-    Array<T> arr;
+    T *arr;
+    i32 count;
 
     struct Proxy {
         T *ptr;
@@ -200,13 +203,14 @@ struct ReverseIterator {
         Proxy& operator--() { index++; return *this; }
     };
 
-    Proxy begin() { return { arr.begin(), arr.count-1 }; }
-    Proxy end()   { return { arr.begin(), -1          }; }
+    Proxy begin() { return { arr, count-1 }; }
+    Proxy end()   { return { arr, -1 }; }
 };
 
 template<typename T>
 struct ReverseIterator<T*> {
-    Array<T*> arr;
+    T** arr;
+    i32 count;
 
     struct Proxy {
         T **ptr;
@@ -225,15 +229,21 @@ struct ReverseIterator<T*> {
         Proxy& operator--() { index++; return *this; }
     };
 
-    Proxy begin() { return { arr.begin(), arr.count-1 }; }
-    Proxy end()   { return { arr.begin(), -1          }; }
+    Proxy begin() { return { arr, count-1 }; }
+    Proxy end()   { return { arr, -1 }; }
 };
 
 template<typename T>
-ArrayIterator<T> iterator(Array<T> arr) { return { .arr = arr }; }
+ArrayIterator<T> iterator(Array<T> arr) { return { arr.data, arr.count }; }
 
 template<typename T>
-ReverseIterator<T> reverse(Array<T> arr) { return { .arr = arr }; }
+ReverseIterator<T> reverse(Array<T> arr) { return { arr.data, arr.count }; }
+
+template<typename T, i32 N>
+ArrayIterator<T> iterator(T (&arr)[N]) { return { arr, N }; }
+
+template<typename T, i32 N>
+ReverseIterator<T> reverse(T (&arr)[N]) { return { arr, N }; }
 
 // -- array procedures
 template<typename T>
