@@ -58,13 +58,17 @@ struct FixedArray : Array<T> {
     using capacity = std::integral_constant<i32, N>;
     alignas(T) u8 storage[sizeof(T)*N];
 
-    FixedArray() { this->data = (T*)storage; }
+    FixedArray()
+    {
+        this->data = (T*)storage;
+        this->count = 0;
+    }
 
     FixedArray(const FixedArray<T, N> &other)
     {
         this->data  = (T*)this->storage;
         this->count = MIN(N, other.count);
-        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
     }
 
     template<i32 M>
@@ -72,14 +76,14 @@ struct FixedArray : Array<T> {
     {
         this->data  = (T*)this->storage;
         this->count = MIN(N, other.count);
-        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
     }
 
     FixedArray(const Array<T> &other)
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
-        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
     }
 
     FixedArray(std::initializer_list<T> list)
@@ -87,14 +91,14 @@ struct FixedArray : Array<T> {
         this->data = (T*)this->storage;
         this->count = MIN(N, list.size());
         auto *src = list.begin();
-        for (i32 i = 0; i < this->count; i++) this->data[i] = src[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(src[i]);
     }
 
     FixedArray<T, N>& operator=(const FixedArray<T, N> &other)
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
-        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
         return *this;
     }
 
@@ -103,7 +107,7 @@ struct FixedArray : Array<T> {
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
-        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
         return *this;
     }
 
@@ -111,7 +115,7 @@ struct FixedArray : Array<T> {
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
-        for (i32 i = 0; i < this->count; i++) this->data[i] = other.data[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
         return *this;
     }
 
@@ -121,7 +125,7 @@ struct FixedArray : Array<T> {
         this->count = MIN(N, list.size());
 
         auto *src = list.begin();
-        for (i32 i = 0; i < this->count; i++) this->data[i] = src[i];
+        for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(src[i]);
         return *this;
     }
 };
@@ -265,8 +269,9 @@ void array_create(Array<T> *arr, i32 count, Allocator mem)
 {
     T *nptr = ALLOC_ARR(mem, T, count);
     if (arr->count > 0) {
-        for (i32 i = 0; i < arr->count; i++) nptr[i] = arr->data[i];
+        for (i32 i = 0; i < arr->count; i++) new (&nptr[i]) T(arr->data[i]);
     }
+    for (i32 i = arr->count; i < count; i++) new (&nptr[i]) T{};
 
     arr->data = nptr;
     arr->count = count;
@@ -449,7 +454,7 @@ void array_grow(DynamicArray<T> *arr, i32 additional_elements)
     T *nptr = EXTEND_ARR(arr->alloc, T, arr->data, old_capacity, arr->capacity);
 
     if (nptr != arr->data) {
-        for (i32 i = 0; i < arr->count; i++) nptr[i] = arr->data[i];
+        for (i32 i = 0; i < arr->count; i++) new (&nptr[i]) T(arr->data[i]);
         FREE(arr->alloc, arr->data);
     }
 
@@ -468,6 +473,7 @@ void array_resize(DynamicArray<T> *arr, i32 count)
 {
     if (!arr->alloc.proc) arr->alloc = mem_dynamic;
     array_reserve(arr, count);
+    for (i32 i = arr->count; i < count; i++) new (&arr->data[i]) T();
     arr->count = count;
 }
 
@@ -478,12 +484,12 @@ void array_set_grow(DynamicArray<T> *arr, i32 index, T element)
         array_grow(arr, index-arr->capacity+1);
 
         for (i32 i = arr->count; i < index; i++) {
-            arr->data[i] = {};
+            new (&arr->data[i]) T{};
         }
     }
 
     arr->count = MAX(arr->count, index+1);
-    arr->at(index) = element;
+    new (&arr->data[index]) T(element);
 }
 
 template<typename T>
@@ -538,7 +544,7 @@ template<typename T>
 i32 array_add(DynamicArray<T> *arr, const T& e)
 {
     array_grow(arr, 1);
-    arr->data[arr->count] = e;
+    new (&arr->data[arr->count]) T(e);
     return arr->count++;
 }
 
@@ -553,7 +559,7 @@ template<typename T>
 i32 array_add(DynamicArray<T> *arr, const T *es, i32 count)
 {
     array_grow(arr, count);
-    memcpy(&arr->data[arr->count], es, count*sizeof *es);
+    for (i32 i = 0; i < count; i++) new (&arr->data[arr->count+i]) T(es[i]);
     i32 start_index = arr->count;
     arr->count += count;
     return start_index;
@@ -563,7 +569,7 @@ template<typename T>
 i32 array_add(DynamicArray<T> *arr, const Array<T> es)
 {
     array_grow(arr, es.count);
-    memcpy(&arr->data[arr->count], es.data, es.count*sizeof(T));
+    for (i32 i = 0; i < es.count; i++) new (&arr->data[arr->count+i]) T(es.data[i]);
     i32 start_index = arr->count;
     arr->count += es.count;
     return start_index;
@@ -580,7 +586,7 @@ template<typename T>
 void array_copy(DynamicArray<T> *dst, const Array<T> src)
 {
     array_resize(dst, src.count);
-    memcpy(dst->data, src.data, src.count*sizeof(T));
+    for (i32 i = 0; i < src.count; i++) new (&dst->data[dst->count+i]) T(src.data[i]);
 }
 
 template<typename T>
@@ -590,7 +596,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T& e)
     array_grow(arr, 1);
 
     for (i32 i = arr->count; i > insert_at; i--) arr->data[i] = arr->data[i-1];
-    arr->data[insert_at] = e;
+    new (&arr->data[insert_at]) T(e);
     arr->count++;
     return insert_at;
 }
@@ -609,7 +615,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const T *es, i32 count)
     }
 
     for (i32 i = 0; i < count; i++)
-        arr->data[insert_at+i] = es[i];
+        new (&arr->data[insert_at+i]) T(es[i]);
 
     arr->count += count;
     return insert_at;
@@ -622,7 +628,7 @@ i32 array_insert(DynamicArray<T> *arr, i32 insert_at, const Array<T> es)
     array_grow(arr, es.count);
 
     for (i32 i = arr->count+es.count-1; i > insert_at; i--) arr->data[i] = arr->data[i-1];
-    for (i32 i = 0; i < es.count; i++) arr->data[insert_at+i] = es[i];
+    for (i32 i = 0; i < es.count; i++) new (&arr->data[insert_at+i]) T(es[i]);
     arr->count += es.count;
     return insert_at;
 }
@@ -683,7 +689,7 @@ template<typename T, i32 N>
 i32 array_add(FixedArray<T, N> *arr, T e)
 {
     PANIC_IF(arr->count >= N, "FixedArray overflow");
-    arr->data[arr->count] = e;
+    new (&arr->data[arr->count]) T(e);
     return arr->count++;
 }
 
@@ -691,7 +697,7 @@ template<typename T, i32 N>
 i32 array_add(FixedArray<T, N> *arr, T *es, i32 count)
 {
     PANIC_IF(arr->count+count > N, "FixedArray overflow");
-    memcpy(&arr->data[arr->count], es, count*sizeof *es);
+    for (i32 i = 0; i < count; i++) new (&arr->data[arr->count+i]) T(es[i]);
     arr->count += count;
     return arr->count;
 }
@@ -967,6 +973,7 @@ static TEST_PROC(fixed_array__copy_operations)
         ASSERT(copied[0] == 10);
     }
 
+
     {
         FixedArray<int, 5> original = {1, 2, 3};
         ASSERT(original.data == (int*)original.storage);
@@ -985,6 +992,81 @@ static TEST_PROC(fixed_array__copy_operations)
         ASSERT(assigned[0] == 10);
     }
 }
+
+#ifdef DO_TESTS
+static TEST_PROC(fixed_array__copy_invokes_copy_constructor_for_each_element)
+{
+    {
+        TestType::reset_counters();
+
+        FixedArray<TestType, 5> original;
+        array_add(&original, TestType(1));
+        array_add(&original, TestType(2));
+        array_add(&original, TestType(3));
+
+        i32 init_copy_constructor_calls = TestType::copy_constructor_calls;
+        i32 init_move_constructor_calls = TestType::move_constructor_calls;
+        i32 init_copy_assignment_calls = TestType::copy_assignment_calls;
+        i32 init_move_assignment_calls = TestType::move_assignment_calls;
+
+        FixedArray<TestType, 5> copied(original);
+
+        ASSERT(copied.count == 3);
+        ASSERT(TestType::copy_constructor_calls == init_copy_constructor_calls + 3);
+        ASSERT(TestType::move_constructor_calls == init_move_constructor_calls);
+        LOG_INFO("copy assignment calls: %d", TestType::copy_assignment_calls);
+        ASSERT(TestType::copy_assignment_calls == init_copy_assignment_calls);
+        ASSERT(TestType::move_assignment_calls == init_move_assignment_calls);
+        ASSERT(copied.data == (TestType*)copied.storage);
+
+        copied[0].value = 10;
+        ASSERT(original[0].value == 1);
+        ASSERT(copied[0].value == 10);
+    }
+
+    {
+        TestType::reset_counters();
+
+        FixedArray<TestType, 5> empty;
+        FixedArray<TestType, 5> copied(empty);
+
+        ASSERT(copied.count == 0);
+        ASSERT(copied.data == (TestType*)copied.storage);
+        ASSERT(TestType::constructor_calls == 0);
+        ASSERT(TestType::destructor_calls == 0);
+        ASSERT(TestType::copy_constructor_calls == 0);
+        ASSERT(TestType::move_constructor_calls == 0);
+        ASSERT(TestType::copy_assignment_calls == 0);
+        ASSERT(TestType::move_assignment_calls == 0);
+    }
+
+    {
+        TestType::reset_counters();
+
+        FixedArray<TestType, 5> original;
+        array_add(&original, TestType(1));
+        array_add(&original, TestType(2));
+        array_add(&original, TestType(3));
+
+        FixedArray<TestType, 5> assigned;
+        array_add(&assigned, TestType(4));
+
+        int pre_assign_constructors = TestType::constructor_calls;
+        int pre_assign_destructors = TestType::destructor_calls;
+
+        assigned = original;
+
+        ASSERT(assigned.count == 3);
+        ASSERT(assigned.data == (TestType*)assigned.storage);
+
+
+        assigned[0].value = 10;
+        ASSERT(original[0].value == 1);
+        ASSERT(assigned[0].value == 10);
+    }
+}
+#endif
+
 
 static TEST_PROC(fixed_array__size_limits)
 {

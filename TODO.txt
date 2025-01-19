@@ -9,3 +9,5 @@
     - currently sends event on trigger, with bugs
 - [ ] expand ASSERT with ASSERT_EQi/NEQf/et al. for a basic way to print the values of the expression
 - [ ] fix sorting in test results, push to tail instead of push to head
+- [ ] [array] move constructor overloads for array_add
+- [ ] [array] move exchange for array_insert procedures that shifts existing elements

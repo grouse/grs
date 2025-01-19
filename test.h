@@ -10,6 +10,7 @@
 
 #ifdef TEST_H_IMPL
 #undef TEST_H_IMPL
+#define DO_TESTS
 
 #include <setjmp.h>
 #include <signal.h>
@@ -39,6 +40,73 @@ struct TestSuite {
     int child_count;
 
     TestResult *result = nullptr;
+};
+
+//#define TEST_TYPE_LOG(...) LOG_INFO(__VA_ARGS__)
+
+#ifndef TEST_TYPE_LOG
+#define TEST_TYPE_LOG(...)
+#endif
+
+struct TestType {
+    static inline int constructor_calls = 0;
+    static inline int destructor_calls = 0;
+    static inline int copy_constructor_calls = 0;
+    static inline int move_constructor_calls = 0;
+    static inline int copy_assignment_calls = 0;
+    static inline int move_assignment_calls = 0;
+
+    int value;
+
+    TestType(int v = 0) : value(v)
+    {
+        constructor_calls++;
+        TEST_TYPE_LOG("constructor: %d", value);
+    }
+
+    ~TestType()
+    {
+        destructor_calls++;
+        TEST_TYPE_LOG("destructor: %d", value);
+    }
+
+    TestType(const TestType& other) : value(other.value)
+    {
+        copy_constructor_calls++;
+        TEST_TYPE_LOG("copy_constructor: %d", value);
+    }
+    TestType(TestType&& other) : value(other.value)
+    {
+        move_constructor_calls++;
+        TEST_TYPE_LOG("move_constructor: %d", value);
+    }
+
+    TestType& operator=(const TestType& other) {
+        if (this != &other) {
+            value = other.value;
+            copy_assignment_calls++;
+            TEST_TYPE_LOG("copy_assignment: %d", value);
+        }
+        return *this;
+    }
+
+    TestType& operator=(TestType&& other) {
+        if (this != &other) {
+            value = other.value;
+            move_assignment_calls++;
+            TEST_TYPE_LOG("move_assignment: %d", value);
+        }
+        return *this;
+    }
+
+    static void reset_counters() {
+        constructor_calls = 0;
+        destructor_calls = 0;
+        copy_constructor_calls = 0;
+        move_constructor_calls = 0;
+        copy_assignment_calls = 0;
+        move_assignment_calls = 0;
+    }
 };
 
 extern TestSuite *test_current;

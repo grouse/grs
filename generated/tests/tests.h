@@ -10,6 +10,7 @@ static void dynamic_array__reserve_test();
 static void dynamic_array__resize_test();
 static void fixed_array__basic_construction_test();
 static void fixed_array__copy_operations_test();
+static void fixed_array__copy_invokes_copy_constructor_for_each_element_test();
 static void fixed_array__size_limits_test();
 static void fixed_array__data_pointer_integrity_test();
 static void array__pop_test();
@@ -88,6 +89,7 @@ TestSuite TESTS_dynamic_array_tests[] = {
 TestSuite TESTS_fixed_array_tests[] = {
 	{ "basic_construction_test", fixed_array__basic_construction_test },
 	{ "copy_operations_test", fixed_array__copy_operations_test },
+	{ "copy_invokes_copy_constructor_for_each_element_test", fixed_array__copy_invokes_copy_constructor_for_each_element_test },
 	{ "size_limits_test", fixed_array__size_limits_test },
 	{ "data_pointer_integrity_test", fixed_array__data_pointer_integrity_test },
 };
