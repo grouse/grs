@@ -83,10 +83,10 @@ void map_reset(DynamicMap<String, V> *map, Allocator mem)
 }
 
 template<typename K, typename V>
-void map_set(DynamicMap<K, V> *map, K key, V value);
+void map_set(DynamicMap<K, V> *map, const K &key, const V &value);
 
 template<typename K, typename V>
-i32 find_slot(DynamicMap<K, V> *map, K key)
+i32 find_slot(DynamicMap<K, V> *map, const K &key)
 {
     // TODO(jesper): round robin to reduce the upper bound of the probing
     if (map->capacity == 0) return -1;
@@ -124,7 +124,7 @@ void grow_map(DynamicMap<K, V> *map, i32 new_capacity)
 }
 
 template<typename K, typename V>
-i32 set_slot(DynamicMap<K, V> *map, i32 slot, K key, V value)
+i32 set_slot(DynamicMap<K, V> *map, i32 slot, const K &key, const V &value)
 {
     if (map->count >= map->capacity*DYNAMIC_MAP_LOAD_FACTOR) {
         i32 new_capacity = map->capacity == 0 ? DYNAMIC_MAP_INNITIAL_CAPACITY : map->capacity*2;
@@ -134,14 +134,14 @@ i32 set_slot(DynamicMap<K, V> *map, i32 slot, K key, V value)
         ASSERT(slot >= 0);
     }
 
-    map->slots[slot] = { .key = key, .value = value, .occupied = true };
+    new (&map->slots[slot]) DynamicMap<K, V>::Pair{ .key = key, .value = value, .occupied = true };
     map->count++;
 
     return slot;
 }
 
 template<typename K, typename V, i32 n>
-i32 set_slot(DynamicMap<K, V[n]> *map, i32 slot, K key, V value[n])
+i32 set_slot(DynamicMap<K, V[n]> *map, i32 slot, const K &key, const V (&value)[n])
 {
     if (map->count >= map->capacity*DYNAMIC_MAP_LOAD_FACTOR) {
         i32 new_capacity = map->capacity == 0 ? DYNAMIC_MAP_INNITIAL_CAPACITY : map->capacity*2;
@@ -152,14 +152,14 @@ i32 set_slot(DynamicMap<K, V[n]> *map, i32 slot, K key, V value[n])
     }
 
     map->slots[slot] = { .key = key, .occupied = true };
-    for (i32 i = 0; i < n; i++) map->slots[slot].value[i] = value[i];
+    for (i32 i = 0; i < n; i++) new (&map->slots[slot].value[i]) V{ value[i] };
     map->count++;
 
     return slot;
 }
 
 template<typename K, typename V>
-void map_set(DynamicMap<K, V> *map, K key, V value)
+void map_set(DynamicMap<K, V> *map, const K &key, const V &value)
 {
     i32 slot = find_slot(map, key);
     if (slot >= 0 && map->slots[slot].occupied) {
@@ -171,7 +171,7 @@ void map_set(DynamicMap<K, V> *map, K key, V value)
 }
 
 template<typename K, typename V, i32 n>
-void map_set(DynamicMap<K, V[n]> *map, K key, V value[n])
+void map_set(DynamicMap<K, V[n]> *map, const K &key, const V (&value)[n])
 {
     i32 slot = find_slot(map, key);
     if (slot >= 0 && map->slots[slot].occupied) {
@@ -183,7 +183,7 @@ void map_set(DynamicMap<K, V[n]> *map, K key, V value[n])
 }
 
 template<typename K, typename V>
-void map_remove(DynamicMap<K, V> *map, K key)
+void map_remove(DynamicMap<K, V> *map, const K &key)
 {
     i32 slot = find_slot(map, key);
     if (slot == -1 || !map->slots[slot].occupied) return;
@@ -192,7 +192,7 @@ void map_remove(DynamicMap<K, V> *map, K key)
 }
 
 template<typename K, typename V>
-V* map_find(DynamicMap<K, V> *map, K key)
+V* map_find(DynamicMap<K, V> *map, const K &key)
 {
     i32 i = find_slot(map, key);
     if (i == -1 || !map->slots[i].occupied) return nullptr;
@@ -200,7 +200,7 @@ V* map_find(DynamicMap<K, V> *map, K key)
 }
 
 template<typename K, typename V, i32 n>
-V* map_find(DynamicMap<K, V[n]> *map, K key)
+V* map_find(DynamicMap<K, V[n]> *map, const K &key)
 {
     i32 i = find_slot(map, key);
     if (i == -1 || !map->slots[i].occupied) return nullptr;
@@ -208,7 +208,7 @@ V* map_find(DynamicMap<K, V[n]> *map, K key)
 }
 
 template<typename K, typename V>
-V* map_find_emplace(DynamicMap<K, V> *map, K key)
+V* map_find_emplace(DynamicMap<K, V> *map, const K &key)
 {
     i32 slot = find_slot(map, key);
 
@@ -220,7 +220,7 @@ V* map_find_emplace(DynamicMap<K, V> *map, K key)
 }
 
 template<typename K, typename V, i32 n>
-V* map_find_emplace(DynamicMap<K, V[n]> *map, K key)
+V* map_find_emplace(DynamicMap<K, V[n]> *map, const K &key)
 {
     i32 slot = find_slot(map, key);
 
@@ -233,7 +233,7 @@ V* map_find_emplace(DynamicMap<K, V[n]> *map, K key)
 }
 
 template<typename K, typename V>
-V* map_find_emplace(DynamicMap<K, V> *map, K key, V emp_value)
+V* map_find_emplace(DynamicMap<K, V> *map, const K &key, const V &emp_value)
 {
     i32 slot = find_slot(map, key);
 
@@ -258,7 +258,7 @@ V* map_find(DynamicMap<String, V> *map, String key)
 }
 
 template<typename V>
-void map_find(DynamicMap<String, V> *map, String key, V value)
+void map_find(DynamicMap<String, V> *map, String key, const V &value)
 {
     i32 i = find_slot(map, key);
     if (i >= 0 && map->slots[i].occupied) {
