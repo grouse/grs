@@ -11,3 +11,12 @@
 - [ ] fix sorting in test results, push to tail instead of push to head
 - [ ] [array] move constructor overloads for array_add
 - [ ] [array] move exchange for array_insert procedures that shifts existing elements
+- [ ] [assets] bring over asset APIs
+- [ ] [gui] bring over GUI APIs
+    - aya is furthest along, with some minor fixes and changes in mimir
+    - decide whether to keep or remove the dependency on font APIs
+- [ ] [font] bring over font APIs
+    - need to decide whether to have a dependency on gfx for creation/updating of the font atlas texture data, or if that should be done in a more separated way
+- [ ] [gfx] bring over core gfx APIs
+    - rely heavily on per-game management of actual complex rendering
+    - core API for management of resources, shaders, materials, etc. Aya is furthest along
