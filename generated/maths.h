@@ -74,6 +74,8 @@ extern Matrix3 mat3_inverse(Matrix3 M);
 extern f32 mat3_determinant(Matrix3 M);
 extern Matrix4 mat4_identity();
 extern Matrix4 mat4_transform_mat3(const Matrix3 & m0);
+extern Matrix4 mat4_rows(Vector4 r0, Vector4 r1, Vector4 r2, Vector4 r3);
+extern Matrix4 mat4_mat3_extend(Matrix3 m);
 extern Matrix4 mat4_rotate_quat(Quaternion q);
 extern Matrix4 mat4_translate(Vector3 v);
 extern Matrix4 mat4_scale(Vector3 v);

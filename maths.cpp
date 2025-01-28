@@ -934,6 +934,26 @@ Matrix4 mat4_transform_mat3(const Matrix3 &m0) EXPORT
     return M;
 }
 
+Matrix4 mat4_rows(Vector4 r0, Vector4 r1, Vector4 r2, Vector4 r3) EXPORT
+{
+    return { .columns = {
+        { r0.x, r1.x, r2.x, r3.x },
+        { r0.y, r1.y, r2.y, r3.y },
+        { r0.z, r1.z, r2.z, r3.z },
+        { r0.w, r1.w, r2.w, r3.w },
+    }};
+}
+
+Matrix4 mat4_mat3_extend(Matrix3 m) EXPORT
+{
+    return { .columns = {
+        { .xyz = m[0], 0 },
+        { .xyz = m[1], 0 },
+        { .xyz = m[2], 0 },
+        { 0, 0, 0,     1 }
+    }};
+}
+
 Matrix4 mat4_rotate_quat(Quaternion q) EXPORT
 {
     f32 xx = q.x*q.x;
