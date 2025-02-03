@@ -333,10 +333,14 @@ struct IChord {
     i32 length, at;
 };
 
-#define IKEY(...)   { .key = { .type = EDGE_DOWN, __VA_ARGS__ } }
+#define IAXIS(...)  { .axis  = { __VA_ARGS__ } }
+
+#define IKEY(...)   { .key   = { .type = EDGE_DOWN, __VA_ARGS__ } }
 #define IMOUSE(...) { .mouse = { .type = AXIS_2D, __VA_ARGS__ } }
 #define ICHORD(...) { .chord = { .seq = (IUnion[]) { __VA_ARGS__, DEVICE_INVALID }} }
-#define IKAXIS(...) { .key = { .type = AXIS, __VA_ARGS__ } }
+#define IKAXIS(...) { .key   = { .type = AXIS, __VA_ARGS__ } }
+#define IPAD(...)   { .pad   = { .type = EDGE_DOWN, __VA_ARGS__ } }
+
 
 struct InputDesc {
     InputId id;
