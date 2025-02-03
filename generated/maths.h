@@ -93,6 +93,7 @@ extern Matrix4 mat4_transpose(Matrix4 m0);
 extern Matrix4 mat4_inverse(Matrix4 M);
 extern Matrix4 mat34_inverse(Matrix4 M);
 extern Matrix4 operator*(Matrix4 A, Matrix4 B);
+extern Matrix4 operator*=(Matrix4 & A, Matrix4 B);
 extern Matrix4 operator*(Matrix4 M, f32 s);
 extern bool ray_intersect_capsule(Vector3 ray_o, Vector3 ray_d, Vector3 cap_p0, Vector3 cap_p1, f32 cap_r, f32 *tr);
 extern bool ray_intersect_triangle(Vector3 ray_o, Vector3 ray_d, Vector3 p0, Vector3 p1, Vector3 p2, f32 *tr);
