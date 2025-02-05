@@ -68,6 +68,7 @@ struct FixedArray : Array<T> {
     {
         this->data  = (T*)this->storage;
         this->count = MIN(N, other.count);
+        if (this->data == other.data) return;
         for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
     }
 
@@ -76,6 +77,7 @@ struct FixedArray : Array<T> {
     {
         this->data  = (T*)this->storage;
         this->count = MIN(N, other.count);
+        if (this->data == other.data) return;
         for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
     }
 
@@ -83,6 +85,7 @@ struct FixedArray : Array<T> {
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
+        if (this->data == other.data) return;
         for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
     }
 
@@ -98,6 +101,7 @@ struct FixedArray : Array<T> {
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
+        if (this->data == other.data) return *this;
         for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
         return *this;
     }
@@ -107,6 +111,7 @@ struct FixedArray : Array<T> {
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
+        if (this->data == other.data) return *this;
         for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
         return *this;
     }
@@ -115,6 +120,7 @@ struct FixedArray : Array<T> {
     {
         this->data = (T*)this->storage;
         this->count = MIN(N, other.count);
+        if (this->data == other.data) return this;
         for (i32 i = 0; i < this->count; i++) new (&this->data[i]) T(other.data[i]);
         return *this;
     }
@@ -1004,20 +1010,21 @@ static TEST_PROC(fixed_array__copy_invokes_copy_constructor_for_each_element)
         array_add(&original, TestType(2));
         array_add(&original, TestType(3));
 
-        i32 init_copy_constructor_calls = TestType::copy_constructor_calls;
-        i32 init_move_constructor_calls = TestType::move_constructor_calls;
-        i32 init_copy_assignment_calls = TestType::copy_assignment_calls;
-        i32 init_move_assignment_calls = TestType::move_assignment_calls;
+        ASSERT(TestType::copy_constructor_calls == 3);
+        ASSERT(TestType::move_constructor_calls == 0);
+        ASSERT(TestType::copy_assignment_calls == 0);
+        ASSERT(TestType::move_assignment_calls == 0);
 
         FixedArray<TestType, 5> copied(original);
 
         ASSERT(copied.count == 3);
-        ASSERT(TestType::copy_constructor_calls == init_copy_constructor_calls + 3);
-        ASSERT(TestType::move_constructor_calls == init_move_constructor_calls);
-        LOG_INFO("copy assignment calls: %d", TestType::copy_assignment_calls);
-        ASSERT(TestType::copy_assignment_calls == init_copy_assignment_calls);
-        ASSERT(TestType::move_assignment_calls == init_move_assignment_calls);
         ASSERT(copied.data == (TestType*)copied.storage);
+        ASSERT(copied.data != original.data);
+
+        ASSERT(TestType::copy_constructor_calls == 6);
+        ASSERT(TestType::move_constructor_calls == 0);
+        ASSERT(TestType::copy_assignment_calls == 0);
+        ASSERT(TestType::move_assignment_calls == 0);
 
         copied[0].value = 10;
         ASSERT(original[0].value == 1);
@@ -1051,9 +1058,6 @@ static TEST_PROC(fixed_array__copy_invokes_copy_constructor_for_each_element)
         FixedArray<TestType, 5> assigned;
         array_add(&assigned, TestType(4));
 
-        int pre_assign_constructors = TestType::constructor_calls;
-        int pre_assign_destructors = TestType::destructor_calls;
-
         assigned = original;
 
         ASSERT(assigned.count == 3);
@@ -1064,6 +1068,32 @@ static TEST_PROC(fixed_array__copy_invokes_copy_constructor_for_each_element)
         ASSERT(original[0].value == 1);
         ASSERT(assigned[0].value == 10);
     }
+}
+
+TEST_PROC(fixed_array__self_assign_avoids_copies)
+{
+    TestType::reset_counters();
+
+    FixedArray<TestType, 5> original;
+    array_add(&original, TestType(1));
+    array_add(&original, TestType(2));
+    array_add(&original, TestType(3));
+
+    i32 init_copy_constructor_calls = TestType::copy_constructor_calls;
+    i32 init_move_constructor_calls = TestType::move_constructor_calls;
+    i32 init_copy_assignment_calls = TestType::copy_assignment_calls;
+    i32 init_move_assignment_calls = TestType::move_assignment_calls;
+
+    auto *other = &original;
+    original = *other;
+
+    ASSERT(other->data == original.data);
+    ASSERT(other->count == original.count);
+
+    ASSERT(TestType::copy_constructor_calls == init_copy_constructor_calls);
+    ASSERT(TestType::move_constructor_calls == init_move_constructor_calls);
+    ASSERT(TestType::copy_assignment_calls == init_copy_assignment_calls);
+    ASSERT(TestType::move_assignment_calls == init_move_assignment_calls);
 }
 #endif
 
