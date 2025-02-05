@@ -1,7 +1,7 @@
 #ifndef TEST_H
 #define TEST_H
 
-#define TEST_PROC(name, ...) void CAT(name, _test)() __attribute__((annotate("test"))) __VA_ARGS__
+#define TEST_PROC(name, ...) void name() __attribute__((annotate("test"))) __VA_ARGS__
 
 // no-op EXPECT_FAIL macros to avoid compiling unnecessary code when included in translation units outside the test-suite
 #define EXPECT_FAIL(...)
@@ -21,6 +21,7 @@
 #include <new>
 
 #include "core.h"
+#include "hash.h"
 
 typedef void (*test_proc_t)();
 
@@ -99,6 +100,8 @@ struct TestType {
         return *this;
     }
 
+    bool operator==(const TestType &other) { return value == other.value; }
+
     static void reset_counters() {
         constructor_calls = 0;
         destructor_calls = 0;
@@ -108,6 +111,12 @@ struct TestType {
         move_assignment_calls = 0;
     }
 };
+
+
+inline u32 hash32(const TestType &value, u32 seed = 0xdeadbeef)
+{
+    return hash32(value.value, seed);
+}
 
 extern TestSuite *test_current;
 extern int test_expect_fail;

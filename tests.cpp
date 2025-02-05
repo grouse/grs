@@ -6,8 +6,10 @@
 #include "string.cpp"
 #include "memory.cpp"
 #include "thread.cpp"
+#include "map.h"
 
 #include "generated/tests/tests.h"
+#include "MurmurHash/MurmurHash3.cpp"
 
 
 int main()

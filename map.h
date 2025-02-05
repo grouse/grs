@@ -72,9 +72,8 @@ void map_reset(DynamicMap<String, V> *map, Allocator mem)
     PANIC_IF(map->alloc != mem, "mismatching allocators");
 
     for (i32 i = 0; i  < map->capacity; i++) {
-        if (map->slots[i].occupied) {
-            FREE(map->alloc, map->slots[i].key.data);
-        }
+        if (!map->slots[i].occupied) continue;
+        FREE(map->alloc, map->slots[i].key.data);
     }
 
     map->slots = nullptr;
@@ -115,9 +114,8 @@ void grow_map(DynamicMap<K, V> *map, i32 new_capacity)
     map->count = 0;
 
     for (i32 i = 0; i < old_table.capacity; i++) {
-        if (old_table.slots[i].occupied) {
-            map_set(map, old_table.slots[i].key, old_table.slots[i].value);
-        }
+        if (!old_table.slots[i].occupied) continue;
+        map_set(map, old_table.slots[i].key, old_table.slots[i].value);
     }
 
     if (old_table.slots) FREE(map->alloc, old_table.slots);
@@ -134,7 +132,9 @@ i32 set_slot(DynamicMap<K, V> *map, i32 slot, const K &key, const V &value)
         ASSERT(slot >= 0);
     }
 
-    new (&map->slots[slot]) DynamicMap<K, V>::Pair{ .key = key, .value = value, .occupied = true };
+    map->slots[slot].occupied = true;
+    new (&map->slots[slot].value) V(value);
+    new (&map->slots[slot].key) K(key);
     map->count++;
 
     return slot;
@@ -151,8 +151,9 @@ i32 set_slot(DynamicMap<K, V[n]> *map, i32 slot, const K &key, const V (&value)[
         ASSERT(slot >= 0);
     }
 
-    map->slots[slot] = { .key = key, .occupied = true };
-    for (i32 i = 0; i < n; i++) new (&map->slots[slot].value[i]) V{ value[i] };
+    map->slots[slot].occupied = true;
+    new (&map->slots[slot].key) K(key);
+    for (i32 i = 0; i < n; i++) new (&map->slots[slot].value[i]) V(value[i]);
     map->count++;
 
     return slot;
@@ -257,25 +258,40 @@ V* map_find(DynamicMap<String, V> *map, String key)
     return &map->slots[i].value;
 }
 
-template<typename V>
-void map_find(DynamicMap<String, V> *map, String key, const V &value)
+// -- test suite
+#include "test.h"
+
+#ifdef DO_TESTS
+static TEST_PROC(dynamic_map__set_invokes_copy_constructor_for_key_and_value)
 {
-    i32 i = find_slot(map, key);
-    if (i >= 0 && map->slots[i].occupied) {
-        map->slots[i].value = value;
-        return;
-    }
+    TestType::reset_counters();
+    DynamicMap<TestType, TestType> map{};
 
-    if (map->count >= map->capacity*DYNAMIC_MAP_LOAD_FACTOR) {
-        i32 new_capacity = map->capacity == 0 ? DYNAMIC_MAP_INNITIAL_CAPACITY : map->capacity*2;
-        grow_map(map, new_capacity);
-    }
+    map_set(&map, { 1 }, { 1 });
+    map_set(&map, { 2 }, { 2 });
+    map_set(&map, { 3 }, { 3 });
 
-    i = find_slot(map, key);
-    ASSERT(i >= 0);
-
-    map->slots[i] = { .key = duplicate_string(key, map->alloc), .value = value, .occupied = true };
-    map->count++;
+    ASSERT(TestType::copy_constructor_calls == 6);
+    ASSERT(TestType::move_constructor_calls == 0);
+    ASSERT(TestType::copy_assignment_calls == 0);
+    ASSERT(TestType::move_assignment_calls == 0);
 }
+
+static TEST_PROC(dynamic_map__set_of_existing_key_invokes_copy_assign_for_value_and_nothing_for_key)
+{
+    TestType::reset_counters();
+    DynamicMap<TestType, TestType> map{};
+
+    map_set(&map, { 1 }, { 1 });
+    map_set(&map, { 2 }, { 2 });
+    map_set(&map, { 3 }, { 3 });
+    map_set(&map, { 2 }, { 1 });
+
+    ASSERT(TestType::copy_constructor_calls == 6);
+    ASSERT(TestType::move_constructor_calls == 0);
+    ASSERT(TestType::copy_assignment_calls == 1);
+    ASSERT(TestType::move_assignment_calls == 0);
+}
+#endif // DO-TESTS
 
 #endif // MAP_H
