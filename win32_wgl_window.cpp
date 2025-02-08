@@ -42,19 +42,21 @@ AppWindow* create_window(WindowCreateDesc desc)
     HDC dummy_hdc = GetDC(dummy_hwnd);
     PANIC_IF(dummy_hdc == NULL, "unable to get dc from dummy window");
 
-    PIXELFORMATDESCRIPTOR pfd{
-        .nSize = sizeof pfd,
-        .nVersion = 1,
-        .dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-        .iPixelType = PFD_TYPE_RGBA,
-        .cColorBits = 32,
-        .cDepthBits = 24,
-        .cStencilBits = 8,
-        .iLayerType = PFD_MAIN_PLANE,
-    };
+    {
+        PIXELFORMATDESCRIPTOR pfd{
+            .nSize = sizeof pfd,
+            .nVersion = 1,
+            .dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+            .iPixelType = PFD_TYPE_RGBA,
+            .cColorBits = 32,
+            .cDepthBits = 24,
+            .cStencilBits = 8,
+            .iLayerType = PFD_MAIN_PLANE,
+        };
 
-    int format = ChoosePixelFormat(dummy_hdc, &pfd);
-    if (!SetPixelFormat(dummy_hdc, format, &pfd)) PANIC("unable to set pixel format: (%d) %s", WIN32_ERR_STR);
+        int format = ChoosePixelFormat(dummy_hdc, &pfd);
+        if (!SetPixelFormat(dummy_hdc, format, &pfd)) PANIC("unable to set pixel format: (%d) %s", WIN32_ERR_STR);
+    }
 
     HGLRC dummy_glrc = wglCreateContext(dummy_hdc);
     PANIC_IF(dummy_glrc == NULL, "unable to create gl context: (%d) %s", WIN32_ERR_STR);
@@ -64,6 +66,9 @@ AppWindow* create_window(WindowCreateDesc desc)
     HMODULE gl_dll = LoadLibraryA("opengl32.dll");
     LOAD_GL_ARB_PROC(wglChoosePixelFormat, gl_dll);
     LOAD_GL_ARB_PROC(wglCreateContextAttribs, gl_dll);
+
+    PANIC_IF(!wglChoosePixelFormat, "wglChoosePixelFormat proc not loaded, and no fallback available");
+    PANIC_IF(!wglCreateContextAttribs, "wglCreateContextAttribs proc not loaded, and no fallback available");
 
     wnd->hwnd = CreateWindowExA(
         0,
@@ -79,8 +84,6 @@ AppWindow* create_window(WindowCreateDesc desc)
 
     wnd->hdc = GetDC(wnd->hwnd);
     PANIC_IF(wnd->hdc == NULL, "unable to get dc from window");
-
-    PANIC_IF(!wglChoosePixelFormat, "wglChoosePixelFormat proc not loaded, and no fallback available");
 
     {
         i32 format_attribs[] = {
@@ -98,13 +101,12 @@ AppWindow* create_window(WindowCreateDesc desc)
         u32 formats_count;
         i32 format;
         wglChoosePixelFormat(wnd->hdc, format_attribs, NULL, 1, &format, &formats_count);
+
+        PIXELFORMATDESCRIPTOR pfd = {};
+        DescribePixelFormat(wnd->hdc, format, sizeof pfd, &pfd);
+        SetPixelFormat(wnd->hdc, format, &pfd);
     }
 
-    pfd = {};
-    DescribePixelFormat(wnd->hdc, format, sizeof pfd, &pfd);
-    SetPixelFormat(wnd->hdc, format, &pfd);
-
-    PANIC_IF(!wglCreateContextAttribs, "wglCreateContextAttribs proc not loaded, and no fallback available");
     {
         i32 context_attribs[] = {
             WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
