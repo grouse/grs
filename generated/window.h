@@ -22,5 +22,6 @@ extern bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id = INPUT_M
 extern bool get_input_edge(InputId id, InputMapId map_id = INPUT_MAP_ANY);
 extern bool get_input_held(InputId id, InputMapId map_id);
 extern bool get_input_mouse(MouseButton btn, InputType type = EDGE_DOWN);
+extern u32 hash32(const InputDesc & desc, u32 seed = MURMUR3_SEED);
 
 #endif // WINDOW_PUBLIC_H

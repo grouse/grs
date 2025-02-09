@@ -3,18 +3,20 @@
 #include "array.h"
 #include "map.h"
 #include "string.h"
+#include "hash.h"
 
 #include "generated/internal/window.h"
 
 struct InputMap {
     String name;
 
-    DynamicArray<InputDesc> by_device[ID_MAX][IT_MAX];
-    DynamicArray<InputDesc> by_type[IT_MAX][ID_MAX];
+    DynamicArray<InputDesc> by_device[IDEVICE_MAX][ITYPE_MAX];
+    DynamicArray<InputDesc> by_type[ITYPE_MAX][IDEVICE_MAX];
 
     DynamicMap<InputId, i32> edges;
     DynamicMap<InputId, bool> held;
     DynamicMap<InputId, f32[2]> axes;
+    DynamicMap<InputDesc, bool> active;
     DynamicMap<InputId, DynamicArray<TextEvent>> text;
 };
 
@@ -96,8 +98,8 @@ String string_from_enum(InputType type) EXPORT
     case AXIS_2D:    return "AXIS_2D";
     case TEXT:       return "TEXT";
     case CHORD:      return "CHORD";
-    case IT_INVALID: return "INVALID";
-    case IT_MAX:     PANIC_UNREACHABLE();
+    case ITYPE_INVALID: return "INVALID";
+    case ITYPE_MAX:     PANIC_UNREACHABLE();
     }
 
     return "unknown";
@@ -514,13 +516,6 @@ bool translate_input_event(
                     (*map_find_emplace(&map->edges, it.id, 0))++;
                     insert_input_event(queue, map_id, it.id, it.any.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
-
-                    LOG_INFO(
-                        "[%.*s] edge down: [%d] %.*s, final: %d",
-                        STRFMT(map->name),
-                        it.id,
-                        STRFMT(string_from_enum((KeyCode_)event.key.keycode)),
-                        handled);
                 }
             }
 
@@ -532,6 +527,8 @@ bool translate_input_event(
                     (*map_find_emplace(&map->held, it.id, false)) = true;
                     insert_input_event(queue, map_id, it.id, it.any.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
+
+                    (*map_find_emplace(&map->active, it, true)) = true;
                 }
             }
 
@@ -545,6 +542,8 @@ bool translate_input_event(
                         axis[it.key.axis] += it.key.faxis;
                         insert_axis2d_event(queue, map_id, it.id, it.any.type, (f32[2]){ axis[0], axis[1] });
                         handled = handled || !(it.flags & FALLTHROUGH);
+
+                        (*map_find_emplace(&map->active, it, true)) = true;
                     }
                 }
             }
@@ -561,7 +560,14 @@ bool translate_input_event(
                 }
             }
 
-            // TODO(jesper): what should happen here in situations where modifier state change during key press? E.g. shift held, key press, shift released, key released. At this point, for any key mapped to an axis that hasn't been set with MF_SHIFT or MF_ANY, the axis will remain zero'd at the key-press, then become negated at the key-release.
+            for (auto &it : map->by_device[KEYBOARD][HOLD]) {
+                if (event.key.keycode == it.key.code) {
+                    (*map_find_emplace(&map->held, it.id, false)) = false;
+                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    (*map_find_emplace(&map->active, it, true)) = false;
+                }
+            }
+
             for (i32 i = AXIS; i <= AXIS_2D; i++) {
                 for (auto &it : map->by_device[KEYBOARD][i]) {
                     if (event.key.keycode == it.key.code &&
@@ -571,10 +577,12 @@ bool translate_input_event(
                         f32 *axis = map_find_emplace(&map->axes, it.id);
                         axis[it.key.axis] -= it.key.faxis;
                         insert_axis2d_event(queue, map_id, it.id, it.any.type, (f32[2]){ axis[0], axis[1] });
-                        handled = handled || !(it.flags & FALLTHROUGH);
+
+                        (*map_find_emplace(&map->active, it, true)) = false;
                     }
                 }
             }
+
             break;
         }
 
@@ -611,24 +619,6 @@ bool translate_input_event(
     }
     handled = handled || translate_input_event(queue, input.active_map, event);
 
-    const auto reset_mouse_held = [](InputMap *map, WindowEvent event)
-    {
-        for (auto &it : map->by_device[MOUSE][HOLD]) {
-            if (event.mouse.button == it.mouse.button) {
-                (*map_find_emplace(&map->held, it.id, false)) = false;
-            }
-        }
-    };
-
-    const auto reset_key_held = [](InputMap *map, WindowEvent event)
-    {
-        for (auto &it : map->by_device[KEYBOARD][HOLD]) {
-            if (event.key.keycode == it.key.code) {
-                (*map_find_emplace(&map->held, it.id, false)) = false;
-            }
-        }
-    };
-
     switch (event.type) {
     case WE_MOUSE_PRESS:
         (*map_find_emplace(&input.mouse, EDGE_DOWN, u8(0))) |= event.mouse.button;
@@ -638,12 +628,51 @@ bool translate_input_event(
         (*map_find_emplace(&input.mouse, EDGE_UP, u8(0))) |= event.mouse.button;
         (*map_find_emplace(&input.mouse, HOLD, u8(0))) &= ~event.mouse.button;
 
-        if (input.active_map != INPUT_MAP_INVALID) reset_mouse_held(&input.maps[input.active_map], event);
-        for (auto map_id : input.layers) reset_mouse_held(&input.maps[map_id], event);
+        for (auto &map : input.maps) {
+            for (auto &it : map.by_device[MOUSE][HOLD]) {
+                if (it.key.code == event.key.keycode) {
+                    (*map_find_emplace(&map.held, it.id, false)) = false;
+                }
+            }
+            for (auto &it : map.by_device[MOUSE][HOLD]) {
+                bool *active = map_find(&map.active, it);
+                if (!active || !*active) continue;
+
+                if ((it.mouse.button & event.mouse.button) ||
+                    it.mouse.button == MB_ANY)
+                {
+                    (*map_find_emplace(&map.held, it.id, false)) = false;
+                    *active = false;
+                }
+            }
+        }
         break;
     case WE_KEY_RELEASE:
-        if (input.active_map != INPUT_MAP_INVALID) reset_key_held(&input.maps[input.active_map], event);
-        for (auto map_id : input.layers) reset_key_held(&input.maps[map_id], event);
+        for (auto &map : input.maps) {
+            for (auto &it : map.by_device[KEYBOARD][HOLD]) {
+                bool *active = map_find(&map.active, it);
+                if (!active || !*active) continue;
+
+                if (it.key.code == event.key.keycode) {
+                    (*map_find_emplace(&map.held, it.id, false)) = false;
+                    *active = false;
+                }
+            }
+
+            for (i32 i = AXIS; i < AXIS_2D; i++) {
+                for (auto &it : map.by_device[KEYBOARD][i]) {
+                    bool *active = map_find(&map.active, it);
+                    if (!active || !*active) continue;
+
+                    if (f32 *axis = map_find(&map.axes, it.id);
+                        axis && it.key.code == event.key.keycode)
+                    {
+                        axis[it.key.axis] -= it.key.faxis;
+                        *active = false;
+                    }
+                }
+            }
+        }
         break;
     default: break;
     }
@@ -684,7 +713,7 @@ bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id /*= INPUT_MAP_ANY*
 
     if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
-    auto *axis = map_find(&map->axes, id);
+    f32 *axis = map_find(&map->axes, id);
     if (!axis || axis[0] == 0.0f) return false;
 
     dst[0] = axis[0];
@@ -700,7 +729,7 @@ bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_AN
 
     if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
-    auto *axis = map_find(&map->axes, id);
+    f32 *axis = map_find(&map->axes, id);
     if (!axis || (axis[0] == 0.0f && axis[1] == 0.0f)) return false;
 
     dst[0] = axis[0];
@@ -744,4 +773,36 @@ bool get_input_mouse(MouseButton btn, InputType type /*= EDGE_DOWN*/) EXPORT
     auto *it = map_find(&input.mouse, type);
     if (!it) return false;
     return (*it & btn) == btn || (btn == MB_ANY && *it);
+}
+
+u32 hash32(const InputDesc &desc, u32 seed /*= MURMUR3_SEED */) EXPORT
+{
+    u32 state = seed;
+    state = hash32(desc.id, state);
+    state = hash32(desc.any.device, state);
+    state = hash32(desc.any.type, state);
+    switch (desc.any.device) {
+    case KEYBOARD:
+        state = hash32(desc.key.code, state);
+        state = hash32(desc.key.modifiers, state);
+        state = hash32(desc.key.axis, state);
+        state = hash32(desc.key.faxis, state);
+        break;
+    case MOUSE:
+        state = hash32(desc.mouse.button, state);
+        state = hash32(desc.mouse.modifiers, state);
+        break;
+    case GAMEPAD:
+        state = hash32(desc.pad.button, state);
+        break;
+    case VAXIS:
+        state = hash32(desc.axis.id, state);
+        break;
+    case VTEXT:
+        break;
+
+    }
+    state = hash32(desc.flags, state);
+    return state;
+
 }

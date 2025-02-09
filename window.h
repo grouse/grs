@@ -3,6 +3,7 @@
 
 #include "string.h"
 #include "maths.h"
+#include "hash.h"
 
 #include <initializer_list>
 
@@ -187,7 +188,7 @@ enum MouseButton : u8 {
 };
 
 enum InputType {
-    IT_INVALID = 0,
+    ITYPE_INVALID = 0,
 
     AXIS = 1,
     AXIS_2D,
@@ -197,11 +198,11 @@ enum InputType {
     TEXT,
     CHORD,
 
-    IT_MAX,
+    ITYPE_MAX,
 };
 
 enum InputDevice {
-    DEVICE_INVALID = 0,
+    IDEVICE_INVALID = 0,
 
     KEYBOARD,
     MOUSE,
@@ -211,7 +212,7 @@ enum InputDevice {
     VTEXT,
     VAXIS,
 
-    ID_MAX,
+    IDEVICE_MAX,
 };
 
 enum InputFlags {
@@ -327,7 +328,7 @@ union IUnion {
 };
 
 struct IChord {
-    InputDevice device = DEVICE_INVALID;
+    InputDevice device = IDEVICE_INVALID;
     InputType   type = CHORD;
     IUnion *seq;
     i32 length, at;
@@ -356,6 +357,33 @@ struct InputDesc {
     };
 
     u32 flags;
+
+    bool operator!=(const InputDesc &rhs)
+    {
+        if (id != rhs.id || any.device != rhs.any.device || any.type != rhs.any.type || flags != rhs.flags)
+            return true;
+
+        switch (any.device) {
+        case KEYBOARD:
+            return
+                key.code != rhs.key.code ||
+                key.modifiers != rhs.key.modifiers ||
+                key.axis != rhs.key.axis ||
+                key.faxis != rhs.key.faxis;
+        case MOUSE:
+            return
+                mouse.button != rhs.mouse.button ||
+                mouse.modifiers != rhs.mouse.modifiers;
+        case GAMEPAD:
+            return pad.button != rhs.pad.button;
+        case VAXIS:
+            return axis.id != rhs.axis.id;
+        case VTEXT:
+            break;
+        }
+
+        return false;
+    }
 };
 
 struct TextEvent {

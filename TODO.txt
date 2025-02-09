@@ -2,15 +2,14 @@
 - [ ] [bug][memory] memory leak observed in vm_freelist_allocator
 - [ ] expose WS_EX_TOPMOST as API and/or window creation flag, with appropriate window control to toggle
     - can I hook into the right-click context menu for the window titlebar and add a command there?
-- [ ] query state for AXIS input events instead of relying on awkward, complicated, and above all broken logic
-    - particularly for axes bound to digital events, like keyboard keys
-- [ ] query state for HOLD input events intead of relying on delta events to update them
 - [ ] figure out whether to send HOLD input events continously every frame, on change, or just when triggered
     - currently sends event on trigger, with bugs
 - [ ] expand ASSERT with ASSERT_EQi/NEQf/et al. for a basic way to print the values of the expression
 - [ ] fix sorting in test results, push to tail instead of push to head
 - [ ] [array] move constructor overloads for array_add
 - [ ] [array] move exchange for array_insert procedures that shifts existing elements
+- [ ] [map] Map
+- [ ] [map] FixedMap
 - [ ] [assets] bring over asset APIs
 - [ ] [gui] bring over GUI APIs
     - aya is furthest along, with some minor fixes and changes in mimir
@@ -20,3 +19,19 @@
 - [ ] [gfx] bring over core gfx APIs
     - rely heavily on per-game management of actual complex rendering
     - core API for management of resources, shaders, materials, etc. Aya is furthest along
+- [ ] [input] lambda/function pointer mapping
+    - can I do it such that I don't need to supply a mapping id? treat the function pointer as the id in some way
+    - In some cases I might want to supply a function pointer but still query the input for the mapping, how to handle that if the function pointer acts as the mapping id?
+- [ ] [input] multi-gamepad support
+- [ ] [input] hold duration
+- [ ] [input] axes deadzone
+    - should this be per device? per action mapping?
+
+# DOING
+
+# DONE
+- [x] [input] query state for AXIS input events instead of relying on awkward, complicated, and above all broken logic
+    - particularly for axes bound to digital events, like keyboard keys
+    - ended up instead keeping an map<InputDesc, bool> active which I can query to determine whether to reset AXIS mappings on key release
+- [x] [input] query state for HOLD input events intead of relying on delta events to update them
+    - ended up instead keeping an map<InputDesc, bool> active which I can query to determine whether to reset HOLD mappings on key release
