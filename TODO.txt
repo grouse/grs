@@ -1,31 +1,45 @@
 # TODO
-- [ ] [bug][memory] memory leak observed in vm_freelist_allocator
-- [ ] expose WS_EX_TOPMOST as API and/or window creation flag, with appropriate window control to toggle
+- [ ] [memory][bug] memory leak observed in vm_freelist_allocator
+- [ ] [window] expose WS_EX_TOPMOST as API and/or window creation flag, with appropriate window control to toggle
     - can I hook into the right-click context menu for the window titlebar and add a command there?
-- [ ] figure out whether to send HOLD input events continously every frame, on change, or just when triggered
-    - currently sends event on trigger, with bugs
 - [ ] expand ASSERT with ASSERT_EQi/NEQf/et al. for a basic way to print the values of the expression
-- [ ] fix sorting in test results, push to tail instead of push to head
+- [ ] [enki] fix sorting in test results, push to tail instead of push to head
 - [ ] [array] move constructor overloads for array_add
 - [ ] [array] move exchange for array_insert procedures that shifts existing elements
 - [ ] [map] Map
+    - Map-view; non-growable, but can pop and push as long as doing so doesn't affect the size
+    - modeled after Array
 - [ ] [map] FixedMap
+    - fixed memory variant
+    - statically allocated memory
+    - push/pop as long as doing so doesn't exceed the fixed memory size
+    - modeled after FixedArray
 - [ ] [assets] bring over asset APIs
 - [ ] [gui] bring over GUI APIs
     - aya is furthest along, with some minor fixes and changes in mimir
     - decide whether to keep or remove the dependency on font APIs
+- [ ] [gui] make get_input_mouse use a gui input map so that I can actually disable gui mouse input dependent on input mapping layers
 - [ ] [font] bring over font APIs
     - need to decide whether to have a dependency on gfx for creation/updating of the font atlas texture data, or if that should be done in a more separated way
+    - depends on gfx
+    - depends on font
 - [ ] [gfx] bring over core gfx APIs
     - rely heavily on per-game management of actual complex rendering
     - core API for management of resources, shaders, materials, etc. Aya is furthest along
+    - depends on assets
 - [ ] [input] lambda/function pointer mapping
     - can I do it such that I don't need to supply a mapping id? treat the function pointer as the id in some way
     - In some cases I might want to supply a function pointer but still query the input for the mapping, how to handle that if the function pointer acts as the mapping id?
 - [ ] [input] multi-gamepad support
-- [ ] [input] hold duration
+- [ ] [input] hold duration/timestamp
 - [ ] [input] axes deadzone
     - should this be per device? per action mapping?
+- [ ] [input] figure out whether to send HOLD input events continously every frame, on change, or just when triggered
+    - currently sends event on trigger
+    - to send continuously every frame, I think best solution would be keeping track whether a HOLD event was sent that frame, and at the end when all the standard events have been processed and consumed, we insert HOLD events for every active HOLD action that weren't triggered that frame
+    - I think I might _want_ continuous HOLD events, but I'm not super keen on that solution. It might be better to just rely on get_input_held API for these actions
+    - that reliance makes the API asymmetrical, in that for all other input types you can freely choose whether to use polling or the event queue
+    - we currently have an input_begin_frame for other reasons, if I can't get rid of that (which I do want to) then continous events already have the hook it needs to do its data keeping
 
 # DOING
 
