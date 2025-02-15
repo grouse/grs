@@ -45,6 +45,8 @@ struct Array {
         for (i32 i = 0; i < this->count; i++) if (this->data[i] != other.data[i]) return false;
         return true;
     }
+
+    explicit operator bool() const { return count; }
 };
 
 template<typename T>
