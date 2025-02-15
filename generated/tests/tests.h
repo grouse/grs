@@ -3,6 +3,7 @@
 
 static void array__indexing();
 static void array__iterator();
+static void dynamic_array__copy_replaces_contents();
 static void dynamic_array__append();
 static void dynamic_array__insert();
 static void dynamic_array__set();
@@ -66,8 +67,6 @@ extern void maths__quaternion__q2_mul_q1_equals_q1q2_minus_2v1_cross_v2();
 extern void maths__quaternion__q_mul_q_conj_is_commutative();
 extern void maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq();
 extern void maths__quaternion__q_inverse_equals_q_conj_if_q_unit();
-extern void maths__quaternion__rotate();
-extern void maths__projection__retains_xy_axis_signs();
 extern void maths__misc__angle_between();
 static void dynamic_map__set_invokes_copy_constructor_for_key_and_value();
 static void dynamic_map__set_of_existing_key_invokes_copy_assign_for_value_and_nothing_for_key();
@@ -85,6 +84,7 @@ TestSuite TESTS_array_tests[] = {
 	{ "sort", array__sort },
 };
 TestSuite TESTS_dynamic_array_tests[] = {
+	{ "copy_replaces_contents", dynamic_array__copy_replaces_contents },
 	{ "append", dynamic_array__append },
 	{ "insert", dynamic_array__insert },
 	{ "set", dynamic_array__set },
@@ -154,10 +154,6 @@ TestSuite TESTS_maths__quaternion_tests[] = {
 	{ "q_mul_q_conj_is_commutative", maths__quaternion__q_mul_q_conj_is_commutative },
 	{ "q_mul_q_conj_equals_v_sq_plus_s_sq", maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq },
 	{ "q_inverse_equals_q_conj_if_q_unit", maths__quaternion__q_inverse_equals_q_conj_if_q_unit },
-	{ "rotate", maths__quaternion__rotate },
-};
-TestSuite TESTS_maths__projection_tests[] = {
-	{ "retains_xy_axis_signs", maths__projection__retains_xy_axis_signs },
 };
 TestSuite TESTS_maths__misc_tests[] = {
 	{ "angle_between", maths__misc__angle_between },
@@ -176,7 +172,6 @@ TestSuite TESTS_tests[] = {
 	{ "maths__mat3", nullptr, TESTS_maths__mat3_tests, sizeof(TESTS_maths__mat3_tests)/sizeof(TESTS_maths__mat3_tests[0]) },
 	{ "maths__mat4", nullptr, TESTS_maths__mat4_tests, sizeof(TESTS_maths__mat4_tests)/sizeof(TESTS_maths__mat4_tests[0]) },
 	{ "maths__quaternion", nullptr, TESTS_maths__quaternion_tests, sizeof(TESTS_maths__quaternion_tests)/sizeof(TESTS_maths__quaternion_tests[0]) },
-	{ "maths__projection", nullptr, TESTS_maths__projection_tests, sizeof(TESTS_maths__projection_tests)/sizeof(TESTS_maths__projection_tests[0]) },
 	{ "maths__misc", nullptr, TESTS_maths__misc_tests, sizeof(TESTS_maths__misc_tests)/sizeof(TESTS_maths__misc_tests[0]) },
 	{ "dynamic_map", nullptr, TESTS_dynamic_map_tests, sizeof(TESTS_dynamic_map_tests)/sizeof(TESTS_dynamic_map_tests[0]) },
 };

@@ -594,7 +594,7 @@ template<typename T>
 void array_copy(DynamicArray<T> *dst, const Array<T> src)
 {
     array_resize(dst, src.count);
-    for (i32 i = 0; i < src.count; i++) new (&dst->data[dst->count+i]) T(src.data[i]);
+    for (i32 i = 0; i < src.count; i++) new (&dst->data[i]) T(src.data[i]);
 }
 
 template<typename T>
@@ -802,6 +802,38 @@ static TEST_PROC(array__iterator)
 
     }
 }
+
+static TEST_PROC(dynamic_array__copy_replaces_contents)
+{
+    i32 data[] = { 1, 2, 3 };
+    Array<i32> src = { data, ARRAY_COUNT(data) };
+
+    {
+        DynamicArray<i32> arr{};
+        array_copy(&arr, src);
+
+        ASSERT(arr.count == src.count);
+        ASSERT(arr[0] == 1);
+        ASSERT(arr[1] == 2);
+        ASSERT(arr[2] == 3);
+    }
+
+    {
+        DynamicArray<i32> arr{};
+        array_add(&arr, 4);
+        array_add(&arr, 5);
+        array_add(&arr, 6);
+        ASSERT(arr.count == 3);
+        array_copy(&arr, src);
+
+        ASSERT(arr.count == src.count);
+        ASSERT(arr[0] == 1);
+        ASSERT(arr[1] == 2);
+        ASSERT(arr[2] == 3);
+    }
+
+}
+
 
 static TEST_PROC(dynamic_array__append)
 {
