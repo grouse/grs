@@ -258,6 +258,9 @@ void* malloc_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
         LOG_ERROR("reset called on malloc allocator, unsupported");
         return nullptr;
     }
+
+    PANIC("unhandled allocator procedure: %d", cmd);
+    return nullptr;
 }
 
 Allocator tl_linear_allocator(i64 size)
