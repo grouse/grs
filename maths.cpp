@@ -1036,25 +1036,25 @@ Matrix4 mat4_look_at(Vector3 eye, Vector3 center, Vector3 up) EXPORT
     M[0].xyz = { r.x, u.x, -f.x };
     M[1].xyz = { r.y, u.y, -f.y };
     M[2].xyz = { r.z, u.z, -f.z };
-    M[3].xyz = { -dot(r, eye), -dot(u, eye), dot(f, eye) };
+    M[3].xyz = { -dot(r, eye), -dot(u, eye), -dot(f, eye) };
     return M;
 }
 
-Matrix4 mat4_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 near_z, f32 far_z) EXPORT
+Matrix4 mat4_orthographic(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z) EXPORT
 {
     // right-handed orthographic projection
     // zero-to-one depth range
 
-    float rl = 1.0f / (right - left);
-    float tb = 1.0f / (top - bottom);
-    float fn = 1.0f / (far_z - near_z);
+    float w_inv = 1.0f / (max_x - min_x);
+    float h_inv = 1.0f / (max_y - min_y);
+    float d_inv = 1.0f / (far_z - near_z);
 
-    Matrix4 M = mat4_identity();
-    M[0].x = 2.0f * rl;
-    M[1].y = 2.0f * tb;
-    M[2].z = -1.0f * fn;
-    M[3].xyz = { -(right+left) * rl, -(top+bottom) * tb, -near_z * fn };
-    return M;
+    return { .columns = {
+        { 2*w_inv,              0,                    0,             0 },
+        { 0,                    2*h_inv,              0,             0 },
+        { 0,                    0,                    d_inv,         0 },
+        { -(max_x+min_x)*w_inv, -(max_y+min_y)/h_inv, -near_z*d_inv, 1 }
+    }};
 }
 
 Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
