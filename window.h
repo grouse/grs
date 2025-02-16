@@ -380,6 +380,10 @@ struct InputDesc {
             return axis.id != rhs.axis.id;
         case VTEXT:
             break;
+        case IDEVICE_INVALID:
+        case IDEVICE_MAX:
+            PANIC("invalid device type");
+            break;
         }
 
         return false;

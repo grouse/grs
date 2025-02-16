@@ -817,7 +817,10 @@ u32 hash32(const InputDesc &desc, u32 seed /*= MURMUR3_SEED */) EXPORT
         break;
     case VTEXT:
         break;
-
+    case IDEVICE_INVALID:
+    case IDEVICE_MAX:
+        PANIC("invalid device type");
+        break;
     }
     state = hash32(desc.flags, state);
     return state;
