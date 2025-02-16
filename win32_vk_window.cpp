@@ -12,7 +12,7 @@ AppWindow* create_window(WindowCreateDesc desc)
     HINSTANCE hInstance = GetModuleHandleA(NULL);
 
     DWORD style = WS_OVERLAPPEDWINDOW;
-    DWORD ex_style = WS_EX_TOPMOST;
+    DWORD ex_style = 0;//WS_EX_TOPMOST;
 
     auto *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
     defer { map_set(&windows, (u64)wnd->hwnd, wnd); };
