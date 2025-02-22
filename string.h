@@ -39,7 +39,7 @@ struct String {
         return data[i];
     }
 
-    operator bool() const { return length > 0; }
+    explicit operator bool() const { return length > 0; }
 
     char* begin() { return &data[0]; }
     char* end() { return &data[length]; }
