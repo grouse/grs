@@ -48,39 +48,6 @@ struct Asset {
 
 #include "generated/assets.h"
 
-void init_assets(Array<String> folders, const AssetTypesDesc &desc);
-
-AssetHandle gen_asset_handle();
-
-AssetHandle load_asset(String path);
-AssetHandle load_asset(String path, u8 *contents, i32 size);
-bool load_asset(AssetHandle handle, u8 *contents, i32 size);
-
-bool asset_path_used(String path);
-bool ensure_loaded(AssetHandle handle);
-bool is_asset_loaded(String path);
-
-void remove_asset(AssetHandle handle);
-void restore_removed_asset(AssetHandle handle);
-AssetHandle restore_removed_asset(String path);
-
-AssetHandle find_loaded_asset(String path);
-Asset* find_asset_by_path(String path);
-AssetHandle find_asset_handle(String filename);
-Asset* get_asset(AssetHandle handle);
-
-String get_asset_path(AssetHandle handle);
-
-void dirty_asset(AssetHandle handle);
-void save_dirty_assets();
-Array<AssetHandle> get_unsaved_assets(Allocator mem);
-
-String resolve_asset_path(String path, Allocator mem);
-String normalise_asset_path(String path, Allocator mem = tl_scratch_arena());
-
-Array<String> list_asset_files(Allocator mem);
-Array<String> list_asset_files(String ext, Allocator mem);
-
 template<typename T>
 T* find_asset(String path)
 {

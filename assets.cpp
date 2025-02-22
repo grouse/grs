@@ -21,7 +21,7 @@ struct {
 } assets{};
 
 
-void init_assets(Array<String> folders, const AssetTypesDesc &desc)
+void init_assets(Array<String> folders, const AssetTypesDesc &desc) EXPORT
 {
     SArena scratch = tl_scratch_arena();
 
@@ -48,13 +48,13 @@ void init_assets(Array<String> folders, const AssetTypesDesc &desc)
     }
 }
 
-bool is_asset_loaded(String path)
+bool is_asset_loaded(String path) EXPORT
 {
     for (auto it : assets.loaded) if (it.path == path) return true;
     return false;
 }
 
-AssetHandle find_loaded_asset(String path)
+AssetHandle find_loaded_asset(String path) EXPORT
 {
     for (i32 i = 0; i < assets.loaded.count; i++) {
         if (assets.loaded[i].path == path) {
@@ -65,7 +65,7 @@ AssetHandle find_loaded_asset(String path)
     return ASSET_HANDLE_INVALID;
 }
 
-AssetHandle find_asset_handle(String path)
+AssetHandle find_asset_handle(String path) EXPORT
 {
     SArena scratch = tl_scratch_arena();
     String apath = resolve_asset_path(path, scratch);
@@ -85,7 +85,7 @@ AssetHandle find_asset_handle(String path)
     return create_asset(apath, *type, nullptr);
 }
 
-Asset* find_asset_by_path(String path)
+Asset* find_asset_by_path(String path) EXPORT
 {
     AssetHandle handle = find_asset_handle(path);
     if (handle == ASSET_HANDLE_INVALID) return nullptr;
@@ -98,7 +98,7 @@ i32 get_asset_type(AssetHandle handle) EXPORT
     return assets.loaded[handle.index].type_id;
 }
 
-Asset* get_asset(AssetHandle handle)
+Asset* get_asset(AssetHandle handle) EXPORT
 {
     SArena scratch = tl_scratch_arena();
     ASSERT(handle != ASSET_HANDLE_INVALID);
@@ -119,7 +119,7 @@ Asset* get_asset(AssetHandle handle)
     return &assets.loaded[handle.index];
 }
 
-String get_asset_path(AssetHandle handle)
+String get_asset_path(AssetHandle handle) EXPORT
 {
     ASSERT(handle != ASSET_HANDLE_INVALID);
 
@@ -128,7 +128,7 @@ String get_asset_path(AssetHandle handle)
     return asset.path;
 }
 
-AssetHandle gen_asset_handle()
+AssetHandle gen_asset_handle() EXPORT
 {
     if (assets.free_slots.count > 0) return array_pop(&assets.free_slots);
     i32 i = array_add(&assets.loaded, { .gen = 1 });
@@ -182,7 +182,7 @@ AssetHandle create_asset(String path, i32 type_id, void *data) EXPORT
     return create_asset(handle, path, type_id, data);
 }
 
-AssetHandle restore_removed_asset(String path)
+AssetHandle restore_removed_asset(String path) EXPORT
 {
     for (i32 i = 0; i < assets.removed.count; i++) {
         auto &it = assets.loaded[assets.removed[i].index];
@@ -196,7 +196,7 @@ AssetHandle restore_removed_asset(String path)
     return ASSET_HANDLE_INVALID;
 }
 
-void restore_removed_asset(AssetHandle handle)
+void restore_removed_asset(AssetHandle handle) EXPORT
 {
     for (i32 i = 0; i < assets.removed.count; i++) {
         if (assets.removed[i] == handle) {
@@ -206,7 +206,7 @@ void restore_removed_asset(AssetHandle handle)
     }
 }
 
-void remove_asset(AssetHandle handle)
+void remove_asset(AssetHandle handle) EXPORT
 {
     if (handle.gen != assets.loaded[handle.index].gen) {
         LOG_ERROR("asset generation id mismatch between handle and loaded asset");
@@ -219,13 +219,13 @@ void remove_asset(AssetHandle handle)
     //assets.loaded[handle.index].gen++;
 }
 
-bool asset_path_used(String path)
+bool asset_path_used(String path) EXPORT
 {
     for (auto it : assets.loaded) if (it.path == path) return true;
     return false;
 }
 
-bool load_asset(AssetHandle handle, u8 *contents, i32 size)
+bool load_asset(AssetHandle handle, u8 *contents, i32 size) EXPORT
 {
     String path = assets.loaded[handle.index].path;
     if (assets.loaded[handle.index].gen == handle.gen &&
@@ -259,7 +259,7 @@ bool load_asset(AssetHandle handle, u8 *contents, i32 size)
     return false;
 }
 
-AssetHandle load_asset(String path)
+AssetHandle load_asset(String path) EXPORT
 {
     SArena scratch = tl_scratch_arena();
 
@@ -281,7 +281,7 @@ AssetHandle load_asset(String path)
     return load_asset(apath, file.data, file.size);
 }
 
-AssetHandle load_asset(String path, u8 *contents, i32 size)
+AssetHandle load_asset(String path, u8 *contents, i32 size) EXPORT
 {
     String ext = extension_of(path);
     asset_load_t *load_proc = map_find(&assets.load_procs, ext);
@@ -303,7 +303,7 @@ AssetHandle load_asset(String path, u8 *contents, i32 size)
     return handle;
 }
 
-bool ensure_loaded(AssetHandle handle)
+bool ensure_loaded(AssetHandle handle) EXPORT
 {
     if (handle.gen != assets.loaded[handle.index].gen) {
         LOG_ERROR("asset generation id mismatch between handle and loaded asset");
@@ -327,13 +327,13 @@ bool ensure_loaded(AssetHandle handle)
     return true;
 }
 
-void dirty_asset(AssetHandle handle)
+void dirty_asset(AssetHandle handle) EXPORT
 {
     ASSERT(handle.gen == assets.loaded[handle.index].gen);
     assets.loaded[handle.index].last_modified = wall_timestamp();
 }
 
-void save_dirty_assets()
+void save_dirty_assets() EXPORT
 {
     SArena scratch = tl_scratch_arena();
 
@@ -370,7 +370,7 @@ void save_dirty_assets()
     }
 }
 
-Array<AssetHandle> get_unsaved_assets(Allocator mem)
+Array<AssetHandle> get_unsaved_assets(Allocator mem) EXPORT
 {
     DynamicArray<AssetHandle> result{ .alloc = mem };
 
@@ -383,7 +383,7 @@ Array<AssetHandle> get_unsaved_assets(Allocator mem)
     return result;
 }
 
-void save_asset(AssetHandle handle)
+void save_asset(AssetHandle handle) EXPORT
 {
     SArena scratch = tl_scratch_arena();
 
@@ -404,7 +404,7 @@ void save_asset(AssetHandle handle)
     }
 }
 
-String resolve_asset_path(String path, Allocator mem)
+String resolve_asset_path(String path, Allocator mem) EXPORT
 {
     SArena scratch = tl_scratch_arena(mem);
 
@@ -420,7 +420,7 @@ String resolve_asset_path(String path, Allocator mem)
     return "";
 }
 
-String normalise_asset_path(String path, Allocator mem)
+String normalise_asset_path(String path, Allocator mem) EXPORT
 {
     String short_path = resolve_asset_path(path, mem);
 
@@ -438,7 +438,7 @@ String normalise_asset_path(String path, Allocator mem)
     return short_path;
 }
 
-Array<String> list_asset_files(Allocator mem)
+Array<String> list_asset_files(Allocator mem) EXPORT
 {
     DynamicArray<String> files{ .alloc = mem };
 
@@ -489,7 +489,7 @@ Array<String> list_asset_files(i32 type, Allocator mem) EXPORT
     return files;
 }
 
-Array<String> list_asset_files(String ext, Allocator mem)
+Array<String> list_asset_files(String ext, Allocator mem) EXPORT
 {
     DynamicArray<String> files{ .alloc = mem };
 
@@ -506,4 +506,11 @@ Array<String> list_asset_files(String ext, Allocator mem)
     }
 
     return files;
+}
+
+
+void* load_string_asset(AssetHandle /*handle*/, void *existing, String /*identifier*/, u8 *data, i32 size) EXPORT
+{
+    if (existing) FREE(mem_dynamic, existing);
+    return ALLOC_T(mem_dynamic, String) { (char*)data, size };
 }
