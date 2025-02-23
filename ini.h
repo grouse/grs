@@ -29,6 +29,14 @@ struct IniSerializer {
          VAR(ini_section);\
          VAR(ini_section) = ini_in_section(ini) || (ini_section_end(ini), false))
 
+#define ini_bitfield_value(ini, name, bit)\
+    do {\
+        bool VAR(value) = bit;\
+        ini_value(ini, name, &VAR(value));\
+        bit = VAR(value);\
+    } while(0)
+
+
 #include "generated/ini.h"
 
 #endif // INI_H
