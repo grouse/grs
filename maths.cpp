@@ -154,6 +154,17 @@ Vector3 abs(Vector3 v) EXPORT
     // TODO(jesper): cmath dependency
     return Vector3{ fabsf(v.x), fabsf(v.y), fabsf(v.z ) };
 }
+
+Vector3 vec3_max(Vector3 lhs, Vector3 rhs) EXPORT
+{
+    return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y), MAX(lhs.z, rhs.z) };
+}
+
+Vector3 vec3_min(Vector3 lhs, Vector3 rhs) EXPORT
+{
+    return { MIN(lhs.x, rhs.x), MIN(lhs.y, rhs.y), MIN(lhs.z, rhs.z) };
+}
+
 f32 length(Vector3 v) EXPORT { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z); }
 f32 length_sq(Vector3 v) EXPORT { return dot(v, v); }
 

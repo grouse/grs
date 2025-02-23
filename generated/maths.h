@@ -15,6 +15,8 @@ extern Vector2 tangent(Vector2 v);
 extern Vector2 line_normal(Vector2 start, Vector2 end);
 extern f32 dot(Vector2 lhs, Vector2 rhs);
 extern Vector3 abs(Vector3 v);
+extern Vector3 vec3_max(Vector3 lhs, Vector3 rhs);
+extern Vector3 vec3_min(Vector3 lhs, Vector3 rhs);
 extern f32 length(Vector3 v);
 extern f32 length_sq(Vector3 v);
 extern Vector3 lerp(Vector3 a, Vector3 b, f32 t);
