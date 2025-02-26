@@ -714,7 +714,7 @@ Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*
     return M;
 }
 
-Matrix3 mat3_rotate_x(f32 theta) EXPORT
+Matrix3 mat3_rotate3_x(f32 theta) EXPORT
 {
     f32 cos_t = cosf(theta);
     f32 sin_t = sinf(theta);
@@ -726,7 +726,7 @@ Matrix3 mat3_rotate_x(f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate_y(f32 theta) EXPORT
+Matrix3 mat3_rotate3_y(f32 theta) EXPORT
 {
     f32 cos_t = cosf(theta);
     f32 sin_t = sinf(theta);
@@ -738,7 +738,7 @@ Matrix3 mat3_rotate_y(f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate_z(f32 theta) EXPORT
+Matrix3 mat3_rotate3_z(f32 theta) EXPORT
 {
     f32 cos_t = cosf(theta);
     f32 sin_t = sinf(theta);
@@ -750,7 +750,7 @@ Matrix3 mat3_rotate_z(f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate(Vector3 axis, f32 theta) EXPORT
+Matrix3 mat3_rotate3(Vector3 axis, f32 theta) EXPORT
 {
     f32 cos_t = cosf(theta);
     f32 sin_t = sinf(theta);
@@ -771,7 +771,7 @@ Matrix3 mat3_rotate(Vector3 axis, f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate_quat(Quaternion q) EXPORT
+Matrix3 mat3_rotate3_quat(Quaternion q) EXPORT
 {
     f32 xx = q.x*q.x;
     f32 yy = q.y*q.y;
@@ -791,14 +791,14 @@ Matrix3 mat3_rotate_quat(Quaternion q) EXPORT
     }};
 }
 
-Matrix3 mat3_translate(Vector2 v) EXPORT
+Matrix3 mat3_translate2(Vector2 v) EXPORT
 {
     Matrix3 M = mat3_identity();
     M[2].xy = v;
     return M;
 }
 
-Matrix3 mat3_scale(f32 scalar) EXPORT
+Matrix3 mat3_scale3(f32 scalar) EXPORT
 {
     Matrix3 M{};
     M.m00 = scalar;
@@ -807,7 +807,15 @@ Matrix3 mat3_scale(f32 scalar) EXPORT
     return M;
 }
 
-Matrix3 mat3_scale_axis(Vector3 axis, f32 scalar) EXPORT
+Matrix3 mat3_scale2(f32 scalar) EXPORT
+{
+    Matrix3 M{};
+    M.m00 = scalar;
+    M.m11 = scalar;
+    return M;
+}
+
+Matrix3 mat3_scale3_axis(Vector3 axis, f32 scalar) EXPORT
 {
     scalar -= 1.0f;
     f32 x = axis.x*scalar;
@@ -824,7 +832,7 @@ Matrix3 mat3_scale_axis(Vector3 axis, f32 scalar) EXPORT
         { axaz,            ayaz,            z*axis.z + 1.0f });
 }
 
-Matrix3 mat3_skew(f32 t, Vector3 a, Vector3 b) EXPORT
+Matrix3 mat3_skew3(f32 t, Vector3 a, Vector3 b) EXPORT
 {
     t = tanf(t);
     f32 x = a.x*t;
@@ -853,16 +861,16 @@ Matrix3 mat3_reflect(Vector3 a) EXPORT
         { axaz,         ayaz,         z*a.z + 1.0f });
 }
 
-Matrix3 mat3_transform(Matrix3 projection, Vector2 position) EXPORT
+Matrix3 mat3_transform2(Matrix3 projection, Vector2 position) EXPORT
 {
-    Matrix3 view = mat3_translate(-position);
+    Matrix3 view = mat3_translate2(-position);
     return projection*view;
 }
 
-Matrix3 mat3_transform(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
+Matrix3 mat3_transform2(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
 {
-    Matrix3 mview = mat3_translate(-position);
-    Matrix3 mscale = mat3_scale(uni_scale);
+    Matrix3 mview = mat3_translate2(-position);
+    Matrix3 mscale = mat3_scale2(uni_scale);
     return projection*mview*mscale;
 }
 
@@ -936,7 +944,7 @@ Matrix4 mat4_identity() EXPORT
     return r;
 }
 
-Matrix4 mat4_transform_mat3(const Matrix3 &m0) EXPORT
+Matrix4 mat4_transform2(const Matrix3 &m0) EXPORT
 {
     Matrix4 M = mat4_identity();
     M[0].xy = m0[0].xy;
@@ -965,7 +973,7 @@ Matrix4 mat4_mat3_extend(Matrix3 m) EXPORT
     }};
 }
 
-Matrix4 mat4_rotate_quat(Quaternion q) EXPORT
+Matrix4 mat4_rotate3_quat(Quaternion q) EXPORT
 {
     f32 xx = q.x*q.x;
     f32 yy = q.y*q.y;
@@ -986,14 +994,14 @@ Matrix4 mat4_rotate_quat(Quaternion q) EXPORT
     }};
 }
 
-Matrix4 mat4_translate(Vector3 v) EXPORT
+Matrix4 mat4_translate3(Vector3 v) EXPORT
 {
     Matrix4 r = mat4_identity();
     r[3] = { .xyz = v, 1 };
     return r;
 }
 
-Matrix4 mat4_scale(Vector3 v) EXPORT
+Matrix4 mat4_scale3(Vector3 v) EXPORT
 {
     Matrix4 r = mat4_identity();
     r[0][0] = v.x;
@@ -1002,21 +1010,21 @@ Matrix4 mat4_scale(Vector3 v) EXPORT
     return r;
 }
 
-Matrix4 mat4_transform(Quaternion rotation, Vector3 position) EXPORT
+Matrix4 mat4_transform3(Quaternion rotation, Vector3 position) EXPORT
 {
-    Matrix4 T = mat4_translate(position);
-    Matrix4 R = mat4_rotate_quat(rotation);
+    Matrix4 T = mat4_translate3(position);
+    Matrix4 R = mat4_rotate3_quat(rotation);
     return T*R;
 }
 
-Matrix4 mat4_transform(
+Matrix4 mat4_transform3(
     Quaternion rotation,
     Vector3 position,
     Vector3 scale) EXPORT
 {
-    Matrix4 T = mat4_translate(position);
-    Matrix4 R = mat4_rotate_quat(rotation);
-    Matrix4 S = mat4_scale(scale);
+    Matrix4 T = mat4_translate3(position);
+    Matrix4 R = mat4_rotate3_quat(rotation);
+    Matrix4 S = mat4_scale3(scale);
     return T*R*S;
 }
 
@@ -1127,7 +1135,7 @@ Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*
     }};
 }
 
-Matrix4 mat4_inv_transform(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
+Matrix4 mat4_inv_transform3(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
 {
     Vector3 Z = normalise(forward);
     Vector3 X = normalise(cross(Z, up));
@@ -2773,7 +2781,7 @@ TEST_PROC(maths__vector4__swizzle)
 TEST_PROC(maths__mat3__rotate_x)
 {
     { // 0 degree rotation
-        Matrix3 m = mat3_rotate_x(0.0f);
+        Matrix3 m = mat3_rotate3_x(0.0f);
         ASSERT(m.m00 == 1.0f);
         ASSERT(m.m01 == 0.0f);
         ASSERT(m.m02 == 0.0f);
@@ -2788,7 +2796,7 @@ TEST_PROC(maths__mat3__rotate_x)
     }
 
     { // 90 degree rotation
-        Matrix3 m = mat3_rotate_x(f32_PI/2);
+        Matrix3 m = mat3_rotate3_x(f32_PI/2);
         ASSERT(m.m00 == 1.0f);
         ASSERT(m.m01 == 0.0f);
         ASSERT(m.m02 == 0.0f);
@@ -2803,7 +2811,7 @@ TEST_PROC(maths__mat3__rotate_x)
     }
 
     { // 180 degree rotation
-        Matrix3 m = mat3_rotate_x(f32_PI);
+        Matrix3 m = mat3_rotate3_x(f32_PI);
         ASSERT(m.m00 == 1.0f);
         ASSERT(m.m01 == 0.0f);
         ASSERT(m.m02 == 0.0f);
@@ -2818,7 +2826,7 @@ TEST_PROC(maths__mat3__rotate_x)
     }
 
     { // 360 degree rotation
-        Matrix3 m = mat3_rotate_x(2*f32_PI);
+        Matrix3 m = mat3_rotate3_x(2*f32_PI);
         ASSERT(m.m00 == 1.0f);
         ASSERT(m.m01 == 0.0f);
         ASSERT(m.m02 == 0.0f);
@@ -2837,7 +2845,7 @@ TEST_PROC(maths__mat3__rotate_x)
 TEST_PROC(maths__mat3__rotate_y)
 {
     { // 0 degree rotation
-        Matrix3 m = mat3_rotate_y(0.0f);
+        Matrix3 m = mat3_rotate3_y(0.0f);
         ASSERT(almost_equal(m.m00, 1.0f));
         ASSERT(m.m01 == 0.0f);
         ASSERT(almost_equal(m.m02, 0.0f));
@@ -2852,7 +2860,7 @@ TEST_PROC(maths__mat3__rotate_y)
     }
 
     { // 90 degree rotation
-        Matrix3 m = mat3_rotate_y(f32_PI/2);
+        Matrix3 m = mat3_rotate3_y(f32_PI/2);
         ASSERT(almost_equal(m.m00,  0.0f));
         ASSERT(m.m01 == 0.0f);
         ASSERT(almost_equal(m.m02, 1.0f));
@@ -2867,7 +2875,7 @@ TEST_PROC(maths__mat3__rotate_y)
     }
 
     { // 180 degree rotation
-        Matrix3 m = mat3_rotate_y(f32_PI);
+        Matrix3 m = mat3_rotate3_y(f32_PI);
         ASSERT(almost_equal(m.m00, -1.0f));
         ASSERT(m.m01 == 0.0f);
         ASSERT(almost_equal(m.m02,  0.0f));
@@ -2885,7 +2893,7 @@ TEST_PROC(maths__mat3__rotate_y)
 TEST_PROC(maths__mat3__rotate_z)
 {
     { // 0 degree rotation
-        Matrix3 m = mat3_rotate_z(0.0f);
+        Matrix3 m = mat3_rotate3_z(0.0f);
         ASSERT(m.m00 == 1.0f);
         ASSERT(m.m01 == 0.0f);
         ASSERT(m.m02 == 0.0f);
@@ -2900,7 +2908,7 @@ TEST_PROC(maths__mat3__rotate_z)
     }
 
     { // 90 degree rotation
-        Matrix3 m = mat3_rotate_z(f32_PI/2);
+        Matrix3 m = mat3_rotate3_z(f32_PI/2);
         ASSERT(almost_equal(m.m00,  0.0f));
         ASSERT(almost_equal(m.m01, -1.0f));
         ASSERT(m.m02 == 0.0f);
@@ -2915,7 +2923,7 @@ TEST_PROC(maths__mat3__rotate_z)
     }
 
     { // 180 degree rotation
-        Matrix3 m = mat3_rotate_z(f32_PI);
+        Matrix3 m = mat3_rotate3_z(f32_PI);
         ASSERT(almost_equal(m.m00, -1.0f));
         ASSERT(almost_equal(m.m01,  0.0f));
         ASSERT(m.m02 == 0.0f);
@@ -2934,8 +2942,8 @@ TEST_PROC(maths__mat3__rotate_axis)
 {
     { // rotation around x-axis (same as mat3_rotate_x)
         Vector3 x_axis = {1.0f, 0.0f, 0.0f};
-        Matrix3 m = mat3_rotate(x_axis, f32_PI/2);
-        ASSERT(almost_equal(m, mat3_rotate_x(f32_PI/2)));
+        Matrix3 m = mat3_rotate3(x_axis, f32_PI/2);
+        ASSERT(almost_equal(m, mat3_rotate3_x(f32_PI/2)));
 
         ASSERT(almost_equal(m.m00, 1.0f));
         ASSERT(almost_equal(m.m01, 0.0f));
@@ -2952,8 +2960,8 @@ TEST_PROC(maths__mat3__rotate_axis)
 
     { // rotation around y-axis (same as mat3_rotate_y)
         Vector3 y_axis = {0.0f, 1.0f, 0.0f};
-        Matrix3 m = mat3_rotate(y_axis, f32_PI/2);
-        ASSERT(almost_equal(m, mat3_rotate_y(f32_PI/2)));
+        Matrix3 m = mat3_rotate3(y_axis, f32_PI/2);
+        ASSERT(almost_equal(m, mat3_rotate3_y(f32_PI/2)));
 
         ASSERT(almost_equal(m.m00, 0.0f));
         ASSERT(almost_equal(m.m01, 0.0f));
@@ -2970,8 +2978,8 @@ TEST_PROC(maths__mat3__rotate_axis)
 
     { // rotation around z-axis (same as mat3_rotate_z)
         Vector3 z_axis = {0.0f, 0.0f, 1.0f};
-        Matrix3 m = mat3_rotate(z_axis, f32_PI/2);
-        ASSERT(almost_equal(m, mat3_rotate_z(f32_PI/2)));
+        Matrix3 m = mat3_rotate3(z_axis, f32_PI/2);
+        ASSERT(almost_equal(m, mat3_rotate3_z(f32_PI/2)));
 
         ASSERT(almost_equal(m.m00,  0.0f));
         ASSERT(almost_equal(m.m01, -1.0f));
