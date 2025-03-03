@@ -704,13 +704,13 @@ Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2) EXPORT
     }};
 }
 
-Matrix3 mat3_orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 ratio /*=1*/) EXPORT
+Matrix3 mat3_orthographic2(f32 left, f32 right, f32 top, f32 bottom) EXPORT
 {
     Matrix3 M = mat3_identity();
     M[0][0] = 2 / (right-left);
-    M[1][1] = (2 / (top-bottom)) * ratio;
+    M[1][1] = 2 / (top-bottom);
     M[2][0] = -(right+left) / (right-left);
-    M[2][1] = (-(top+bottom) / (top-bottom)) * ratio;
+    M[2][1] = -(top+bottom) / (top-bottom);
     return M;
 }
 
@@ -812,6 +812,7 @@ Matrix3 mat3_scale2(f32 scalar) EXPORT
     Matrix3 M{};
     M.m00 = scalar;
     M.m11 = scalar;
+    M.m22 = 1;
     return M;
 }
 
@@ -861,13 +862,13 @@ Matrix3 mat3_reflect(Vector3 a) EXPORT
         { axaz,         ayaz,         z*a.z + 1.0f });
 }
 
-Matrix3 mat3_transform2(Matrix3 projection, Vector2 position) EXPORT
+Matrix3 mat3_inv_transform2(Matrix3 projection, Vector2 position) EXPORT
 {
     Matrix3 view = mat3_translate2(-position);
     return projection*view;
 }
 
-Matrix3 mat3_transform2(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
+Matrix3 mat3_inv_transform2(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
 {
     Matrix3 mview = mat3_translate2(-position);
     Matrix3 mscale = mat3_scale2(uni_scale);
@@ -1059,14 +1060,14 @@ Matrix4 mat4_look_at(Vector3 eye, Vector3 center, Vector3 up) EXPORT
     return M;
 }
 
-Matrix4 mat4_orthographic(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z) EXPORT
+Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z) EXPORT
 {
     // right-handed orthographic projection
     // zero-to-one depth range
 
-    float w_inv = 1.0f / (max_x - min_x);
-    float h_inv = 1.0f / (max_y - min_y);
-    float d_inv = 1.0f / (far_z - near_z);
+    f32 w_inv = 1.0f / (max_x - min_x);
+    f32 h_inv = 1.0f / (max_y - min_y);
+    f32 d_inv = 1.0f / (far_z - near_z);
 
     return { .columns = {
         { 2*w_inv,              0,                    0,             0 },
@@ -3011,13 +3012,13 @@ TEST_PROC(maths__mat3__determinant_of_M_equals_determinant_of_M_transposed)
     }
 
     {
-        Matrix3 M = mat3_orthographic(-1, 1, 1, -1);
+        Matrix3 M = mat3_orthographic2(-1, 1, -1, 1);
         Matrix3 Mt = mat3_transpose(M);
         ASSERT(almost_equal(mat3_determinant(M), mat3_determinant(Mt), 0.0001f));
     }
 
     {
-        Matrix3 M = mat3_orthographic(-5, 5, 3, -2);
+        Matrix3 M = mat3_orthographic2(-5, 5, -2, 3);
         Matrix3 Mt = mat3_transpose(M);
         ASSERT(almost_equal(mat3_determinant(M), mat3_determinant(Mt), 0.0001f));
     }
@@ -3032,13 +3033,13 @@ TEST_PROC(maths__mat3__M_times_M_inverse_equals_identity)
     }
 
     {
-        Matrix3 M = mat3_orthographic(-1, 1, 1, -1);
+        Matrix3 M = mat3_orthographic2(-1, 1, -1, 1);
         Matrix3 Mi = mat3_inverse(M);
         ASSERT(almost_equal(M*Mi, mat3_identity(), 0.0001f));
     }
 
     {
-        Matrix3 M = mat3_orthographic(-5, 5, 3, -2);
+        Matrix3 M = mat3_orthographic2(-5, 5, -2, 3);
         Matrix3 Mi = mat3_inverse(M);
         ASSERT(almost_equal(M*Mi, mat3_identity(), 0.0001f));
     }
@@ -3054,7 +3055,7 @@ TEST_PROC(maths__mat4__M_times_M_inverse_equals_identity)
     }
 
     {
-        Matrix4 M = mat4_orthographic(-5, 5, 3, -2, 0.0001f, 100.0f);
+        Matrix4 M = mat4_orthographic3(-5, 5, 3, -2, 0.0001f, 100.0f);
         Matrix4 Mi = mat4_inverse(M);
         ASSERT(almost_equal(M*Mi, mat4_identity(), 0.0001f));
     }
