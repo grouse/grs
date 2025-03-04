@@ -708,9 +708,9 @@ Matrix3 mat3_orthographic2(f32 left, f32 right, f32 top, f32 bottom) EXPORT
 {
     Matrix3 M = mat3_identity();
     M[0][0] = 2 / (right-left);
-    M[1][1] = 2 / (top-bottom);
+    M[1][1] = 2 / (bottom-top);
     M[2][0] = -(right+left) / (right-left);
-    M[2][1] = -(top+bottom) / (top-bottom);
+    M[2][1] = -(bottom+top) / (bottom-top);
     return M;
 }
 
