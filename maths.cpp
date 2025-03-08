@@ -704,14 +704,16 @@ Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2) EXPORT
     }};
 }
 
-Matrix3 mat3_orthographic2(f32 left, f32 right, f32 top, f32 bottom) EXPORT
+Matrix3 mat3_orthographic2(f32 min_x, f32 max_x, f32 min_y, f32 max_y) EXPORT
 {
-    Matrix3 M = mat3_identity();
-    M[0][0] = 2 / (right-left);
-    M[1][1] = 2 / (bottom-top);
-    M[2][0] = -(right+left) / (right-left);
-    M[2][1] = -(bottom+top) / (bottom-top);
-    return M;
+    f32 w_inv = 1.0f / (max_x - min_x);
+    f32 h_inv = 1.0f / (max_y - min_y);
+
+    return { .columns = {
+        { 2*w_inv,              0,                    0 },
+        { 0,                    2*h_inv,              0 },
+        { -(max_x+min_x)*w_inv, -(max_y+min_y)*h_inv, 1 },
+    }};
 }
 
 Matrix3 mat3_rotate3_x(f32 theta) EXPORT
@@ -1073,7 +1075,7 @@ Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_
         { 2*w_inv,              0,                    0,             0 },
         { 0,                    2*h_inv,              0,             0 },
         { 0,                    0,                    d_inv,         0 },
-        { -(max_x+min_x)*w_inv, -(max_y+min_y)/h_inv, -near_z*d_inv, 1 }
+        { -(max_x+min_x)*w_inv, -(max_y+min_y)*h_inv, -near_z*d_inv, 1 }
     }};
 }
 

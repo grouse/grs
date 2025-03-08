@@ -58,7 +58,7 @@ extern Quaternion operator*(f32 scalar, Quaternion q);
 extern Quaternion operator/(Quaternion q, f32 scalar);
 extern Matrix3 mat3_identity();
 extern Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2);
-extern Matrix3 mat3_orthographic2(f32 left, f32 right, f32 top, f32 bottom);
+extern Matrix3 mat3_orthographic2(f32 min_x, f32 max_x, f32 min_y, f32 max_y);
 extern Matrix3 mat3_rotate3_x(f32 theta);
 extern Matrix3 mat3_rotate3_y(f32 theta);
 extern Matrix3 mat3_rotate3_z(f32 theta);
