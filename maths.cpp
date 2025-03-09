@@ -1048,20 +1048,6 @@ void mat4_trs_decompose(
     *rot = quat_from_mat4(trs);
 }
 
-Matrix4 mat4_look_at(Vector3 eye, Vector3 center, Vector3 up) EXPORT
-{
-    Vector3 f = normalise(center - eye);
-    Vector3 r = normalise(cross(f, up));
-    Vector3 u = cross(r, f);
-
-    Matrix4 M = mat4_identity();
-    M[0].xyz = { r.x, u.x, -f.x };
-    M[1].xyz = { r.y, u.y, -f.y };
-    M[2].xyz = { r.z, u.z, -f.z };
-    M[3].xyz = { -dot(r, eye), -dot(u, eye), -dot(f, eye) };
-    return M;
-}
-
 Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z) EXPORT
 {
     // right-handed orthographic projection
@@ -1139,6 +1125,20 @@ Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*
 }
 
 Matrix4 mat4_inv_transform3(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
+{
+    Vector3 Z = normalise(forward);
+    Vector3 X = normalise(cross(Z, up));
+    Vector3 Y = cross(X, Z);
+
+    Matrix4 M;
+    M[0] = { X[0], Y[0], Z[0], 0 };
+    M[1] = { X[1], Y[1], Z[1], 0 };
+    M[2] = { X[2], Y[2], Z[2], 0 };
+    M[3] = { -dot(X, eye), -dot(Y, eye), -dot(Z, eye), 1 };
+    return M;
+}
+
+Matrix4 mat4_look_at(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
 {
     Vector3 Z = normalise(forward);
     Vector3 X = normalise(cross(Z, up));
