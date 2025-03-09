@@ -40,6 +40,9 @@
     - I think I might _want_ continuous HOLD events, but I'm not super keen on that solution. It might be better to just rely on get_input_held API for these actions
     - that reliance makes the API asymmetrical, in that for all other input types you can freely choose whether to use polling or the event queue
     - we currently have an input_begin_frame for other reasons, if I can't get rid of that (which I do want to) then continous events already have the hook it needs to do its data keeping
+- [ ] [input] revisit chord-actions
+    - they don't appear to work the way I expect, usage in mimir
+        - ICHORD(IKEY(KC_G), IKEY(KC_D))
 
 # DOING
 

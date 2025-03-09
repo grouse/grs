@@ -151,6 +151,21 @@ bool i32_from_string(String s, i32 *dst)
     return true;
 }
 
+bool u32_from_string(String s, u32 *dst) EXPORT
+{
+    u32 result = 0;
+
+    i32 i = 0;
+    if (s[0] == '-') return false;
+
+    for (; i < s.length; i++) {
+        result = result * 10 + (s[i] - '0');
+    }
+
+    *dst = result;
+    return true;
+}
+
 u8 u8_from_string(String s) EXPORT
 {
     if (u8 value; u8_from_string(s, &value)) return value;
@@ -871,9 +886,9 @@ i32 utf8_from_utf32(u8 utf8[4], i32 utf32) EXPORT
     return -1;
 }
 
-i64 utf32_it_next(char *str, i64 length, i64 *offset) EXPORT
+u32 utf32_it_next(char *str, i64 length, i64 *offset) EXPORT
 {
-    i32 c = str[*offset];
+    u32 c = str[*offset];
     i64 end = (i64)(str + length);
 
     if (c & 0x80) {
@@ -907,7 +922,7 @@ i64 utf32_it_next(char *str, i64 length, i64 *offset) EXPORT
     return c;
 }
 
-i32 utf32_it_next(String str, i32 *offset) EXPORT
+u32 utf32_it_next(String str, i32 *offset) EXPORT
 {
     i32 c = str[*offset];
     i64 end = (i64)(str.data + str.length);
@@ -1141,13 +1156,13 @@ char to_lower(char c)
 
 char* last_of(char *str, char c)
 {
-	char *p = nullptr;
-	while (*str) {
-		if (*str == c) p = str;
-		str++;
-	}
+    char *p = nullptr;
+    while (*str) {
+        if (*str == c) p = str;
+        str++;
+    }
 
-	return p;
+    return p;
 }
 
 bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2]) EXPORT
