@@ -81,11 +81,13 @@ constexpr f32 f32_PI = (f32)f64_PI;
 #define f32_EPSILON __FLT_EPSILON__
 #define f32_INF ((f32)(1e+300*1e+300))
 
-#define i32_MAX (i32)0x7FFFFFFF
-#define u32_MAX (u32)0xFFFFFFFF
-
 #define i16_MAX (i16)0x7FFF
+#define i32_MAX (i32)0x7FFFFFFF
+
 #define u16_MAX (u16)0xFFFF
+#define u32_MAX (u32)0xFFFFFFFF
+#define u64_MAX (u64)0xFFFFFFFFFFFFFFFF
+
 
 
 static_assert(sizeof(u64) == 8, "u64 sizeof mismatch");
