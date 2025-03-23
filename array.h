@@ -4,7 +4,6 @@
 #include "core.h"
 #include "memory.h"
 
-#include <type_traits>
 #include <initializer_list>
 
 #ifndef ASSERT_BOUNDS
@@ -57,8 +56,9 @@ struct DynamicArray : Array<T> {
 
 template<typename T, i32 N>
 struct FixedArray : Array<T> {
-    using capacity = std::integral_constant<i32, N>;
     alignas(T) u8 storage[sizeof(T)*N];
+
+    constexpr i32 capacity() { return N; }
 
     FixedArray()
     {

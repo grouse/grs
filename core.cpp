@@ -43,7 +43,11 @@ panic_handler_t panic_handler = default_panic_handler;
 
 bool add_log_sink(sink_proc_t sink)
 {
-    if (log_sinks.count == decltype(log_sinks)::capacity()) return false;
+    if (log_sinks.count == log_sinks.capacity()) {
+        LOG_ERROR("maximum number of log sinks exceeded");
+        return false;
+    }
+
     array_add(&log_sinks, sink);
     return true;
 }
