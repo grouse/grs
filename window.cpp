@@ -224,25 +224,25 @@ void init_input_map_(InputMapId *dst, String name, std::initializer_list<InputDe
 {
     InputMap map{ .name = name };
     for (auto it : descriptors) {
-        if (it.any.type == CHORD) {
-            if (it.chord.seq && !it.chord.length) {
-                for (auto *seq = it.chord.seq; seq && seq->any.type; seq++) {
-                    it.chord.length++;
+        if (it.input.type == CHORD) {
+            if (it.input.chord.seq && !it.input.chord.length) {
+                for (auto *seq = it.input.chord.seq; seq && seq->type; seq++) {
+                    it.input.chord.length++;
                 }
             }
 
-            auto *seq = it.chord.seq;
-            it.chord.seq = ALLOC_ARR(mem_dynamic,IUnion, it.chord.length);
-            memcpy(it.chord.seq, seq, it.chord.length*sizeof *seq);
+            auto *seq = it.input.chord.seq;
+            it.input.chord.seq = ALLOC_ARR(mem_dynamic, IUnion, it.input.chord.length);
+            memcpy(it.input.chord.seq, seq, it.input.chord.length*sizeof *seq);
         }
 
-        if (it.any.device) {
-            array_add(&map.by_device[it.any.device][0], it);
-            array_add(&map.by_type[it.any.type][it.any.device], it);
+        if (it.input.device) {
+            array_add(&map.by_device[it.input.device][0], it);
+            array_add(&map.by_type[it.input.type][it.input.device], it);
         }
 
-        array_add(&map.by_type[it.any.type][0], it);
-        if (it.any.device) array_add(&map.by_device[it.any.device][it.any.type], it);
+        array_add(&map.by_type[it.input.type][0], it);
+        if (it.input.device) array_add(&map.by_device[it.input.device][it.input.type], it);
 
     }
 
@@ -348,7 +348,7 @@ bool translate_input_event(
         switch (event.type) {
         case WE_TEXT:
             for (auto &it : map->by_type[TEXT][0]) {
-                array_insert(queue, 0, { it.id, .input = { map_id, it.any.type, .text = event.text } });
+                array_insert(queue, 0, { it.id, .input = { map_id, it.input.type, .text = event.text } });
                 handled = handled || !(it.flags & FALLTHROUGH);
 
                 auto *text = map_find_emplace(&map->text, it.id);
@@ -357,86 +357,86 @@ bool translate_input_event(
             break;
         case WE_PAD_AXIS2:
             for (auto &it : map->by_device[GAMEPAD][AXIS_2D]) {
-                if (event.axis2.id == it.axis.id) {
+                if (event.axis2.id == it.input.axis.id) {
                     f32 *axis = map_find_emplace(&map->axes, it.id);
                     axis[0] = event.axis2.value[0];
                     axis[1] = event.axis2.value[1];
 
-                    insert_axis2d_event(queue, map_id, it.id, it.any.type, event.axis2.value);
+                    insert_axis2d_event(queue, map_id, it.id, it.input.type, event.axis2.value);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             } break;
         case WE_PAD_AXIS:
             for (auto &it : map->by_device[GAMEPAD][AXIS]) {
-                if (event.axis.id == it.axis.id) {
+                if (event.axis.id == it.input.axis.id) {
                     f32 *axis = map_find_emplace(&map->axes, it.id);
                     *axis = event.axis.value;
 
-                    insert_axis_event(queue, map_id, it.id, it.any.type, event.axis.value);
+                    insert_axis_event(queue, map_id, it.id, it.input.type, event.axis.value);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
             break;
         case WE_PAD_PRESS:
             for (auto &it : map->by_device[GAMEPAD][EDGE_DOWN]) {
-                if (event.pad.button == it.pad.button) {
+                if (event.pad.button == it.input.pad.button) {
                     (*map_find_emplace(&map->edges, it.id, 0))++;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
 
             for (auto &it : map->by_device[GAMEPAD][HOLD]) {
-                if (event.pad.button == it.pad.button) {
+                if (event.pad.button == it.input.pad.button) {
                     (*map_find_emplace(&map->active, it, true)) = true;
                     (*map_find_emplace(&map->held, it.id, false)) = true;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
             break;
         case WE_PAD_RELEASE:
             for (auto &it : map->by_device[GAMEPAD][EDGE_UP]) {
-                if (event.pad.button == it.pad.button) {
+                if (event.pad.button == it.input.pad.button) {
                     (*map_find_emplace(&map->edges, it.id, 0))++;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
 
             for (auto &it : map->by_device[GAMEPAD][HOLD]) {
-                if (event.pad.button == it.pad.button) {
+                if (event.pad.button == it.input.pad.button) {
                     (*map_find_emplace(&map->active, it, false)) = false;
                     (*map_find_emplace(&map->held, it.id, false)) = false;
 
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
             break;
         case WE_MOUSE_WHEEL:
             for (auto &it : map->by_device[MOUSE][AXIS]) {
-                if (event.mouse_wheel.modifiers == it.mouse.modifiers ||
-                    it.mouse.modifiers == MF_ANY)
+                if (event.mouse_wheel.modifiers == it.input.mouse.modifiers ||
+                    it.input.mouse.modifiers == MF_ANY)
                 {
                     f32 *axis = map_find_emplace(&map->axes, it.id);
                     axis[0] += event.mouse_wheel.delta;
-                    insert_axis_event(queue, map_id, it.id, it.any.type, (f32)event.mouse_wheel.delta);
+                    insert_axis_event(queue, map_id, it.id, it.input.type, (f32)event.mouse_wheel.delta);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
             break;
         case WE_MOUSE_MOVE:
             for (auto &it : map->by_device[MOUSE][AXIS_2D]) {
-                if ((event.mouse.button == it.mouse.button ||
-                     it.mouse.button == MB_ANY) &&
-                    (event.mouse.modifiers == it.mouse.modifiers ||
-                     it.mouse.modifiers == MF_ANY))
+                if ((event.mouse.button == it.input.mouse.button ||
+                     it.input.mouse.button == MB_ANY) &&
+                    (event.mouse.modifiers == it.input.mouse.modifiers ||
+                     it.input.mouse.modifiers == MF_ANY))
                 {
                     f32 *axis = map_find_emplace(&map->axes, it.id);
                     axis[0] += event.mouse.dx;
                     axis[1] += event.mouse.dy;
-                    insert_axis2d_event(queue, map_id, it.id, it.any.type, (f32[2]){ (f32)event.mouse.dx, (f32)event.mouse.dy });
+                    insert_axis2d_event(queue, map_id, it.id, it.input.type, (f32[2]){ (f32)event.mouse.dx, (f32)event.mouse.dy });
                     handled = handled || !(it.flags & FALLTHROUGH);
 
                     if (false) LOG_INFO("[%.*s] mouse move: [%d], final: %d", STRFMT(map->name), it.id, handled);
@@ -445,47 +445,47 @@ bool translate_input_event(
             break;
         case WE_MOUSE_PRESS:
             for (auto &it : map->by_device[MOUSE][EDGE_DOWN]) {
-                if ((event.mouse.button == it.mouse.button ||
-                     it.mouse.button == MB_ANY) &&
-                    (event.mouse.modifiers == it.mouse.modifiers ||
-                     it.mouse.button == MF_ANY))
+                if ((event.mouse.button == it.input.mouse.button ||
+                     it.input.mouse.button == MB_ANY) &&
+                    (event.mouse.modifiers == it.input.mouse.modifiers ||
+                     it.input.mouse.button == MF_ANY))
                 {
                     (*map_find_emplace(&map->edges, it.id, 0))++;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
 
             for (auto &it : map->by_device[MOUSE][HOLD]) {
-                if (event.mouse.button == it.mouse.button &&
-                    (event.mouse.modifiers == it.mouse.modifiers ||
-                     it.mouse.button == MF_ANY))
+                if (event.mouse.button == it.input.mouse.button &&
+                    (event.mouse.modifiers == it.input.mouse.modifiers ||
+                     it.input.mouse.button == MF_ANY))
                 {
                     (*map_find_emplace(&map->active, it, true)) = true;
                     (*map_find_emplace(&map->held, it.id, true)) = true;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
             break;
         case WE_MOUSE_RELEASE:
             for (auto &it : map->by_device[MOUSE][EDGE_UP]) {
-                if ((event.mouse.button == it.mouse.button ||
-                     it.mouse.button == MB_ANY) &&
-                    (event.mouse.modifiers == it.mouse.modifiers ||
-                     it.mouse.modifiers == MF_ANY))
+                if ((event.mouse.button == it.input.mouse.button ||
+                     it.input.mouse.button == MB_ANY) &&
+                    (event.mouse.modifiers == it.input.mouse.modifiers ||
+                     it.input.mouse.modifiers == MF_ANY))
                 {
                     (*map_find_emplace(&map->edges, it.id, 0))++;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
 
             for (auto &it : map->by_device[MOUSE][HOLD]) {
-                if ((event.mouse.button == it.mouse.button ||
-                     it.mouse.button == MB_ANY) &&
-                    (event.mouse.modifiers == it.mouse.modifiers ||
-                     it.mouse.modifiers == MF_ANY))
+                if ((event.mouse.button == it.input.mouse.button ||
+                     it.input.mouse.button == MB_ANY) &&
+                    (event.mouse.modifiers == it.input.mouse.modifiers ||
+                     it.input.mouse.modifiers == MF_ANY))
                 {
                     bool *active = map_find_emplace(&map->active, it, false);
                     if (*active) {
@@ -500,61 +500,62 @@ bool translate_input_event(
             if (event.key.prev_state) break;
 
             for (auto &it : map->by_type[CHORD][0]) {
-                auto &curr = it.chord.seq[it.chord.at];
-                if (curr.any.device == KEYBOARD && curr.any.type == EDGE_DOWN) {
+                auto &curr = it.input.chord.seq[it.input.chord.at];
+                if (curr.device == KEYBOARD && curr.type == EDGE_DOWN) {
                     if (event.key.keycode == curr.key.code &&
                         (event.key.modifiers == curr.key.modifiers ||
                          curr.key.modifiers == MF_ANY))
                     {
-                        if (++it.chord.at == it.chord.length) {
+                        if (++it.input.chord.at == it.input.chord.length) {
                             (*map_find_emplace(&map->edges, it.id, 0))++;
-                            insert_input_event(queue, map_id, it.id, it.any.type);
-                            it.chord.at = 0;
+                            insert_input_event(queue, map_id, it.id, it.input.type);
+                            it.input.chord.at = 0;
                         }
 
                         handled = handled || !(it.flags & FALLTHROUGH);
                     } else {
-                        it.chord.at = 0;
+                        it.input.chord.at = 0;
                     }
                 }
             }
+
             if (handled) break;
 
             for (auto &it : map->by_device[KEYBOARD][EDGE_DOWN]) {
-                if (event.key.keycode == it.key.code &&
-                    (event.key.modifiers == it.key.modifiers ||
-                     it.key.modifiers == MF_ANY))
+                if (event.key.keycode == it.input.key.code &&
+                    (event.key.modifiers == it.input.key.modifiers ||
+                     it.input.key.modifiers == MF_ANY))
                 {
                     (*map_find_emplace(&map->edges, it.id, 0))++;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
 
             for (auto &it : map->by_device[KEYBOARD][HOLD]) {
-                if (event.key.keycode == it.key.code &&
-                    (event.key.modifiers == it.key.modifiers ||
-                     it.key.modifiers == MF_ANY))
+                if (event.key.keycode == it.input.key.code &&
+                    (event.key.modifiers == it.input.key.modifiers ||
+                     it.input.key.modifiers == MF_ANY))
                 {
                     (*map_find_emplace(&map->active, it, true)) = true;
                     (*map_find_emplace(&map->held, it.id, false)) = true;
 
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
 
             for (i32 i = AXIS; i <= AXIS_2D; i++) {
                 for (auto &it : map->by_device[KEYBOARD][i]) {
-                    if(event.key.keycode == it.key.code &&
-                       (event.key.modifiers == it.key.modifiers ||
-                        it.key.modifiers == MF_ANY))
+                    if(event.key.keycode == it.input.key.code &&
+                       (event.key.modifiers == it.input.key.modifiers ||
+                        it.input.key.modifiers == MF_ANY))
                     {
                         (*map_find_emplace(&map->active, it, true)) = true;
                         f32 *axis = map_find_emplace(&map->axes, it.id);
-                        axis[it.key.axis] += it.key.faxis;
+                        axis[it.input.key.axis] += it.input.key.faxis;
 
-                        insert_axis2d_event(queue, map_id, it.id, it.any.type, (f32[2]){ axis[0], axis[1] });
+                        insert_axis2d_event(queue, map_id, it.id, it.input.type, (f32[2]){ axis[0], axis[1] });
                         handled = handled || !(it.flags & FALLTHROUGH);
                     }
                 }
@@ -562,18 +563,18 @@ bool translate_input_event(
             break;
         case WE_KEY_RELEASE:
             for (auto &it : map->by_device[KEYBOARD][EDGE_UP]) {
-                if (event.key.keycode == it.key.code &&
-                    (event.key.modifiers == it.key.modifiers ||
-                     it.key.modifiers == MF_ANY))
+                if (event.key.keycode == it.input.key.code &&
+                    (event.key.modifiers == it.input.key.modifiers ||
+                     it.input.key.modifiers == MF_ANY))
                 {
                     (*map_find_emplace(&map->edges, it.id, 0))++;
-                    insert_input_event(queue, map_id, it.id, it.any.type);
+                    insert_input_event(queue, map_id, it.id, it.input.type);
                     handled = handled || !(it.flags & FALLTHROUGH);
                 }
             }
 
             for (auto &it : map->by_device[KEYBOARD][HOLD]) {
-                if (event.key.keycode == it.key.code) {
+                if (event.key.keycode == it.input.key.code) {
                     (*map_find_emplace(&map->active, it, true)) = false;
                     (*map_find_emplace(&map->held, it.id, false)) = false;
                     handled = handled || !(it.flags & FALLTHROUGH);
@@ -582,17 +583,17 @@ bool translate_input_event(
 
             for (i32 i = AXIS; i <= AXIS_2D; i++) {
                 for (auto &it : map->by_device[KEYBOARD][i]) {
-                    if (event.key.keycode == it.key.code &&
-                        (event.key.modifiers == it.key.modifiers ||
-                         it.key.modifiers == MF_ANY))
+                    if (event.key.keycode == it.input.key.code &&
+                        (event.key.modifiers == it.input.key.modifiers ||
+                         it.input.key.modifiers == MF_ANY))
                     {
                         bool *active = map_find_emplace(&map->active, it, false);
                         if (*active) {
                             *active = false;
 
                             f32 *axis = map_find_emplace(&map->axes, it.id);
-                            axis[it.key.axis] -= it.key.faxis;
-                            insert_axis2d_event(queue, map_id, it.id, it.any.type, (f32[2]){ axis[0], axis[1] });
+                            axis[it.input.key.axis] -= it.input.key.faxis;
+                            insert_axis2d_event(queue, map_id, it.id, it.input.type, (f32[2]){ axis[0], axis[1] });
                         }
 
                         handled = handled || !(it.flags & FALLTHROUGH);
@@ -647,7 +648,7 @@ bool translate_input_event(
 
         for (auto &map : input.maps) {
             for (auto &it : map.by_device[MOUSE][HOLD]) {
-                if (it.key.code == event.key.keycode) {
+                if (it.input.key.code == event.key.keycode) {
                     (*map_find_emplace(&map.held, it.id, false)) = false;
                 }
             }
@@ -655,8 +656,8 @@ bool translate_input_event(
                 bool *active = map_find(&map.active, it);
                 if (!active || !*active) continue;
 
-                if ((it.mouse.button & event.mouse.button) ||
-                    it.mouse.button == MB_ANY)
+                if ((it.input.mouse.button & event.mouse.button) ||
+                    it.input.mouse.button == MB_ANY)
                 {
                     (*map_find_emplace(&map.held, it.id, false)) = false;
                     *active = false;
@@ -670,7 +671,7 @@ bool translate_input_event(
                 bool *active = map_find(&map.active, it);
                 if (!active || !*active) continue;
 
-                if (it.key.code == event.key.keycode) {
+                if (it.input.key.code == event.key.keycode) {
                     (*map_find_emplace(&map.held, it.id, false)) = false;
                     *active = false;
                 }
@@ -682,9 +683,9 @@ bool translate_input_event(
                     if (!active || !*active) continue;
 
                     if (f32 *axis = map_find(&map.axes, it.id);
-                        axis && it.key.code == event.key.keycode)
+                        axis && it.input.key.code == event.key.keycode)
                     {
-                        axis[it.key.axis] -= it.key.faxis;
+                        axis[it.input.key.axis] -= it.input.key.faxis;
                         *active = false;
                     }
                 }
@@ -796,32 +797,50 @@ u32 hash32(const InputDesc &desc, u32 seed /*= MURMUR3_SEED */) EXPORT
 {
     u32 state = seed;
     state = hash32(desc.id, state);
-    state = hash32(desc.any.device, state);
-    state = hash32(desc.any.type, state);
-    switch (desc.any.device) {
-    case KEYBOARD:
-        state = hash32(desc.key.code, state);
-        state = hash32(desc.key.modifiers, state);
-        state = hash32(desc.key.axis, state);
-        state = hash32(desc.key.faxis, state);
-        break;
-    case MOUSE:
-        state = hash32(desc.mouse.button, state);
-        state = hash32(desc.mouse.modifiers, state);
-        break;
-    case GAMEPAD:
-        state = hash32(desc.pad.button, state);
-        break;
-    case VAXIS:
-        state = hash32(desc.axis.id, state);
-        break;
-    case VTEXT:
-        break;
-    case IDEVICE_INVALID:
-    case IDEVICE_MAX:
-        PANIC("invalid device type");
-        break;
+    state = hash32(desc.input.device, state);
+    state = hash32(desc.input.type, state);
+
+    auto ihash = [](IUnion input, u32 seed) -> u32
+    {
+        u32 state = seed;
+
+        switch (input.device) {
+        case KEYBOARD:
+            state = hash32(input.key.code, state);
+            state = hash32(input.key.modifiers, state);
+            state = hash32(input.key.axis, state);
+            state = hash32(input.key.faxis, state);
+            break;
+        case MOUSE:
+            state = hash32(input.mouse.button, state);
+            state = hash32(input.mouse.modifiers, state);
+            break;
+        case GAMEPAD:
+            state = hash32(input.pad.button, state);
+            break;
+        case VAXIS:
+            state = hash32(input.axis.id, state);
+            break;
+        case VTEXT:
+            break;
+        case IDEVICE_INVALID:
+        case IDEVICE_MAX:
+            PANIC("invalid device type");
+            break;
+        }
+
+        return state;
+    };
+
+    if (desc.input.type == CHORD) {
+        state = hash32(desc.input.chord.length, state);
+        for (i32 i = 0; i < desc.input.chord.length; i++) {
+            state = ihash(desc.input.chord.seq[i], state);
+        }
+    } else {
+        state = ihash(desc.input, state);
     }
+
     state = hash32(desc.flags, state);
     return state;
 

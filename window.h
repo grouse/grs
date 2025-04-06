@@ -1,6 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "core.h"
 #include "string.h"
 #include "maths.h"
 #include "hash.h"
@@ -203,6 +204,7 @@ enum InputType {
 
 enum InputDevice {
     IDEVICE_INVALID = 0,
+    VCHORD = 0,
 
     KEYBOARD,
     MOUSE,
@@ -278,11 +280,6 @@ struct WindowCreateDesc {
     u32 flags = WINDOW_OPENGL;
 };
 
-struct IAny {
-    InputDevice device;
-    InputType   type;
-};
-
 struct IKey {
     InputDevice device = KEYBOARD;
     InputType   type = EDGE_DOWN;
@@ -295,7 +292,7 @@ struct IKey {
 
 struct IMouse {
     InputDevice device = MOUSE;
-    InputType   type = AXIS_2D;
+    InputType   type = EDGE_DOWN;
 
     u8 button;
     u8 modifiers;
@@ -303,7 +300,7 @@ struct IMouse {
 
 struct IPad {
     InputDevice device = GAMEPAD;
-    InputType   type;
+    InputType   type = EDGE_DOWN;
     u8 button;
 };
 
@@ -318,66 +315,62 @@ struct IText {
     InputType   type = TEXT;
 };
 
-union IUnion {
-    IAny any;
-    IKey key;
-    IMouse mouse;
-    IPad pad;
-    IAxis axis;
-    IText text;
-};
-
 struct IChord {
-    InputDevice device = IDEVICE_INVALID;
+    InputDevice device = VCHORD;
     InputType   type = CHORD;
-    IUnion *seq;
+    union IUnion *seq;
     i32 length, at;
 };
 
-#define IAXIS(...)  { .axis  = { __VA_ARGS__ } }
+union IUnion {
+    struct {
+        InputDevice device;
+        InputType   type;
+    };
 
-#define IKEY(...)   { .key   = { .type = EDGE_DOWN, __VA_ARGS__ } }
-#define IMOUSE(...) { .mouse = { .type = AXIS_2D, __VA_ARGS__ } }
-#define ICHORD(...) { .chord = { .seq = (IUnion[]) { __VA_ARGS__ }} }
-#define IKAXIS(...) { .key   = { .type = AXIS, __VA_ARGS__ } }
-#define IPAD(...)   { .pad   = { .type = EDGE_DOWN, __VA_ARGS__ } }
+    IKey   key;
+    IMouse mouse;
+    IPad   pad;
+    IAxis  axis;
+    IText  text;
+    IChord chord;
+};
+
+
+#define IKEY(...)   IUnion{ .key   = { KEYBOARD, EDGE_DOWN, __VA_ARGS__ } }
+#define IMOUSE(...) IUnion{ .mouse = { MOUSE, AXIS_2D, __VA_ARGS__ } }
+#define IAXIS(...)  IUnion{ .axis  = { VAXIS, AXIS, __VA_ARGS__ } }
+#define ITEXT()     IUnion{ .text  = { VTEXT, TEXT } }
+#define ICHORD(...) IUnion{ .chord = { VCHORD, CHORD, (IUnion[]){ __VA_ARGS__, {} } } }
+#define IKAXIS(...) IUnion{ .key   = { KEYBOARD, AXIS, __VA_ARGS__ } }
+#define IPAD(...)   IUnion{ .pad   = { GAMEPAD, EDGE_DOWN, __VA_ARGS__ } }
 
 
 struct InputDesc {
     InputId id;
-
-    union {
-        IAny   any;
-        IKey   key;
-        IMouse mouse;
-        IPad   pad;
-        IAxis  axis;
-        IText  text;
-        IChord chord;
-    };
-
-    u32 flags;
+    IUnion  input;
+    u32     flags;
 
     bool operator!=(const InputDesc &rhs)
     {
-        if (id != rhs.id || any.device != rhs.any.device || any.type != rhs.any.type || flags != rhs.flags)
+        if (id != rhs.id || input.device != rhs.input.device || input.type != rhs.input.type || flags != rhs.flags)
             return true;
 
-        switch (any.device) {
+        switch (input.device) {
         case KEYBOARD:
             return
-                key.code != rhs.key.code ||
-                key.modifiers != rhs.key.modifiers ||
-                key.axis != rhs.key.axis ||
-                key.faxis != rhs.key.faxis;
+                input.key.code != rhs.input.key.code ||
+                input.key.modifiers != rhs.input.key.modifiers ||
+                input.key.axis != rhs.input.key.axis ||
+                input.key.faxis != rhs.input.key.faxis;
         case MOUSE:
             return
-                mouse.button != rhs.mouse.button ||
-                mouse.modifiers != rhs.mouse.modifiers;
+                input.mouse.button != rhs.input.mouse.button ||
+                input.mouse.modifiers != rhs.input.mouse.modifiers;
         case GAMEPAD:
-            return pad.button != rhs.pad.button;
+            return input.pad.button != rhs.input.pad.button;
         case VAXIS:
-            return axis.id != rhs.axis.id;
+            return input.axis.id != rhs.input.axis.id;
         case VTEXT:
             break;
         case IDEVICE_INVALID:
