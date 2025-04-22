@@ -116,6 +116,9 @@ extern Contact aabb_intersect_line(Vector2 pos_a, Vector2 extents_a, Vector2 l_p
 extern bool line_intersect_line(Line2 l0, Line2 l1, Vector2 *intersect_point);
 extern bool line_intersect_line(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, Vector2 *intersect_point);
 extern bool line_intersect_aabb(Vector2 l_p0, Vector2 l_p1, Vector2 pos, Vector2 half_size, Vector2 *out_intersect_point, Vector2 *out_normal);
+extern f32 dist_point_vs_line(Vector3 q, Vector3 p, Vector3 v);
+extern f32 dist_point_vs_line_unit(Vector3 q, Vector3 p, Vector3 v);
+extern f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2);
 extern void calc_aabb_lines(Line2 lines[4], Vector2 pos, Vector2 extents);
 extern bool aabb_intersect_circle(Vector2 aabb_p, Vector2 aabb_half_size, Vector2 circle_p, f32 circle_r);
 extern bool aabb_intersect_aabb(Vector2 pos_a, Vector2 extents_a, Vector2 pos_b, Vector2 extents_b, Vector2 *out_delta, Vector2 *out_normal);

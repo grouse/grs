@@ -1649,6 +1649,41 @@ bool line_intersect_aabb(
     return false;
 }
 
+f32 dist_point_vs_line(Vector3 q, Vector3 p, Vector3 v) EXPORT
+{
+    Vector3 a = cross(q-p, v);
+    return sqrtf(dot(a, a) / dot(v, v));
+}
+
+f32 dist_point_vs_line_unit(Vector3 q, Vector3 p, Vector3 v) EXPORT
+{
+    ASSERT_UNIT_LENGTH(v);
+    Vector3 a = cross(q-p, v);
+    return sqrtf(dot(a, a));
+}
+
+f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2) EXPORT
+{
+    Vector3 dp = p2-p1;
+    f32 v12 = dot(v1, v1);
+    f32 v22 = dot(v2, v2);
+    f32 v1v2 = dot(v1, v2);
+
+    f32 det = v1v2*v1v2 - v12*v22;
+    if (fabsf(det) > f32_MIN) {
+        det = 1.0f / det;
+        f32 dpv1 = dot(dp, v1);
+        f32 dpv2 = dot(dp, v2);
+        f32 t1 = (v1v2*dpv2 - v22*dpv1) * det;
+        f32 t2 = (v12*dpv2 - v1v2*dpv1) * det;
+
+        return length(dp + v2*t2 - v1*t1);
+    }
+
+    Vector3 a = cross(dp, v1);
+    return sqrtf(dot(a, a) / v12);
+}
+
 void calc_aabb_lines(Line2 lines[4], Vector2 pos, Vector2 extents) EXPORT
 {
     lines[0] = { { pos.x + extents.x, pos.y - extents.y }, { pos.x - extents.x, pos.y - extents.y } };
