@@ -339,7 +339,7 @@ union IUnion {
 
 #define IKEY(...)   IUnion{ .key   = { KEYBOARD, EDGE_DOWN, __VA_ARGS__ } }
 #define IMOUSE(...) IUnion{ .mouse = { MOUSE, AXIS_2D, __VA_ARGS__ } }
-#define IAXIS(...)  IUnion{ .axis  = { VAXIS, AXIS, __VA_ARGS__ } }
+#define IAXIS(...)  IUnion{ .axis  = { __VA_ARGS__ } }
 #define ITEXT()     IUnion{ .text  = { VTEXT, TEXT } }
 #define ICHORD(...) IUnion{ .chord = { VCHORD, CHORD, (IUnion[]){ __VA_ARGS__, {} } } }
 #define IKAXIS(...) IUnion{ .key   = { KEYBOARD, AXIS, __VA_ARGS__ } }
