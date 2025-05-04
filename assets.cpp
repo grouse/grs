@@ -489,13 +489,13 @@ Array<String> list_asset_files(i32 type, Allocator mem) EXPORT
     return files;
 }
 
-Array<String> list_asset_files(String ext, Allocator mem) EXPORT
+Array<String> list_asset_files(Array<String> extensions, Allocator mem) EXPORT
 {
     DynamicArray<String> files{ .alloc = mem };
 
     for (auto dir : assets.folders) {
         i32 c = files.count;
-        list_files(&files, dir, ext, mem, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
+        list_files(&files, dir, extensions, mem, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
 
         // NOTE(jesper): handle the case of an asset folder being a subfolder to another. This should probably be handled in a much better way to avoid a lot of re-iteration of the filesystem, nevermind the allocation of the resolved file paths
         for (i32 i = 0; i < c; i++) {
@@ -507,7 +507,6 @@ Array<String> list_asset_files(String ext, Allocator mem) EXPORT
 
     return files;
 }
-
 
 void* load_string_asset(AssetHandle /*handle*/, void *existing, String /*identifier*/, u8 *data, i32 size) EXPORT
 {

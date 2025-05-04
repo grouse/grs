@@ -42,17 +42,27 @@ struct FileEvent {
 
 FileInfo read_file(String path, Allocator mem, i32 retry_count = 0);
 
-void list_files(DynamicArray<String> *dst, String dir, String ext, Allocator mem, u32 flags = 0);
+void list_files(DynamicArray<String> *dst, String dir, Array<String> extensions, Allocator mem, u32 flags = 0);
+
+inline void list_files(DynamicArray<String> *dst, String dir, std::initializer_list<String> extensions, Allocator mem, u32 flags = 0)
+{
+    list_files(dst, dir, Array<String>{ (String*)extensions.begin(), (i32)extensions.size() }, mem, flags);
+}
+
+inline void list_files(DynamicArray<String> *dst, String dir, String ext, Allocator mem, u32 flags = 0)
+{
+    list_files(dst, dir, { &ext, 1 }, mem, flags);
+}
 
 inline void list_files(DynamicArray<String> *dst, String dir, Allocator mem, u32 flags = 0)
 {
-    list_files(dst, dir, "", mem, flags);
+    list_files(dst, dir, {}, mem, flags);
 }
 
 inline DynamicArray<String> list_files(String dir, Allocator mem, u32 flags = 0)
 {
     DynamicArray<String> files{ .alloc = mem };
-    list_files(&files, dir, "", mem, flags);
+    list_files(&files, dir, {}, mem, flags);
     return files;
 }
 

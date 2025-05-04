@@ -33,7 +33,7 @@ extern String resolve_asset_path(String path, Allocator mem);
 extern String normalise_asset_path(String path, Allocator mem);
 extern Array<String> list_asset_files(Allocator mem);
 extern Array<String> list_asset_files(i32 type, Allocator mem);
-extern Array<String> list_asset_files(String ext, Allocator mem);
+extern Array<String> list_asset_files(Array<String> extensions, Allocator mem);
 extern void *load_string_asset(AssetHandle, void *existing, String, u8 *data, i32 size);
 
 #endif // ASSETS_PUBLIC_H

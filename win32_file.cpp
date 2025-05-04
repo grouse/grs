@@ -161,7 +161,7 @@ bool is_directory(String path)
     return attribs == FILE_ATTRIBUTE_DIRECTORY;
 }
 
-void list_files(DynamicArray<String> *dst, String dir, String ext, Allocator mem, u32 flags)
+void list_files(DynamicArray<String> *dst, String dir, Array<String> extensions, Allocator mem, u32 flags)
 {
     SArena scratch = tl_scratch_arena(mem);
 
@@ -189,7 +189,10 @@ void list_files(DynamicArray<String> *dst, String dir, String ext, Allocator mem
                 }
             } else if (ffd.dwFileAttributes & (FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_ARCHIVE)) {
                 String filename{ ffd.cFileName, (i32)strlen(ffd.cFileName) };
-                if (ext && !ends_with(filename, ext)) continue;
+                for (auto ext : extensions) if (ends_with(filename, ext)) goto pass_ext_filter;
+                continue;
+
+            pass_ext_filter:
 
                 String path;
                 if (flags & FILE_LIST_ABSOLUTE) {

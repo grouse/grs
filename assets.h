@@ -47,6 +47,10 @@ struct Asset {
 };
 
 #include "generated/assets.h"
+inline Array<String> list_asset_files(std::initializer_list<String> extensions, Allocator mem)
+{
+    return list_asset_files(Array<String>{ (String*)extensions.begin(), (i32)extensions.size() }, mem);
+}
 
 template<typename T>
 T* find_asset(String path)

@@ -59,7 +59,7 @@ FileInfo read_file(String path, Allocator mem, i32 /*retry_count*/)
     return fi;
 }
 
-void list_files(DynamicArray<String> *dst, String dir, String ext, Allocator mem, u32 flags)
+void list_files(DynamicArray<String> *dst, String dir, Array<String> extensions, Allocator mem, u32 flags)
 {
     SArena scratch = tl_scratch_arena(mem);
 
@@ -86,7 +86,10 @@ void list_files(DynamicArray<String> *dst, String dir, String ext, Allocator mem
                 // TODO(jesper): should I read the target linux address and return that instead?
             case DT_REG: {
                 String filename = string(it->d_name);
-                if (ext && !ends_with(filename, ext)) continue;
+                for (auto ext : extensions) if (ends_with(filename, ext)) goto pass_ext_filter;
+                continue;
+
+            pass_ext_filter:
 
                 String path;
                 if (flags & FILE_LIST_ABSOLUTE) {
