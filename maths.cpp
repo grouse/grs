@@ -412,6 +412,18 @@ Vector3 cross(Vector3 a, Vector3 b) EXPORT
     };
 }
 
+Vector3 calc_center(Vector3 *points, i32 point_count) EXPORT
+{
+    Vector3 min = vec3_MAX, max = -vec3_MAX;
+    for (i32 i = 0; i < point_count; i++) {
+        auto &it = points[i];
+        min = vec3_min(min, it);
+        max = vec3_max(max, it);
+    }
+
+    return min + (max-min)*0.5f;
+}
+
 
 // Vector4
 f32 length(Vector4 v) EXPORT { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w); }
@@ -488,6 +500,8 @@ Vector4 operator+(Vector4 v, f32 s)
     return r;
 }
 
+Vector4 operator-(Vector4 v) { return { -v.x, -v.y, -v.z, -v.w }; }
+
 Vector4 operator-(Vector4 a, Vector4 b)
 {
     Vector4 r;
@@ -545,6 +559,28 @@ bool operator!=(const Vector4 &a, const Vector4 &b) { return a.x != b.x || a.y !
 f32 dot(Vector4 a, Vector4 b) EXPORT
 {
     return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
+}
+
+Vector4 vec4_max(Vector4 lhs, Vector4 rhs) EXPORT
+{
+    return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y), MAX(lhs.z, rhs.z), MAX(lhs.w, rhs.w) };
+}
+
+Vector4 vec4_min(Vector4 lhs, Vector4 rhs) EXPORT
+{
+    return { MIN(lhs.x, rhs.x), MIN(lhs.y, rhs.y), MIN(lhs.z, rhs.z), MIN(lhs.w, rhs.w) };
+}
+
+Vector4 calc_center(Vector4 *points, i32 point_count) EXPORT
+{
+    Vector4 min = vec4_MAX, max = -vec4_MAX;
+    for (i32 i = 0; i < point_count; i++) {
+        auto &it = points[i];
+        min = vec4_min(min, it);
+        max = vec4_max(max, it);
+    }
+
+    return min + (max-min)*0.5f;
 }
 
 

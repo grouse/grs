@@ -30,6 +30,7 @@ extern "C" CRTIMP float fmodf( float x, float y ) NOTHROW;
     constexpr const T& operator[](i32 i) const { M_BOUNDS_CHECK(i, 0, ARRAY_COUNT((values))-1); return values[i]; }\
 
 #define vec3_MAX Vector3{ f32_MAX, f32_MAX, f32_MAX }
+#define vec4_MAX Vector4{ f32_MAX, f32_MAX, f32_MAX, f32_MAX }
 
 #define M_ADD_OPS(R, T_l, T_r)\
     R operator+(T_l lhs,   T_r rhs);\
