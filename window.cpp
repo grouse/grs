@@ -7,6 +7,11 @@
 
 #include "generated/internal/window.h"
 
+struct InputCursor {
+    f32 x, y;
+    f32 dx, dy;
+};
+
 struct InputMap {
     String name;
 
@@ -16,6 +21,7 @@ struct InputMap {
     DynamicMap<InputId, i32> edges;
     DynamicMap<InputId, bool> held;
     DynamicMap<InputId, f32[2]> axes;
+    DynamicMap<InputId, InputCursor> cursors;
     DynamicMap<InputDesc, bool> active;
     DynamicMap<InputId, DynamicArray<TextEvent>> text;
 };
@@ -96,6 +102,7 @@ String string_from_enum(InputType type) EXPORT
     case HOLD:       return "HOLD";
     case AXIS:       return "AXIS";
     case AXIS_2D:    return "AXIS_2D";
+    case CURSOR:     return "CURSOR";
     case TEXT:       return "TEXT";
     case CHORD:      return "CHORD";
     case ITYPE_INVALID: return "INVALID";
@@ -442,6 +449,33 @@ bool translate_input_event(
                     if (false) LOG_INFO("[%.*s] mouse move: [%d], final: %d", STRFMT(map->name), it.id, handled);
                 }
             }
+
+            for (auto &it : map->by_device[MOUSE][CURSOR]) {
+                if ((event.mouse.button == it.input.mouse.button ||
+                     it.input.mouse.button == MB_ANY) &&
+                    (event.mouse.modifiers == it.input.mouse.modifiers ||
+                     it.input.mouse.modifiers == MF_ANY))
+                {
+                    InputCursor *cursor = map_find_emplace(&map->cursors, it.id);
+                    cursor->x = event.mouse.x;
+                    cursor->y = event.mouse.y;
+                    cursor->dx += event.mouse.dx;
+                    cursor->dy += event.mouse.dy;
+
+                    array_insert(queue, 0, {
+                        it.id,
+                        .input = {
+                            map_id,
+                            it.input.type,
+                            .cursor = {
+                                cursor->x, cursor->y,
+                                (f32)event.mouse.dx, (f32)event.mouse.dy
+                            }}});
+                    handled = handled || !(it.flags & FALLTHROUGH);
+
+                    if (false) LOG_INFO("[%.*s] mouse move: [%d], final: %d", STRFMT(map->name), it.id, handled);
+                }
+            }
             break;
         case WE_MOUSE_PRESS:
             for (auto &it : map->by_device[MOUSE][EDGE_DOWN]) {
@@ -752,6 +786,68 @@ bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_AN
 
     dst[0] = axis[0];
     dst[1] = axis[1];
+    return true;
+}
+
+bool get_input_cursor(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+{
+    if (map_id == INPUT_MAP_ANY) {
+        for (auto it : reverse(input.layers)) if (get_input_cursor(id, dst, it)) return true;
+        map_id = input.active_map;
+    }
+
+    if (map_id == INPUT_MAP_INVALID) return false;
+    InputMap *map = &input.maps[map_id];
+    InputCursor *cursor = map_find(&map->cursors, id);
+    if (!cursor) return false;
+
+    dst[0] = cursor->x;
+    dst[1] = cursor->y;
+    return true;
+}
+
+bool has_input_cursor(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+{
+    if (map_id == INPUT_MAP_ANY) {
+        for (auto it : reverse(input.layers)) if (has_input_cursor(id, it)) return true;
+        map_id = input.active_map;
+    }
+
+    if (map_id == INPUT_MAP_INVALID) return false;
+    InputMap *map = &input.maps[map_id];
+    InputCursor *cursor = map_find(&map->cursors, id);
+    if (!cursor) return false;
+    return true;
+}
+
+bool get_input_cursor_delta(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+{
+    if (map_id == INPUT_MAP_ANY) {
+        for (auto it : reverse(input.layers)) if (get_input_cursor_delta(id, dst, it)) return true;
+        map_id = input.active_map;
+    }
+
+    if (map_id == INPUT_MAP_INVALID) return false;
+    InputMap *map = &input.maps[map_id];
+    InputCursor *cursor = map_find(&map->cursors, id);
+    if (!cursor || (cursor->dx == 0 && cursor->dy == 0)) return false;
+
+    dst[0] = cursor->dx;
+    dst[1] = cursor->dy;
+    return true;
+}
+
+bool has_input_cursor_delta(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+{
+    if (map_id == INPUT_MAP_ANY) {
+        for (auto it : reverse(input.layers)) if (has_input_cursor_delta(id, it)) return true;
+        map_id = input.active_map;
+    }
+
+    if (map_id == INPUT_MAP_INVALID) return false;
+    InputMap *map = &input.maps[map_id];
+    InputCursor *cursor = map_find(&map->cursors, id);
+    if (!cursor || (cursor->dx == 0 && cursor->dy == 0)) return false;
     return true;
 }
 

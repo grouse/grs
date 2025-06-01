@@ -193,11 +193,16 @@ enum InputType {
 
     AXIS = 1,
     AXIS_2D,
+
+    CURSOR,
+
     EDGE_DOWN,
     EDGE_UP,
     HOLD,
-    TEXT,
+
     CHORD,
+
+    TEXT,
 
     ITYPE_MAX,
 };
@@ -338,7 +343,7 @@ union IUnion {
 
 
 #define IKEY(...)   IUnion{ .key   = { KEYBOARD, EDGE_DOWN, __VA_ARGS__ } }
-#define IMOUSE(...) IUnion{ .mouse = { MOUSE, AXIS_2D, __VA_ARGS__ } }
+#define IMOUSE(...) IUnion{ .mouse = { MOUSE, CURSOR, __VA_ARGS__ } }
 #define IAXIS(...)  IUnion{ .axis  = { __VA_ARGS__ } }
 #define ITEXT()     IUnion{ .text  = { VTEXT, TEXT } }
 #define ICHORD(...) IUnion{ .chord = { VCHORD, CHORD, (IUnion[]){ __VA_ARGS__, {} } } }
@@ -424,6 +429,10 @@ struct WindowEvent {
             union {
                 f32 axis;
                 f32 axis2d[2];
+                struct {
+                    f32 x, y;
+                    f32 dx, dy;
+                } cursor;
                 TextEvent text;
             };
         } input;

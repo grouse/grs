@@ -382,12 +382,11 @@ void linux_input_event(DynamicArray<WindowEvent> *stream, AppWindow *wnd, XEvent
 
 				t.text.length = Xutf8LookupString(
 					wnd->ic, &xevent.xkey,
-					(char*)t.text.c, sizeof t.text.c,
+					(char*)&t.text.c[0], sizeof t.text.c,
 					nullptr, nullptr);
 
 				if (t.text.length > 0) {
 					array_add(stream, t);
-					String s{(char*)t.text.c, t.text.length};
 				}
 			}
 
