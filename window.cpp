@@ -269,6 +269,11 @@ void reset_input_map(InputMapId map_id) INTERNAL
             axis[0] = axis[1] = 0;
         }
     }
+
+    for (auto &it : map->by_device[MOUSE][CURSOR]) {
+        auto *cursor = map_find_emplace(&map->cursors, it.id);
+        cursor->dx = cursor->dy = 0;
+    }
 }
 
 void input_begin_frame() EXPORT
@@ -699,6 +704,15 @@ bool translate_input_event(
             }
         }
         break;
+    case WE_MOUSE_MOVE:
+        for (auto &map : input.maps) {
+            for (auto &it : map.by_device[MOUSE][CURSOR]) {
+                if (auto *cursor = map_find(&map.cursors, it.id)) {
+                    cursor->x = event.mouse.x;
+                    cursor->y = event.mouse.y;
+                }
+            }
+        } break;
     case WE_KEY_RELEASE:
         for (auto &map : input.maps) {
             for (auto &it : map.by_device[KEYBOARD][HOLD]) {
