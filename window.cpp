@@ -707,7 +707,7 @@ bool translate_input_event(
     case WE_MOUSE_MOVE:
         for (auto &map : input.maps) {
             for (auto &it : map.by_device[MOUSE][CURSOR]) {
-                if (auto *cursor = map_find(&map.cursors, it.id)) {
+                if (auto *cursor = map_find_emplace(&map.cursors, it.id, {})) {
                     cursor->x = event.mouse.x;
                     cursor->y = event.mouse.y;
                 }
