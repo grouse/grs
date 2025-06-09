@@ -137,7 +137,7 @@ extern VkFormat vk_format(GfxTextureFormat format) INTERNAL
     case GFX_TEXTURE_R8G8B8A8_SRGB: return VK_FORMAT_R8G8B8A8_SRGB;
     }
 
-    LOG_ERROR("unsupported texture format: %d", format);
+    PANIC("[gfx] unknown texture format: %s [%d]", sz_from_enum(format), format);
     return VK_FORMAT_UNDEFINED;
 }
 
@@ -487,6 +487,7 @@ extern const char* sz_from_enum(shaderc_compilation_status status) INTERNAL
     case shaderc_compilation_status_configuration_error: return "configuration_error";
     }
 
+    LOG_ERROR("[gfx] unknown shaderc compilation status: %d", status);
     return "unknown";
 }
 
@@ -543,6 +544,7 @@ extern const char* sz_from_enum(VkResult result) INTERNAL
     case VK_RESULT_MAX_ENUM: return "VK_RESULT_MAX_ENUM";
     }
 
+    LOG_ERROR("[gfx] unknown vulkan result: %d", result);
     return "unknown";
 }
 
@@ -575,11 +577,10 @@ extern const char* sz_from_enum(VkFormat format) INTERNAL
     case VK_FORMAT_B8G8R8_UNORM: return "VK_FORMAT_B8G8R8_UNORM";
     case VK_FORMAT_R32G32_SFLOAT: return "VK_FORMAT_R32G32_SFLOAT";
     default:
-        LOG_INFO("[vk] unhandled format: %d", format);
+        LOG_ERROR("[vk] unhandled format: %d", format);
         return "unknown";
     }
 
-    return "unknown";
 }
 
 extern const char* sz_from_enum(VkPresentModeKHR mode) INTERNAL
@@ -593,6 +594,8 @@ extern const char* sz_from_enum(VkPresentModeKHR mode) INTERNAL
     case VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR: return "VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR";
     case VK_PRESENT_MODE_MAX_ENUM_KHR: return "VK_PRESENT_MODE_MAX_ENUM_KHR";
     }
+
+    LOG_ERROR("[gfx] unknown present mode: %d", mode);
     return "unknown";
 }
 
