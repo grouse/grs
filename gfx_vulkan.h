@@ -11,6 +11,7 @@
 #include <vk_mem_alloc.h>
 #include <shaderc/shaderc.h>
 
+constexpr i32 MAX_FRAMES_IN_FLIGHT        = 2;
 constexpr i32 MAX_SHADER_STAGES           = 3;
 constexpr i32 MAX_COLOR_ATTACHMENTS       = 1;
 constexpr i32 MAX_VERTEX_INPUT_BINDINGS   = 4;
