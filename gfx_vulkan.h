@@ -209,6 +209,7 @@ struct GfxVkFrame {
 
     struct {
         VkImageView view;
+        u32 index;
     } swapchain;
 
     struct {
@@ -220,8 +221,6 @@ struct GfxVkFrame {
     VkFence     fence;
     VkSemaphore image_available;
     VkSemaphore render_finished;
-
-    u32 image_index;
 };
 
 extern struct GfxVkContext {
