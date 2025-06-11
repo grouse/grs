@@ -30,10 +30,10 @@ enum GfxShaderStageFlagsBits {
 typedef u32 GfxShaderStageFlags;
 
 enum GfxTextureFormat {
-    GFX_TEXTURE_R8,
-    GFX_TEXTURE_R8G8,
-    GFX_TEXTURE_R8G8B8,
-    GFX_TEXTURE_R8G8B8A8,
+    GFX_TEXTURE_R8_UNORM,
+    GFX_TEXTURE_R8G8_UNORM,
+    GFX_TEXTURE_R8G8B8_UNORM,
+    GFX_TEXTURE_R8G8B8A8_UNORM,
 
     GFX_TEXTURE_R8_SRGB,
     GFX_TEXTURE_R8G8_SRGB,
@@ -52,6 +52,13 @@ enum GfxDescriptorType {
     GFX_TEXTURE_ARRAY,
     GFX_UNIFORM,
 };
+
+struct GfxTextureAsset {
+    void *data;
+    u32 width, height;
+    GfxTextureFormat format;
+};
+
 
 struct GfxMaterialParameters {
     Vector4 albedo_factor             = {1, 1, 1, 1};
@@ -112,10 +119,7 @@ struct GfxMesh {
     GfxBuffer index_buffer;
     i32 index_count;
 
-    explicit operator bool()
-    {
-        return vertex_buffer != GfxBuffer_INVALID;
-    }
+    explicit operator bool() { return vertex_buffer != GfxBuffer_INVALID; }
 };
 
 #include "generated/gfx.h"

@@ -20,6 +20,7 @@ extern const char *sz_from_enum(shaderc_compilation_status status);
 extern const char *sz_from_enum(VkResult result);
 extern const char *sz_from_enum(VkFormat format);
 extern const char *sz_from_enum(VkPresentModeKHR mode);
+extern u32 hash32(const GfxTextureAssetDesc & it, u32 seed = MURMUR3_SEED);
 extern u32 hash32(const GfxVkBuffer & it, u32 seed = MURMUR3_SEED);
 extern u32 hash32(const GfxVkTexture & it, u32 seed = MURMUR3_SEED);
 extern u32 hash32(const GfxVkDescriptorDesc & desc, u32 seed = MURMUR3_SEED);

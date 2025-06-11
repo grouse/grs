@@ -4,6 +4,7 @@
 #include "platform.h"
 #include "string.h"
 #include "array.h"
+#include "hash.h"
 
 struct Asset;
 
@@ -11,8 +12,8 @@ struct AssetHandle {
     i32 index;
     i32 gen;
 
-    bool operator!=(const AssetHandle &rhs) const { return index != rhs.index || gen != rhs.gen; }
-    bool operator==(const AssetHandle &rhs) const { return index == rhs.index && gen == rhs.gen; }
+    bool operator!=(const AssetHandle &rhs) const = default;
+    bool operator==(const AssetHandle &rhs) const = default;
 
     explicit operator bool() const { return index != 0 || gen != 0; }
 };

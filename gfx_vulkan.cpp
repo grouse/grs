@@ -4,6 +4,43 @@
 
 GfxVkContext vk;
 
+GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) EXPORT
+{
+    AssetHandle handle = find_asset_handle(path);
+    return gfx_load_texture(handle, sRGB);
+}
+
+GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
+{
+    extern GfxVkTexture vk_create_texture(void *pixels, VkFormat format, VkComponentMapping swizzle, u32 width, u32 height);
+
+    if (!handle) return GfxTexture_INVALID;
+
+    if (auto *asset = map_find(&vk.texture_assets, { handle, sRGB })) {
+        return *asset;
+    }
+
+    GfxTextureAsset *asset = get_asset<GfxTextureAsset>(handle);
+    if (!asset) return GfxTexture_INVALID;
+
+    GfxSwizzle swizzle = GFX_SWIZZLE_IDENTITY;
+    GfxTextureFormat format = sRGB ?
+        gfx_format_srgb(asset->format) :
+        gfx_format_unorm(asset->format);
+
+    GfxVkTexture texture = vk_create_texture(
+        asset->data,
+        vk_format(format),
+        vk_component_mapping(swizzle),
+        asset->width, asset->height);
+
+    i32 idx = array_add(&vk.textures, texture);
+    GfxTexture texture_handle = GfxTexture(idx);
+
+    map_set(&vk.texture_assets, { handle, sRGB }, texture_handle);
+    return texture_handle;
+}
+
 extern void vk_set_viewport(VkCommandBuffer cmd, f32 width, f32 height) INTERNAL
 {
     VkViewport viewport = { .width = width, .height = height, .minDepth = 0.0f, .maxDepth = 1.0f };
@@ -127,14 +164,14 @@ extern VkImageAspectFlags vk_aspect_mask(VkFormat format) INTERNAL
 extern VkFormat vk_format(GfxTextureFormat format) INTERNAL
 {
     switch (format) {
-    case GFX_TEXTURE_R8:            return VK_FORMAT_R8_UNORM;
-    case GFX_TEXTURE_R8_SRGB:       return VK_FORMAT_R8_SRGB;
-    case GFX_TEXTURE_R8G8:          return VK_FORMAT_R8G8_UNORM;
-    case GFX_TEXTURE_R8G8_SRGB:     return VK_FORMAT_R8G8_SRGB;
-    case GFX_TEXTURE_R8G8B8:        return VK_FORMAT_R8G8B8_UNORM;
-    case GFX_TEXTURE_R8G8B8_SRGB:   return VK_FORMAT_R8G8B8_SRGB;
-    case GFX_TEXTURE_R8G8B8A8:      return VK_FORMAT_R8G8B8A8_UNORM;
-    case GFX_TEXTURE_R8G8B8A8_SRGB: return VK_FORMAT_R8G8B8A8_SRGB;
+    case GFX_TEXTURE_R8_UNORM:       return VK_FORMAT_R8_UNORM;
+    case GFX_TEXTURE_R8_SRGB:        return VK_FORMAT_R8_SRGB;
+    case GFX_TEXTURE_R8G8_UNORM:     return VK_FORMAT_R8G8_UNORM;
+    case GFX_TEXTURE_R8G8_SRGB:      return VK_FORMAT_R8G8_SRGB;
+    case GFX_TEXTURE_R8G8B8_UNORM:   return VK_FORMAT_R8G8B8_UNORM;
+    case GFX_TEXTURE_R8G8B8_SRGB:    return VK_FORMAT_R8G8B8_SRGB;
+    case GFX_TEXTURE_R8G8B8A8_UNORM: return VK_FORMAT_R8G8B8A8_UNORM;
+    case GFX_TEXTURE_R8G8B8A8_SRGB:  return VK_FORMAT_R8G8B8A8_SRGB;
     }
 
     PANIC("[gfx] unknown texture format: %s [%d]", sz_from_enum(format), format);
@@ -597,6 +634,14 @@ extern const char* sz_from_enum(VkPresentModeKHR mode) INTERNAL
 
     LOG_ERROR("[gfx] unknown present mode: %d", mode);
     return "unknown";
+}
+
+extern u32 hash32(const GfxTextureAssetDesc &it, u32 seed /*= MURMUR3_SEED*/) INTERNAL
+{
+    u32 state = seed;
+    state = hash32(it.asset, state);
+    state = hash32(it.sRGB, state);
+    return state;
 }
 
 extern u32 hash32(const GfxVkBuffer &it, u32 seed /*= MURMUR3_SEED*/) INTERNAL

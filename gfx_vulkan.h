@@ -5,6 +5,7 @@
 
 #include "array.h"
 #include "map.h"
+#include "assets.h"
 
 #include <volk/volk.h>
 #define VULKAN_H_ 1
@@ -223,6 +224,15 @@ struct GfxVkFrame {
     VkSemaphore render_finished;
 };
 
+struct GfxTextureAssetDesc {
+    AssetHandle asset;
+    bool sRGB;
+
+    bool operator==(const GfxTextureAssetDesc &rhs) const = default;
+    bool operator!=(const GfxTextureAssetDesc &rhs) const = default;
+};
+
+
 extern struct GfxVkContext {
     VkDevice device;
     VkInstance instance;
@@ -270,6 +280,7 @@ extern struct GfxVkContext {
     DynamicMap<GfxSamplerDesc, VkSampler> samplers;
 
     VkDebugUtilsMessengerEXT debug_messenger;
+    DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_assets;
 } vk;
 
 
