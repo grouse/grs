@@ -24,9 +24,19 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
     if (!asset) return GfxTexture_INVALID;
 
     GfxSwizzle swizzle = GFX_SWIZZLE_IDENTITY;
-    GfxTextureFormat format = sRGB ?
-        gfx_format_srgb(asset->format) :
-        gfx_format_unorm(asset->format);
+
+    GfxTextureFormat format;
+    switch (asset->components) {
+    case 1: format = GFX_TEXTURE_R8_SRGB; break;
+    case 2: format = GFX_TEXTURE_R8G8_SRGB; break;
+    case 3: format = GFX_TEXTURE_R8G8B8_SRGB; break;
+    case 4: format = GFX_TEXTURE_R8G8B8A8_SRGB; break;
+    default:
+        LOG_ERROR("[vulkan] invalid image component count: %d", asset->components);
+        return GfxTexture_INVALID;
+    }
+
+    if (!sRGB) format = gfx_format_unorm(format);
 
     GfxVkTexture texture = vk_create_texture(
         asset->data,

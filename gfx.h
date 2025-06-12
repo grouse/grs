@@ -56,7 +56,7 @@ enum GfxDescriptorType {
 struct GfxTextureAsset {
     void *data;
     u32 width, height;
-    GfxTextureFormat format;
+    u32 components;
 };
 
 

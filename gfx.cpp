@@ -17,29 +17,14 @@ void* gfx_load_texture_asset(
         if (components == 3) components = 4;
     }
 
-    GfxTextureFormat format = GFX_TEXTURE_R8_SRGB;
-
-    switch (components) {
-    case 1: format = GFX_TEXTURE_R8_SRGB; break;
-    case 2: format = GFX_TEXTURE_R8G8_SRGB; break;
-    case 3: format = GFX_TEXTURE_R8G8B8_SRGB; break;
-    case 4: format = GFX_TEXTURE_R8G8B8A8_SRGB; break;
-    default:
-        LOG_ERROR("[vulkan][%.*s] invalid image component count: %d", STRFMT(identifier), components);
-        return nullptr;
-    }
-
-    stbi_uc *pixels = stbi_load_from_memory(data, size, &width, &height, nullptr, components);
-
-
     GfxTextureAsset *asset = (GfxTextureAsset*)existing;
     if (asset) stbi_image_free(asset->data);
     else asset = ALLOC_T(mem_dynamic, GfxTextureAsset) {};
 
-    asset->data   = pixels;
+    asset->data   = stbi_load_from_memory(data, size, &width, &height, nullptr, components);
     asset->width  = width;
     asset->height = height;
-    asset->format = format;
+    asset->components = components;
     return asset;
 }
 
