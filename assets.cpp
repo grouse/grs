@@ -138,6 +138,15 @@ String get_asset_path(AssetHandle handle) EXPORT
     return asset.path;
 }
 
+String get_asset_identifier(AssetHandle handle) EXPORT
+{
+    ASSERT(handle != ASSET_HANDLE_INVALID);
+
+    Asset &asset = assets.loaded[handle.index];
+    if (asset.gen != handle.gen) return {};
+    return asset.identifier;
+}
+
 AssetHandle gen_asset_handle() EXPORT
 {
     if (assets.free_slots.count > 0) return array_pop(&assets.free_slots);
