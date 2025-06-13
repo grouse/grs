@@ -24,7 +24,17 @@ void* gfx_load_texture_asset(
     asset->data   = stbi_load_from_memory(data, size, &width, &height, nullptr, components);
     asset->width  = width;
     asset->height = height;
-    asset->components = components;
+
+    switch (components) {
+    case 1: asset->format = GFX_TEXTURE_R8_SRGB; break;
+    case 2: asset->format = GFX_TEXTURE_R8G8_SRGB; break;
+    case 3: asset->format = GFX_TEXTURE_R8G8B8_SRGB; break;
+    case 4: asset->format = GFX_TEXTURE_R8G8B8A8_SRGB; break;
+    default:
+        LOG_ERROR("[vulkan] invalid image component count: %d", components);
+        return nullptr;
+    }
+
     return asset;
 }
 
