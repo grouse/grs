@@ -8,6 +8,11 @@ extern void vk_transition_image(VkCommandBuffer cmd, VkImage image, VkImageAspec
 extern GfxVkBuffer vk_create_buffer(i32 size, VkBufferUsageFlags usage, VmaMemoryUsage mem_usage, VmaAllocationCreateFlagBits flags);
 extern GfxVkBuffer vk_create_buffer(void *data, i32 size, VkBufferUsageFlags usage, VmaMemoryUsage mem_usage, VmaAllocationCreateFlagBits flags);
 extern void vk_destroy_buffer(GfxVkBuffer buffer);
+extern void vk_set_image_label(VkImage image, String label);
+extern void vk_set_image_view_label(VkImageView view, String label);
+extern void vk_set_texture_label(GfxVkTexture texture, String label);
+extern void vk_set_buffer_label(VkBuffer buffer, String label);
+extern void vk_set_pipeline_label(GfxPipeline handle, String label);
 extern VkImageAspectFlags vk_aspect_mask(VkFormat format);
 extern VkFormat vk_format(GfxTextureFormat format);
 extern u32 vk_format_size(VkFormat format);

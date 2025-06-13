@@ -80,6 +80,8 @@ bool is_number(i32 c);
 String stringf(char *buffer, i32 size, const char *fmt, ...);
 String stringf(Allocator mem, const char *fmt, ...);
 
+char* sz_stringf(Allocator mem, const char *fmt, ...);
+
 char* sztringf(Allocator mem, const char *fmt, ...);
 
 i32 i32_from_string(String s);

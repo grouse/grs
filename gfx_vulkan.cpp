@@ -1,6 +1,7 @@
 #include "gfx_vulkan.h"
 #include "generated/internal/gfx_vulkan.h"
 #include "gfx.h"
+#include "string.h"
 
 GfxVkContext vk;
 
@@ -43,6 +44,8 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
         vk_format(format),
         vk_component_mapping(swizzle),
         asset->width, asset->height);
+
+    vk_set_texture_label(texture, get_asset_identifier(handle));
 
     i32 idx = array_add(&vk.textures, texture);
     GfxTexture texture_handle = GfxTexture(idx);
@@ -149,6 +152,68 @@ extern GfxVkBuffer vk_create_buffer(
 extern void vk_destroy_buffer(GfxVkBuffer buffer) INTERNAL
 {
     vmaDestroyBuffer(vk.allocator, buffer.handle, buffer.allocation);
+}
+
+extern void vk_set_image_label(VkImage image, String label) INTERNAL
+{
+    VkDebugUtilsObjectNameInfoEXT name_info{
+        VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+        .objectType = VK_OBJECT_TYPE_IMAGE,
+        .objectHandle = (u64)image,
+        .pObjectName = sz_stringf(mem_dynamic, "image/%.*s", STRFMT(label)),
+    };
+
+    vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
+}
+
+extern void vk_set_image_view_label(VkImageView view, String label) INTERNAL
+{
+    SArena scratch = tl_scratch_arena();
+
+    VkDebugUtilsObjectNameInfoEXT name_info{
+        VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+        .objectType = VK_OBJECT_TYPE_IMAGE_VIEW,
+        .objectHandle = (u64)view,
+        .pObjectName = sz_stringf(scratch, "image_view/%.*s", STRFMT(label)),
+    };
+
+    vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
+}
+
+extern void vk_set_texture_label(GfxVkTexture texture, String label) INTERNAL
+{
+    vk_set_image_label(texture.image, label);
+    vk_set_image_view_label(texture.view, label);
+}
+
+extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
+{
+    SArena scratch = tl_scratch_arena();
+
+    VkDebugUtilsObjectNameInfoEXT name_info{
+        VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+        .objectType = VK_OBJECT_TYPE_BUFFER,
+        .objectHandle = (u64)buffer,
+        .pObjectName = sz_stringf(scratch, "buffer/%.*s", STRFMT(label)),
+    };
+
+    vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
+}
+
+extern void vk_set_pipeline_label(GfxPipeline handle, String label) INTERNAL
+{
+    SArena scratch = tl_scratch_arena();
+
+    VkPipeline pipeline = vk.pipelines[handle];
+
+    VkDebugUtilsObjectNameInfoEXT name_info{
+        VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+        .objectType = VK_OBJECT_TYPE_PIPELINE,
+        .objectHandle = (u64)pipeline,
+        .pObjectName = sz_stringf(scratch, "pipeline/%.*s", STRFMT(label)),
+    };
+
+    vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
 }
 
 extern VkImageAspectFlags vk_aspect_mask(VkFormat format) INTERNAL
