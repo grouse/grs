@@ -40,8 +40,18 @@ void init_assets(Array<String> folders, const AssetTypesDesc &desc) EXPORT
     assets.load_procs.alloc = mem_dynamic;
     assets.save_procs.alloc = mem_dynamic;
 
+    register_asset_procs(desc);
+}
+
+void register_asset_procs(const AssetTypesDesc &desc) EXPORT
+{
     for (i32 i = 0; i < ARRAY_COUNT(desc.types); i++) {
         if (desc.types[i].ext.length == 0) break;
+        if (map_find(&assets.types, desc.types[i].ext)) {
+            LOG_ERROR("[assets] asset with extension '%.*s' has already been registered", STRFMT(desc.types[i].ext));
+            continue;
+        }
+
         map_set(&assets.types, desc.types[i].ext, desc.types[i].type_id);
         map_set(&assets.load_procs, desc.types[i].ext, desc.types[i].load_proc);
         map_set(&assets.save_procs, desc.types[i].ext, desc.types[i].save_proc);
