@@ -151,7 +151,7 @@ extern void vk_set_image_label(VkImage image, String label) INTERNAL
         VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
         .objectType = VK_OBJECT_TYPE_IMAGE,
         .objectHandle = (u64)image,
-        .pObjectName = sz_stringf(mem_dynamic, "image/%.*s", STRFMT(label)),
+        .pObjectName = sz_stringf(mem_dynamic, "image/%.*s [%llX]", STRFMT(label), image),
     };
 
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
@@ -165,7 +165,7 @@ extern void vk_set_image_view_label(VkImageView view, String label) INTERNAL
         VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
         .objectType = VK_OBJECT_TYPE_IMAGE_VIEW,
         .objectHandle = (u64)view,
-        .pObjectName = sz_stringf(scratch, "image_view/%.*s", STRFMT(label)),
+        .pObjectName = sz_stringf(scratch, "image_view/%.*s [%llX]", STRFMT(label), view),
     };
 
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
@@ -185,7 +185,7 @@ extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
         VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
         .objectType = VK_OBJECT_TYPE_BUFFER,
         .objectHandle = (u64)buffer,
-        .pObjectName = sz_stringf(scratch, "buffer/%.*s", STRFMT(label)),
+        .pObjectName = sz_stringf(scratch, "buffer/%.*s [%llX]", STRFMT(label), buffer),
     };
 
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
@@ -194,14 +194,13 @@ extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
 extern void vk_set_pipeline_label(GfxPipeline handle, String label) INTERNAL
 {
     SArena scratch = tl_scratch_arena();
-
     VkPipeline pipeline = vk.pipelines[handle];
 
     VkDebugUtilsObjectNameInfoEXT name_info{
         VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
         .objectType = VK_OBJECT_TYPE_PIPELINE,
         .objectHandle = (u64)pipeline,
-        .pObjectName = sz_stringf(scratch, "pipeline/%.*s", STRFMT(label)),
+        .pObjectName = sz_stringf(scratch, "pipeline/%.*s [%llX]", STRFMT(label), handle),
     };
 
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
@@ -553,8 +552,6 @@ extern VkFilter vk_filter(GfxSampleFilter filter) INTERNAL
     return VK_FILTER_LINEAR;
 }
 
-
-
 extern VkComponentMapping vk_component_mapping(GfxSwizzle swizzle) INTERNAL
 {
     VkComponentMapping components{};
@@ -779,7 +776,6 @@ extern u32 hash32(const VkDescriptorSetLayoutCreateInfo &info, u32 seed /*=MURMU
 
         PANIC_IF(binding.pImmutableSamplers, "unimplemented path, double check that pImmuteableSamplers is an array of binding.descriptorCount length, and add it to hash");
     }
-
 
     return state;
 }
