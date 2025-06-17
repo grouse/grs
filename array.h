@@ -12,6 +12,7 @@
 
 // In honour of Dirk
 #define ANON_ARRAY(fields) struct anon_##__LINE__ { fields; }; Array<anon_##__LINE__>
+#define ARRAY(arr) (Array{ &arr[0], ARRAY_COUNT(arr) })
 
 // -- structures
 template<typename T>
