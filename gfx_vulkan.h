@@ -189,7 +189,7 @@ struct GfxVkPipelineDesc {
         VkFormat format;
         VkBool32 test;
         VkBool32 write;
-        VkCompareOp compare_op = VK_COMPARE_OP_GREATER;
+        VkCompareOp compare_op = VK_COMPARE_OP_GREATER_OR_EQUAL;
     } depth;
 
     FixedArray<GfxVkShader, MAX_SHADER_STAGES> stages;
