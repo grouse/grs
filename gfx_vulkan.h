@@ -66,7 +66,6 @@ struct GfxVkTexture {
 };
 
 struct GfxVkMaterial {
-    u64 entity;
     GfxPipeline pipeline;
     VkDescriptorSet set;
 };
@@ -266,7 +265,8 @@ extern struct GfxVkContext {
     DynamicArray<GfxVkPipeline> pipelines;
     DynamicArray<GfxVkTexture> textures;
     DynamicArray<GfxVkBuffer> buffers;
-    DynamicMap<GfxMaterial, GfxVkMaterial> materials;
+    DynamicArray<GfxVkMaterial> materials;
+    DynamicMap<GfxMaterial, GfxMaterialDesc> material_descs;
 
     DynamicArray<GfxVkShader> shaders;
     DynamicMap<GfxShader, DynamicArray<GfxPipeline>> shaders_used_by;
