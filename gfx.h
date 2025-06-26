@@ -118,6 +118,8 @@ struct GfxMesh {
     GfxBuffer vertex_buffer;
     GfxBuffer index_buffer;
     i32 index_count;
+    i32 first_index;
+    i32 vertex_offset;
 
     explicit operator bool() { return vertex_buffer != GfxBuffer_INVALID; }
 };
