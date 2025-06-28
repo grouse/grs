@@ -5,10 +5,140 @@
 
 GfxVkContext vk;
 
+extern GfxVkTexture vk_create_texture(void *pixels, VkFormat format, VkComponentMapping swizzle, u32 width, u32 height);
+extern GfxVkTexture vk_create_depth_texture(VkExtent2D extent);
+
+
 Vector2 gfx_resolution() EXPORT
 {
     return { (f32)vk.swapchain.extent.width, (f32)vk.swapchain.extent.height };
 }
+
+void gfx_wait_frame() EXPORT
+{
+    auto *frame = &vk.frames[vk.current_frame];
+    VK_CHECK(vkWaitForFences(vk.device, 1, &frame->fence, VK_TRUE, UINT64_MAX));
+}
+
+extern void vk_destroy_swapchain() INTERNAL
+{
+    if (vk.swapchain.handle) {
+        vkDeviceWaitIdle(vk.device);
+        vkDestroySwapchainKHR(vk.device, vk.swapchain.handle, nullptr);
+        vk.swapchain.handle = VK_NULL_HANDLE;
+    }
+}
+
+extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
+{
+    SArena scratch = tl_scratch_arena();
+
+    VkSurfaceCapabilitiesKHR surface_caps{};
+    VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk.physical_device.handle, vk.surface, &surface_caps));
+
+    vk.swapchain.extent.width = CLAMP(
+        extent.width,
+        surface_caps.minImageExtent.width,
+        surface_caps.maxImageExtent.width);
+
+    vk.swapchain.extent.height = CLAMP(
+        extent.height,
+        surface_caps.minImageExtent.height,
+        surface_caps.maxImageExtent.height);
+
+    u32 format_count = 0;
+    VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(vk.physical_device.handle, vk.surface, &format_count, nullptr));
+    auto formats = array_create<VkSurfaceFormatKHR>(format_count, scratch);
+    VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(vk.physical_device.handle, vk.surface, &format_count, formats.data));
+
+    i32 chosen_format = -1;
+    for (auto it : iterator(formats)) {
+        LOG_INFO("swapchain [%d]: %s", it.index, sz_from_enum(it->format));
+        if (it->format == VK_FORMAT_B8G8R8A8_SRGB &&
+            it->colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+        {
+            chosen_format = it.index;
+        }
+    }
+    PANIC_IF(chosen_format == -1, "no suitable surface format found");
+    LOG_INFO("chosen swapchain format: %s [%u]", sz_from_enum(formats[chosen_format].format), formats[chosen_format].format);
+    vk.swapchain.format = formats[chosen_format].format;
+
+    u32 present_modes = 0;
+    VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(vk.physical_device.handle, vk.surface, &present_modes, nullptr));
+    auto modes = array_create<VkPresentModeKHR>(present_modes, scratch);
+    VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(vk.physical_device.handle, vk.surface, &present_modes, modes.data));
+
+    i32 chosen_mode = -1;
+    for (auto it : iterator(modes)) {
+        LOG_INFO("present mode [%d]: %s", it.index, sz_from_enum(*it));
+        if (it == VK_PRESENT_MODE_FIFO_KHR) chosen_mode = it.index;
+    }
+    PANIC_IF(chosen_mode == -1, "no suitable present mode found");
+    LOG_INFO("chosen present mode: %s", sz_from_enum(modes[chosen_mode]));
+
+    VkSwapchainCreateInfoKHR swapchain_info{
+        VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+        .surface            = vk.surface,
+        .minImageCount      = MAX(surface_caps.minImageCount, MAX_FRAMES_IN_FLIGHT),
+        .imageFormat        = formats[chosen_format].format,
+        .imageColorSpace    = formats[chosen_format].colorSpace,
+        .imageExtent        = vk.swapchain.extent,
+        .imageArrayLayers   = 1,
+        .imageUsage         = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+        .imageSharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+        .preTransform       = surface_caps.currentTransform,
+        .compositeAlpha     = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        .presentMode        = modes[chosen_mode],
+        .clipped            = VK_TRUE,
+    };
+
+    u32 queue_indices[] = {
+        vk.physical_device.graphics_family_index,
+        vk.physical_device.present_family_index
+    };
+
+    if (vk.physical_device.graphics_family_index != vk.physical_device.present_family_index) {
+        swapchain_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        swapchain_info.queueFamilyIndexCount = ARRAY_COUNT(queue_indices);
+        swapchain_info.pQueueFamilyIndices = queue_indices;
+    }
+
+    VK_CHECK(vkCreateSwapchainKHR(vk.device, &swapchain_info, nullptr, &vk.swapchain.handle));
+
+    u32 image_count = 0;
+    VK_CHECK(vkGetSwapchainImagesKHR(vk.device, vk.swapchain.handle, &image_count, nullptr));
+
+    if (vk.swapchain.images.count != (i32)image_count) {
+        FREE(mem_dynamic, vk.swapchain.images.data);
+        FREE(mem_dynamic, vk.swapchain.views.data);
+
+        vk.swapchain.images = array_create<VkImage>((i32)image_count, mem_dynamic);
+        vk.swapchain.views = array_create<VkImageView>((i32)image_count, mem_dynamic);
+    }
+    VK_CHECK(vkGetSwapchainImagesKHR(vk.device, vk.swapchain.handle, &image_count, vk.swapchain.images.data));
+
+    for (auto it : iterator(vk.swapchain.views)) {
+        VkImageViewCreateInfo view_info{
+            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image            = vk.swapchain.images[it.index],
+            .viewType         = VK_IMAGE_VIEW_TYPE_2D,
+            .format           = formats[chosen_format].format,
+            .subresourceRange = {
+                .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+                .baseMipLevel   = 0,
+                .levelCount     = 1,
+                .baseArrayLayer = 0,
+                .layerCount     = 1,
+            },
+        };
+
+        VK_CHECK(vkCreateImageView(vk.device, &view_info, nullptr, &it.elem()));
+    }
+
+    vk.swapchain.depth = vk_create_depth_texture(vk.swapchain.extent);
+}
+
 GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) EXPORT
 {
     AssetHandle handle = find_asset_handle(path);
@@ -17,8 +147,6 @@ GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) EXPORT
 
 GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
 {
-    extern GfxVkTexture vk_create_texture(void *pixels, VkFormat format, VkComponentMapping swizzle, u32 width, u32 height);
-
     if (!handle) return GfxTexture_INVALID;
 
     if (auto *asset = map_find(&vk.texture_assets, { handle, sRGB })) {

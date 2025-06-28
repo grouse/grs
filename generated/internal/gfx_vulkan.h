@@ -1,6 +1,8 @@
 #ifndef GFX_VULKAN_INTERNAL_H
 #define GFX_VULKAN_INTERNAL_H
 
+extern void vk_destroy_swapchain();
+extern void vk_create_swapchain(VkExtent2D extent);
 extern void vk_set_viewport(VkCommandBuffer cmd, f32 width, f32 height);
 extern void vk_set_scissor(VkCommandBuffer cmd, f32 width, f32 height);
 extern void vk_transition_image(VkCommandBuffer cmd, GfxVkTexture texture, VkImageLayout old_layout, VkImageLayout new_layout);
