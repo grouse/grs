@@ -5,6 +5,10 @@
 
 GfxVkContext vk;
 
+Vector2 gfx_resolution() EXPORT
+{
+    return { (f32)vk.swapchain.extent.width, (f32)vk.swapchain.extent.height };
+}
 GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) EXPORT
 {
     AssetHandle handle = find_asset_handle(path);
