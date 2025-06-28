@@ -16,6 +16,9 @@
     };\
     constexpr name name##_INVALID = 0
 
+#define GFX_RENDER_PASS(...)\
+    SCOPE_EXPR(gfx_begin_pass(__VA_ARGS__), gfx_end_pass())
+
 GFX_HANDLE(GfxTexture, u32);
 GFX_HANDLE(GfxBuffer, u32);
 GFX_HANDLE(GfxPipeline, u32);
@@ -39,6 +42,17 @@ enum GfxTextureFormat {
     GFX_TEXTURE_R8G8_SRGB,
     GFX_TEXTURE_R8G8B8_SRGB,
     GFX_TEXTURE_R8G8B8A8_SRGB,
+};
+
+enum GfxStoreOp {
+    GFX_STORE_OP_DONT_CARE,
+    GFX_STORE_OP_STORE,
+};
+
+enum GfxLoadOp {
+    GFX_LOAD_OP_DONT_CARE,
+    GFX_LOAD_OP_LOAD,
+    GFX_LOAD_OP_CLEAR,
 };
 
 enum GfxSwizzle {

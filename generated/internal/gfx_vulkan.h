@@ -31,5 +31,7 @@ extern u32 hash32(const GfxVkTexture & it, u32 seed = MURMUR3_SEED);
 extern u32 hash32(const GfxVkDescriptorDesc & desc, u32 seed = MURMUR3_SEED);
 extern u32 hash32(const GfxVkDescriptorSetDesc & desc, u32 seed =MURMUR3_SEED);
 extern u32 hash32(const VkDescriptorSetLayoutCreateInfo & info, u32 seed =MURMUR3_SEED);
+static VkAttachmentLoadOp vk_load_op(GfxLoadOp op);
+static VkAttachmentStoreOp vk_store_op(GfxStoreOp op);
 
 #endif // GFX_VULKAN_INTERNAL_H

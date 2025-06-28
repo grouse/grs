@@ -29,6 +29,7 @@ constexpr i32 MAX_DESCRIPTOR_SET_BINDINGS = 4;
 
 #define VK_IMM SCOPE_EXPR(vk_imm_begin(), vk_imm_end())
 
+
 struct SpvCompilationResult {
     shaderc_compilation_status status;
     shaderc_compilation_result_t result;
@@ -58,7 +59,7 @@ struct GfxVkTexture {
     VmaAllocation allocation;
     VmaAllocationInfo allocation_info;
 
-    explicit operator bool() { return image != VK_NULL_HANDLE; }
+    explicit operator bool() const { return image != VK_NULL_HANDLE; }
     bool operator==(const GfxVkTexture &other) const
     {
         return image == other.image && view == other.view && allocation == other.allocation;
@@ -208,7 +209,7 @@ struct GfxVkFrame {
     VkCommandBuffer cmd;
 
     struct {
-        VkImageView view;
+        GfxVkTexture res;
         u32 index;
     } swapchain;
 
@@ -231,6 +232,19 @@ struct GfxTextureAssetDesc {
     bool operator!=(const GfxTextureAssetDesc &rhs) const = default;
 };
 
+struct GfxVkAttachment {
+    GfxVkTexture res;
+    GfxLoadOp load_op;
+    GfxStoreOp store_op;
+    f32 clear_value[4];
+};
+
+struct GfxVkRenderPassDesc {
+    GfxVkAttachment color[MAX_COLOR_ATTACHMENTS];
+    GfxVkAttachment depth;
+    struct { u32 x, y; } offset;
+    struct { u32 w, h; } extent;
+};
 
 extern struct GfxVkContext {
     VkDevice device;
@@ -281,6 +295,9 @@ extern struct GfxVkContext {
 
     VkDebugUtilsMessengerEXT debug_messenger;
     DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_assets;
+
+    FixedArray<GfxVkFrame, MAX_FRAMES_IN_FLIGHT> frames;
+    u32 current_frame = 0;
 } vk;
 
 

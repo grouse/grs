@@ -779,3 +779,112 @@ extern u32 hash32(const VkDescriptorSetLayoutCreateInfo &info, u32 seed /*=MURMU
 
     return state;
 }
+
+void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
+{
+    auto *frame = &vk.frames[vk.current_frame];
+    auto cmd = frame->cmd;
+
+    i32 color_count;
+    VkRenderingAttachmentInfo color_attachments[MAX_COLOR_ATTACHMENTS];
+    for (color_count = 0; color_count < MAX_COLOR_ATTACHMENTS; color_count++) {
+        if (!desc.color[color_count].res) break;
+
+        color_attachments[color_count] = VkRenderingAttachmentInfo {
+            VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+            .imageView   = desc.color[color_count].res.view,
+            .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .loadOp      = vk_load_op(desc.color[color_count].load_op),
+            .storeOp     = vk_store_op(desc.color[color_count].store_op),
+            .clearValue.color.float32 = {
+                desc.color[color_count].clear_value[0],
+                desc.color[color_count].clear_value[1],
+                desc.color[color_count].clear_value[2],
+                desc.color[color_count].clear_value[3],
+            }
+        };
+    }
+
+    VkRenderingAttachmentInfo depth_attachment {
+        VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+    };
+
+    if (desc.depth.res) {
+        depth_attachment.imageView   = desc.depth.res.view;
+        depth_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depth_attachment.loadOp      = vk_load_op(desc.depth.load_op);
+        depth_attachment.storeOp     = vk_store_op(desc.depth.store_op);
+        depth_attachment.clearValue.depthStencil = {
+            desc.depth.clear_value[0],
+            u32(desc.depth.clear_value[1]),
+        };
+    };
+
+    VkRenderingInfo render_info{
+        VK_STRUCTURE_TYPE_RENDERING_INFO,
+        .renderArea = {
+            .extent = { desc.extent.w, desc.extent.h }
+        },
+        .layerCount = 1,
+        .colorAttachmentCount = u32(color_count),
+        .pColorAttachments = &color_attachments[0],
+        .pDepthAttachment = desc.depth.res ? &depth_attachment : nullptr
+    };
+
+    vkCmdBeginRendering(cmd, &render_info);
+}
+
+void gfx_end_pass() EXPORT
+{
+    auto *frame = &vk.frames[vk.current_frame];
+    auto cmd = frame->cmd;
+
+    vkCmdEndRendering(cmd);
+}
+
+
+VkAttachmentLoadOp vk_load_op(GfxLoadOp op) INTERNAL
+{
+    switch (op) {
+    case GFX_LOAD_OP_DONT_CARE: return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    case GFX_LOAD_OP_LOAD: return VK_ATTACHMENT_LOAD_OP_LOAD;
+    case GFX_LOAD_OP_CLEAR: return VK_ATTACHMENT_LOAD_OP_CLEAR;
+    }
+
+    LOG_ERROR("[gfx] unknown attachment load op: %d", op);
+    return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+}
+
+VkAttachmentStoreOp vk_store_op(GfxStoreOp op) INTERNAL
+{
+    switch (op) {
+    case GFX_STORE_OP_DONT_CARE: return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    case GFX_STORE_OP_STORE: return VK_ATTACHMENT_STORE_OP_STORE;
+    }
+
+    LOG_ERROR("[gfx] unknown attachment store op: %d", op);
+    return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+}
+
+const char* sz_from_enum(GfxLoadOp op) EXPORT
+{
+    switch (op) {
+    case GFX_LOAD_OP_DONT_CARE: return "GFX_LOAD_OP_DONT_CARE";
+    case GFX_LOAD_OP_LOAD: return "GFX_LOAD_OP_LOAD";
+    case GFX_LOAD_OP_CLEAR: return "GFX_LOAD_OP_CLEAR";
+    }
+
+    LOG_ERROR("[gfx] unknown load op: %d", op);
+    return "unknown";
+}
+
+const char* sz_from_enum(GfxStoreOp op) EXPORT
+{
+    switch (op) {
+    case GFX_STORE_OP_DONT_CARE: return "GFX_STORE_OP_DONT_CARE";
+    case GFX_STORE_OP_STORE: return "GFX_STORE_OP_STORE";
+    }
+
+    LOG_ERROR("[gfx] unknown store op: %d", op);
+    return "unknown";
+}
