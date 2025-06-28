@@ -252,6 +252,11 @@ extern struct GfxVkContext {
     VmaAllocator allocator;
 
     struct {
+        VkQueue graphics;
+        VkQueue present;
+    } queues;
+
+    struct {
         VkPhysicalDevice handle;
         u32 graphics_family_index;
         u32 present_family_index;
