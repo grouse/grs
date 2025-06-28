@@ -169,6 +169,116 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
     vk.swapchain.depth = vk_create_depth_texture(vk.swapchain.extent);
 }
 
+extern void vk_copy_buffer(VkCommandBuffer cmd, VkBuffer dst, VkBuffer src, VkDeviceSize size) INTERNAL
+{
+    VkBufferCopy copy{ .size = size, };
+    vkCmdCopyBuffer(cmd, src, dst, 1, &copy);
+}
+
+extern void vk_copy_buffer_to_image(
+    VkCommandBuffer cmd,
+    VkBuffer buffer, VkImage image,
+    u32 width, u32 height,
+    i32 dst_x/*= 0*/, i32 dst_y /*= 0*/) INTERNAL
+{
+    VkBufferImageCopy copy{
+        .bufferOffset      = 0,
+        .bufferRowLength   = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource  = {
+            .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+            .mipLevel       = 0,
+            .baseArrayLayer = 0,
+            .layerCount     = 1,
+        },
+        .imageOffset = { dst_x, dst_y, 0 },
+        .imageExtent = { width, height, 1 },
+    };
+
+    vkCmdCopyBufferToImage(cmd, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
+}
+
+
+GfxBuffer gfx_create_buffer(i32 size) EXPORT
+{
+    GfxVkBuffer buffer = vk_create_buffer(
+        size,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        VMA_MEMORY_USAGE_GPU_ONLY,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    return (GfxBuffer)array_add(&vk.buffers, buffer);
+}
+
+GfxBuffer gfx_create_buffer(void *data, i32 size) EXPORT
+{
+    GfxVkBuffer buffer = vk_create_buffer(
+        size,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        VMA_MEMORY_USAGE_GPU_ONLY,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    GfxVkBuffer staging = vk_create_buffer(
+        size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VMA_MEMORY_USAGE_CPU_TO_GPU,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
+    memcpy(staging.allocation_info.pMappedData, data, size);
+    vmaUnmapMemory(vk.allocator, staging.allocation);
+
+    VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
+    vk_destroy_buffer(staging);
+    return (GfxBuffer)array_add(&vk.buffers, buffer);
+}
+
+GfxBuffer gfx_create_vertex_buffer(void *data, i32 size) EXPORT
+{
+    GfxVkBuffer buffer = vk_create_buffer(
+        size,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VMA_MEMORY_USAGE_GPU_ONLY,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    GfxVkBuffer staging = vk_create_buffer(
+        size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VMA_MEMORY_USAGE_CPU_TO_GPU,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
+    memcpy(staging.allocation_info.pMappedData, data, size);
+    vmaUnmapMemory(vk.allocator, staging.allocation);
+
+    VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
+    vk_destroy_buffer(staging);
+    return (GfxBuffer)array_add(&vk.buffers, buffer);
+}
+
+GfxBuffer gfx_create_index_buffer(void *data, i32 size) EXPORT
+{
+    GfxVkBuffer buffer = vk_create_buffer(
+        size,
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VMA_MEMORY_USAGE_GPU_ONLY,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    GfxVkBuffer staging = vk_create_buffer(
+        size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VMA_MEMORY_USAGE_CPU_TO_GPU,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
+    memcpy(staging.allocation_info.pMappedData, data, size);
+    vmaUnmapMemory(vk.allocator, staging.allocation);
+
+    VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
+    vk_destroy_buffer(staging);
+    return (GfxBuffer)array_add(&vk.buffers, buffer);
+}
+
 GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) EXPORT
 {
     AssetHandle handle = find_asset_handle(path);

@@ -6,6 +6,10 @@ using namespace PUBLIC;
 
 extern Vector2 gfx_resolution();
 extern void gfx_wait_frame();
+extern GfxBuffer gfx_create_buffer(i32 size);
+extern GfxBuffer gfx_create_buffer(void *data, i32 size);
+extern GfxBuffer gfx_create_vertex_buffer(void *data, i32 size);
+extern GfxBuffer gfx_create_index_buffer(void *data, i32 size);
 extern GfxTexture gfx_load_texture(String path, bool sRGB = true);
 extern GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB = true);
 extern void gfx_begin_pass(const GfxVkRenderPassDesc & desc);

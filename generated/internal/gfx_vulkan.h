@@ -5,6 +5,8 @@ extern void vk_imm_begin();
 extern void vk_imm_end();
 extern void vk_destroy_swapchain();
 extern void vk_create_swapchain(VkExtent2D extent);
+extern void vk_copy_buffer(VkCommandBuffer cmd, VkBuffer dst, VkBuffer src, VkDeviceSize size);
+extern void vk_copy_buffer_to_image(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, u32 width, u32 height, i32 dst_x = 0, i32 dst_y = 0);
 extern void vk_set_viewport(VkCommandBuffer cmd, f32 width, f32 height);
 extern void vk_set_scissor(VkCommandBuffer cmd, f32 width, f32 height);
 extern void vk_transition_image(VkCommandBuffer cmd, GfxVkTexture texture, VkImageLayout old_layout, VkImageLayout new_layout);
