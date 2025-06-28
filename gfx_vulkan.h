@@ -250,6 +250,7 @@ extern struct GfxVkContext {
     VkDevice device;
     VkInstance instance;
     VmaAllocator allocator;
+    VkDebugUtilsMessengerEXT debug_messenger;
 
     struct {
         VkQueue graphics;
@@ -280,26 +281,32 @@ extern struct GfxVkContext {
 
     VkSurfaceKHR surface;
 
-    DynamicArray<GfxVkPipelineDesc> pipeline_descs;
+    struct {
+        VkCommandBuffer cmd;
+        VkCommandPool   pool;
+        VkFence         fence;
+    } imm;
+
     DynamicArray<GfxVkPipeline> pipelines;
+    DynamicArray<GfxVkPipelineDesc> pipeline_descs;
+
     DynamicArray<GfxVkTexture> textures;
+    DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_assets;
+    DynamicMap<GfxSamplerDesc, VkSampler> samplers;
+
     DynamicArray<GfxVkBuffer> buffers;
+
     DynamicArray<GfxVkMaterial> materials;
     DynamicMap<GfxMaterial, GfxMaterialDesc> material_descs;
+    DynamicMap<GfxMaterialParameters, GfxVkBuffer> material_parameters;
 
     DynamicArray<GfxVkShader> shaders;
     DynamicMap<GfxShader, DynamicArray<GfxPipeline>> shaders_used_by;
 
     VkDescriptorPool descriptor_pool;
     DynamicArray<VkDescriptorPool> descriptor_pools;
-
     DynamicMap<VkDescriptorSetLayoutCreateInfo, VkDescriptorSetLayout> descriptor_layouts;
     DynamicMap<GfxVkDescriptorSetDesc, VkDescriptorSet> descriptor_sets;
-    DynamicMap<GfxMaterialParameters, GfxVkBuffer> material_parameters;
-    DynamicMap<GfxSamplerDesc, VkSampler> samplers;
-
-    VkDebugUtilsMessengerEXT debug_messenger;
-    DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_assets;
 
     FixedArray<GfxVkFrame, MAX_FRAMES_IN_FLIGHT> frames;
     u32 current_frame = 0;

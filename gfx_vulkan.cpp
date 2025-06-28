@@ -8,6 +8,36 @@ GfxVkContext vk;
 extern GfxVkTexture vk_create_texture(void *pixels, VkFormat format, VkComponentMapping swizzle, u32 width, u32 height);
 extern GfxVkTexture vk_create_depth_texture(VkExtent2D extent);
 
+extern void vk_imm_begin() INTERNAL
+{
+    VK_CHECK(vkResetFences(vk.device, 1, &vk.imm.fence));
+    VK_CHECK(vkResetCommandBuffer(vk.imm.cmd, 0));
+
+    VkCommandBufferBeginInfo begin_info{
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
+
+    VK_CHECK(vkBeginCommandBuffer(vk.imm.cmd, &begin_info));
+}
+
+extern void vk_imm_end() INTERNAL
+{
+    VK_CHECK(vkEndCommandBuffer(vk.imm.cmd));
+
+    VkCommandBufferSubmitInfo cmd_info{
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+        .commandBuffer = vk.imm.cmd,
+    };
+
+    VkSubmitInfo2 submit_info{
+        VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+        .commandBufferInfoCount = 1, .pCommandBufferInfos = &cmd_info,
+    };
+    VK_CHECK(vkQueueSubmit2(vk.queues.graphics, 1, &submit_info, vk.imm.fence));
+    vkWaitForFences(vk.device, 1, &vk.imm.fence, VK_TRUE, UINT64_MAX);
+}
+
 
 Vector2 gfx_resolution() EXPORT
 {
