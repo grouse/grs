@@ -797,10 +797,10 @@ void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
             .loadOp      = vk_load_op(desc.color[color_count].load_op),
             .storeOp     = vk_store_op(desc.color[color_count].store_op),
             .clearValue.color.float32 = {
-                desc.color[color_count].clear_value[0],
-                desc.color[color_count].clear_value[1],
-                desc.color[color_count].clear_value[2],
-                desc.color[color_count].clear_value[3],
+                desc.color[color_count].clear[0],
+                desc.color[color_count].clear[1],
+                desc.color[color_count].clear[2],
+                desc.color[color_count].clear[3],
             }
         };
     }
@@ -815,8 +815,8 @@ void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
         depth_attachment.loadOp      = vk_load_op(desc.depth.load_op);
         depth_attachment.storeOp     = vk_store_op(desc.depth.store_op);
         depth_attachment.clearValue.depthStencil = {
-            desc.depth.clear_value[0],
-            u32(desc.depth.clear_value[1]),
+            desc.depth.clear[0],
+            u32(desc.depth.clear[1]),
         };
     };
 

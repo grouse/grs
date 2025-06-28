@@ -236,7 +236,7 @@ struct GfxVkAttachment {
     GfxVkTexture res;
     GfxLoadOp load_op;
     GfxStoreOp store_op;
-    f32 clear_value[4];
+    f32 clear[4];
 };
 
 struct GfxVkRenderPassDesc {
