@@ -5,8 +5,70 @@
 
 GfxVkContext vk;
 
-extern GfxVkTexture vk_create_texture(void *pixels, VkFormat format, VkComponentMapping swizzle, u32 width, u32 height);
-extern GfxVkTexture vk_create_depth_texture(VkExtent2D extent);
+extern bool vk_image_format_supported(
+    VkFormat format,
+    VkImageCreateInfo image_info) INTERNAL
+{
+    VkFormatFeatureFlags required_flags = 0;
+    if (image_info.usage & VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
+        required_flags |= VK_FORMAT_FEATURE_TRANSFER_SRC_BIT;
+    if (image_info.usage & VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+        required_flags |= VK_FORMAT_FEATURE_TRANSFER_DST_BIT;
+    if (image_info.usage & VK_IMAGE_USAGE_SAMPLED_BIT)
+        required_flags |= VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+    if (image_info.usage & VK_IMAGE_USAGE_STORAGE_BIT)
+        required_flags |= VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+    if (image_info.usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
+        required_flags |= VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+    if (image_info.usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+        required_flags |= VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+
+    VkFormatProperties props;
+    vkGetPhysicalDeviceFormatProperties(vk.physical_device.handle, format, &props);
+
+    VkFormatFeatureFlags supported_flags;
+    if (image_info.tiling == VK_IMAGE_TILING_LINEAR) {
+        supported_flags = props.linearTilingFeatures;
+    } else if (image_info.tiling == VK_IMAGE_TILING_OPTIMAL) {
+        supported_flags = props.optimalTilingFeatures;
+    } else {
+        LOG_ERROR("[gfx] unknown tiling mode: %d", image_info.tiling);
+        return false;
+    }
+
+    if ((supported_flags & required_flags) != required_flags) return false;
+
+    VkImageFormatProperties format_properties;
+    VkResult result = vkGetPhysicalDeviceImageFormatProperties(
+        vk.physical_device.handle,
+        format,
+        image_info.imageType,
+        image_info.tiling,
+        image_info.usage,
+        image_info.flags,
+        &format_properties);
+
+    if (result != VK_SUCCESS) {
+        LOG_ERROR(
+            "[gfx] unable to retrieve image format properties for format %d and { imageType: %d, tiling: %d, usage: %d, flags: %d }",
+            format,
+            image_info.imageType, image_info.tiling, image_info.usage, image_info.flags);
+        return false;
+    }
+
+    if (image_info.extent.width > format_properties.maxExtent.width ||
+        image_info.extent.height > format_properties.maxExtent.height ||
+        image_info.extent.depth > format_properties.maxExtent.depth)
+    {
+        return false;
+    }
+
+    if (image_info.mipLevels > format_properties.maxMipLevels) return false;
+    if (image_info.arrayLayers > format_properties.maxArrayLayers) return false;
+    if (!(format_properties.sampleCounts & image_info.samples)) return false;
+    return true;
+}
+
 
 extern void vk_imm_begin() INTERNAL
 {
@@ -317,6 +379,129 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
     return texture_handle;
 }
 
+extern GfxVkTexture vk_create_texture(
+    VkFormat format,
+    VkComponentMapping swizzle,
+    u32 width, u32 height,
+    VkImageUsageFlags usage) INTERNAL
+{
+    GfxVkTexture texture{ .format = format };
+
+    VkImageCreateInfo image_info{
+        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .imageType   = VK_IMAGE_TYPE_2D,
+        .format      = format,
+        .extent      = { width, height, 1 },
+        .mipLevels   = 1,
+        .arrayLayers = 1,
+        .samples     = VK_SAMPLE_COUNT_1_BIT,
+        .tiling      = VK_IMAGE_TILING_OPTIMAL,
+        .usage       = usage,
+    };
+
+    if (!vk_image_format_supported(image_info.format, image_info)) {
+        switch (image_info.format) {
+        case VK_FORMAT_R8G8B8_UNORM:
+            if (vk_image_format_supported(VK_FORMAT_B8G8R8_UNORM, image_info)) {
+                image_info.format = VK_FORMAT_B8G8R8A8_UNORM;
+                swizzle = { VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_R };
+                LOG_INFO("[vulkan] using B8G8R8A8_UNORM instead of R8G8B8_UNORM, swizzle adjusted");
+            } else if (vk_image_format_supported(VK_FORMAT_R8G8B8A8_UNORM, image_info)) {
+                image_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+            } else {
+                LOG_ERROR("[vulkan] unsupported texture format: %s", sz_from_enum(image_info.format));
+                return {};
+            }
+            break;
+        default:
+            LOG_ERROR("[vulkan] unsupported texture format: %s", sz_from_enum(image_info.format));
+            return {};
+        }
+    }
+
+    VmaAllocationCreateInfo alloc_info{
+        .usage         = VMA_MEMORY_USAGE_GPU_ONLY,
+        .requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    };
+    VK_CHECK(vmaCreateImage(vk.allocator, &image_info, &alloc_info, &texture.image, &texture.allocation, &texture.allocation_info));
+
+    VkImageViewCreateInfo view_info{
+        VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image    = texture.image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format   = image_info.format,
+        .components = swizzle,
+        .subresourceRange = {
+            .aspectMask     = vk_aspect_mask(format),
+            .baseMipLevel   = 0, .levelCount = image_info.mipLevels,
+            .baseArrayLayer = 0, .layerCount = image_info.arrayLayers,
+        },
+    };
+
+    VK_CHECK(vkCreateImageView(vk.device, &view_info, nullptr, &texture.view));
+    return texture;
+}
+
+extern GfxVkTexture vk_create_texture(
+    VkFormat format,
+    VkComponentMapping swizzle,
+    u32 width, u32 height) INTERNAL
+{
+    GfxVkTexture texture = vk_create_texture(
+        format, swizzle,
+        width, height,
+        VK_IMAGE_USAGE_SAMPLED_BIT|VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+
+    VK_IMM vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    return texture;
+}
+
+extern GfxVkTexture vk_create_texture(
+    void *pixels,
+    VkFormat format,
+    VkComponentMapping swizzle,
+    u32 width, u32 height) INTERNAL
+{
+    GfxVkTexture texture = vk_create_texture(format, swizzle, width, height);
+    if (!texture) return {};
+
+    u32 block_size = vk_block_size(format);
+    auto staging = vk_create_buffer(
+        width*height*block_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VMA_MEMORY_USAGE_CPU_TO_GPU,
+        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
+    if (!staging) {
+        LOG_ERROR("[gfx][vk] unable to create staging buffer for texture");
+        return {};
+    }
+
+
+    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
+    memcpy(staging.allocation_info.pMappedData, pixels, width*height*block_size);
+    vmaUnmapMemory(vk.allocator, staging.allocation);
+
+    VK_IMM {
+        vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        vk_copy_buffer_to_image(vk.imm.cmd, staging, texture.image, width, height);
+        vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
+
+    vk_destroy_buffer(staging);
+    return texture;
+}
+
+extern GfxVkTexture vk_create_depth_texture(VkExtent2D extent) INTERNAL
+{
+    return vk_create_texture(
+        VK_FORMAT_D16_UNORM,
+        vk_component_mapping(GFX_SWIZZLE_IDENTITY),
+        extent.width, extent.height,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+}
+
 extern void vk_set_viewport(VkCommandBuffer cmd, f32 width, f32 height) INTERNAL
 {
     VkViewport viewport = { .width = width, .height = height, .minDepth = 0.0f, .maxDepth = 1.0f };
@@ -373,6 +558,15 @@ extern void vk_transition_image(
     };
 
     vkCmdPipelineBarrier2(cmd, &dep_info);
+}
+
+extern VkDeviceAddress vk_get_buffer_address(VkBuffer buffer) INTERNAL
+{
+    VkBufferDeviceAddressInfo address_info{
+        VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
+        .buffer = buffer,
+    };
+    return vkGetBufferDeviceAddress(vk.device, &address_info);
 }
 
 extern GfxVkBuffer vk_create_buffer(
