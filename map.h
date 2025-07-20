@@ -85,7 +85,7 @@ template<typename K, typename V>
 void map_set(DynamicMap<K, V> *map, const K &key, const V &value);
 
 template<typename K, typename V>
-i32 find_slot(DynamicMap<K, V> *map, const K &key)
+i32 map_find_slot(DynamicMap<K, V> *map, const K &key)
 {
     // TODO(jesper): round robin to reduce the upper bound of the probing
     if (map->capacity == 0) return -1;
@@ -100,8 +100,9 @@ i32 find_slot(DynamicMap<K, V> *map, const K &key)
 }
 
 template<typename K, typename V>
-void grow_map(DynamicMap<K, V> *map, i32 new_capacity)
+void map_grow(DynamicMap<K, V> *map, i32 new_capacity)
 {
+    //LOG_INFO("[map][%p] grow: %d -> %d", map, map->capacity, new_capacity);
     ASSERT(new_capacity > map->capacity);
     if (map->alloc.proc == nullptr) map->alloc = mem_dynamic;
 
@@ -122,16 +123,17 @@ void grow_map(DynamicMap<K, V> *map, i32 new_capacity)
 }
 
 template<typename K, typename V>
-i32 set_slot(DynamicMap<K, V> *map, i32 slot, const K &key, const V &value)
+i32 map_set_slot(DynamicMap<K, V> *map, i32 slot, const K &key, const V &value)
 {
     if (map->count >= map->capacity*DYNAMIC_MAP_LOAD_FACTOR) {
         i32 new_capacity = map->capacity == 0 ? DYNAMIC_MAP_INNITIAL_CAPACITY : map->capacity*2;
-        grow_map(map, new_capacity);
+        map_grow(map, new_capacity);
 
-        slot = find_slot(map, key);
+        slot = map_find_slot(map, key);
         ASSERT(slot >= 0);
     }
 
+    //LOG_INFO("[map][%p] set slot[%d]", map, slot);
     map->slots[slot].occupied = true;
     new (&map->slots[slot].value) V(value);
     new (&map->slots[slot].key) K(key);
@@ -141,16 +143,17 @@ i32 set_slot(DynamicMap<K, V> *map, i32 slot, const K &key, const V &value)
 }
 
 template<typename K, typename V, i32 n>
-i32 set_slot(DynamicMap<K, V[n]> *map, i32 slot, const K &key, const V (&value)[n])
+i32 map_set_slot(DynamicMap<K, V[n]> *map, i32 slot, const K &key, const V (&value)[n])
 {
     if (map->count >= map->capacity*DYNAMIC_MAP_LOAD_FACTOR) {
         i32 new_capacity = map->capacity == 0 ? DYNAMIC_MAP_INNITIAL_CAPACITY : map->capacity*2;
-        grow_map(map, new_capacity);
+        map_grow(map, new_capacity);
 
-        slot = find_slot(map, key);
+        slot = map_find_slot(map, key);
         ASSERT(slot >= 0);
     }
 
+    //LOG_INFO("[map][%p] set slot[%d]", map, slot);
     map->slots[slot].occupied = true;
     new (&map->slots[slot].key) K(key);
     for (i32 i = 0; i < n; i++) new (&map->slots[slot].value[i]) V(value[i]);
@@ -162,31 +165,32 @@ i32 set_slot(DynamicMap<K, V[n]> *map, i32 slot, const K &key, const V (&value)[
 template<typename K, typename V>
 void map_set(DynamicMap<K, V> *map, const K &key, const V &value)
 {
-    i32 slot = find_slot(map, key);
+    i32 slot = map_find_slot(map, key);
     if (slot >= 0 && map->slots[slot].occupied) {
+        //LOG_INFO("[map] set slot[%d]", slot);
         map->slots[slot].value = value;
         return;
     }
 
-    set_slot(map, slot, key, value);
+    map_set_slot(map, slot, key, value);
 }
 
 template<typename K, typename V, i32 n>
 void map_set(DynamicMap<K, V[n]> *map, const K &key, const V (&value)[n])
 {
-    i32 slot = find_slot(map, key);
+    i32 slot = map_find_slot(map, key);
     if (slot >= 0 && map->slots[slot].occupied) {
         for (i32 i = 0; i < n; i++) map->slots[slot].value[i] = value[i];
         return;
     }
 
-    set_slot(map, slot, key, value);
+    map_set_slot(map, slot, key, value);
 }
 
 template<typename K, typename V>
 void map_remove(DynamicMap<K, V> *map, const K &key)
 {
-    i32 slot = find_slot(map, key);
+    i32 slot = map_find_slot(map, key);
     if (slot == -1 || !map->slots[slot].occupied) return;
     map->slots[slot].occupied = false;
     map->count--;
@@ -195,7 +199,7 @@ void map_remove(DynamicMap<K, V> *map, const K &key)
 template<typename K, typename V>
 V* map_find(DynamicMap<K, V> *map, const K &key)
 {
-    i32 i = find_slot(map, key);
+    i32 i = map_find_slot(map, key);
     if (i == -1 || !map->slots[i].occupied) return nullptr;
     return &map->slots[i].value;
 }
@@ -203,7 +207,7 @@ V* map_find(DynamicMap<K, V> *map, const K &key)
 template<typename K, typename V, i32 n>
 V* map_find(DynamicMap<K, V[n]> *map, const K &key)
 {
-    i32 i = find_slot(map, key);
+    i32 i = map_find_slot(map, key);
     if (i == -1 || !map->slots[i].occupied) return nullptr;
     return &map->slots[i].value[0];
 }
@@ -211,10 +215,10 @@ V* map_find(DynamicMap<K, V[n]> *map, const K &key)
 template<typename K, typename V>
 V* map_find_emplace(DynamicMap<K, V> *map, const K &key)
 {
-    i32 slot = find_slot(map, key);
+    i32 slot = map_find_slot(map, key);
 
     if (slot == -1 || !map->slots[slot].occupied) {
-        slot = set_slot(map, slot, key, V{});
+        slot = map_set_slot(map, slot, key, V{});
     }
 
     return &map->slots[slot].value;
@@ -223,11 +227,11 @@ V* map_find_emplace(DynamicMap<K, V> *map, const K &key)
 template<typename K, typename V, i32 n>
 V* map_find_emplace(DynamicMap<K, V[n]> *map, const K &key)
 {
-    i32 slot = find_slot(map, key);
+    i32 slot = map_find_slot(map, key);
 
     if (slot == -1 || !map->slots[slot].occupied) {
         V value[n] = {};
-        slot = set_slot(map, slot, key, value);
+        slot = map_set_slot(map, slot, key, value);
     }
 
     return &map->slots[slot].value[0];
@@ -236,10 +240,10 @@ V* map_find_emplace(DynamicMap<K, V[n]> *map, const K &key)
 template<typename K, typename V>
 V* map_find_emplace(DynamicMap<K, V> *map, const K &key, const V &emp_value)
 {
-    i32 slot = find_slot(map, key);
+    i32 slot = map_find_slot(map, key);
 
     if (slot == -1 || !map->slots[slot].occupied) {
-        slot = set_slot(map, slot, key, emp_value);
+        slot = map_set_slot(map, slot, key, emp_value);
     }
 
     return &map->slots[slot].value;
@@ -253,7 +257,7 @@ void map_set(DynamicMap<String, V> *map, const char *key, V value) { return map_
 template<typename V>
 V* map_find(DynamicMap<String, V> *map, String key)
 {
-    i32 i = find_slot(map, key);
+    i32 i = map_find_slot(map, key);
     if (i == -1 || !map->slots[i].occupied) return nullptr;
     return &map->slots[i].value;
 }
@@ -272,6 +276,25 @@ static TEST_PROC(dynamic_map__set_invokes_copy_constructor_for_key_and_value)
     map_set(&map, { 3 }, { 3 });
 
     ASSERT(TestType::copy_constructor_calls == 6);
+    ASSERT(TestType::move_constructor_calls == 0);
+    ASSERT(TestType::copy_assignment_calls == 0);
+    ASSERT(TestType::move_assignment_calls == 0);
+}
+
+static TEST_PROC(dynamic_map__growing_map_invokes_copy_constructors)
+{
+    TestType::reset_counters();
+    DynamicMap<TestType, TestType> map{};
+
+    map_set(&map, { 1 }, { 1 });
+    map_set(&map, { 2 }, { 2 });
+    map_set(&map, { 3 }, { 3 });
+
+    void *old = map.slots;
+    map_grow(&map, map.capacity+2);
+    ASSERT(map.slots != old);
+
+    ASSERT(TestType::copy_constructor_calls == 12);
     ASSERT(TestType::move_constructor_calls == 0);
     ASSERT(TestType::copy_assignment_calls == 0);
     ASSERT(TestType::move_assignment_calls == 0);
