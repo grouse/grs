@@ -1,7 +1,6 @@
 #ifndef MATHS_H
 #define MATHS_H
 
-#include "platform.h"
 #include "core.h"
 
 extern "C" CRTIMP double floor (double x) NOTHROW;

@@ -1,7 +1,6 @@
 #ifndef ASSETS_H
 #define ASSETS_H
 
-#include "platform.h"
 #include "string.h"
 #include "array.h"
 #include "hash.h"

@@ -1,7 +1,7 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#include "platform.h"
+#include "core.h"
 
 #define GUARD_MUTEX(mutex) for (i32 i_##__LINE__ = (lock_mutex(mutex), 0); i_##__LINE__ == 0; i_##__LINE__ = (unlock_mutex(mutex), 1))
 

@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include "platform.h"
+#include "core.h"
 #include "memory.h"
 
 #define STRFMT(str) (str).length, (str).data
@@ -129,5 +129,24 @@ i32 utf8_length(const wchar_t *str, i32 utf16_len);
 i32 utf8_from_utf16(u8 *dst, i32 capacity, const wchar_t *src, i32 length);
 String string_from_utf16(const wchar_t *in_str, i32 length, Allocator mem);
 #endif // defined(WIN32)
+
+inline String read_memory(MemoryBuffer *buf, Allocator mem) EXPORT
+{
+    i32 length = read_memory<i32>(buf);
+    if (length > 0) {
+        char* data = (char*)read_memory(buf, length);
+        return string(data, length, mem);
+    }
+
+    return {};
+}
+
+template<>
+inline void write_memory(MemoryBuffer *buf, String str)
+{
+    PANIC_IF(buf->offset + (i32)sizeof(i32) + str.length > buf->size, "reading beyond end of buffer");
+    write_memory(buf, str.length);
+    write_memory(buf, str.data, str.length);
+}
 
 #endif // STRING_H

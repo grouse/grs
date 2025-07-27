@@ -1,7 +1,6 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "platform.h"
 #include "string.h"
 #include "core.h"
 

@@ -867,3 +867,40 @@ void win32_input_begin_frame()
 {
     for (AppWindow *it : windows) it->query_xinput = true;
 }
+
+String read_clipboard_str(Allocator mem)
+{
+    if (!OpenClipboard(NULL)) return {};
+    defer { CloseClipboard(); };
+
+    HANDLE clip = GetClipboardData(CF_UNICODETEXT);
+    if (!clip) return {};
+
+    wchar_t *ptr = (wchar_t*)GlobalLock(clip);
+    if (!ptr) return {};
+    defer { GlobalUnlock(ptr); };
+
+    String s{};
+    s.length = utf8_length((u16*)ptr, wcslen(ptr));
+    s.data = ALLOC_ARR(mem, char, s.length);
+    utf8_from_utf16((u8*)s.data, s.length, (u16*)ptr, wcslen(ptr));
+    return s;
+}
+
+void set_clipboard_data(String str)
+{
+    if (!OpenClipboard(NULL)) return;
+    defer { CloseClipboard(); };
+
+    if (!EmptyClipboard()) return;
+
+    i32 utf16_len = utf16_length(str);
+    HANDLE clip_mem = GlobalAlloc(GMEM_MOVEABLE, (utf16_len+1) * sizeof(u16));
+    defer { GlobalUnlock(clip_mem); };
+
+    u16 *clip_str = (u16*)GlobalLock(clip_mem);
+    utf16_from_string(clip_str, utf16_len, str);
+    clip_str[utf16_len] = '\0';
+
+    if (!SetClipboardData(CF_UNICODETEXT, clip_mem)) return;
+}

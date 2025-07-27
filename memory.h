@@ -2,7 +2,7 @@
 #define MEMORY_H
 
 #include <new>
-#include "platform.h"
+#include "core.h"
 
 extern "C" CRTIMP void* malloc(size_t size) NOTHROW;
 extern "C" CRTIMP void* realloc(void* ptr, size_t size) NOTHROW;
@@ -123,5 +123,44 @@ struct VMFreeListState {
 
     i32 page_size;
 };
+
+struct MemoryBuffer {
+    u8 *data;
+    i32 size;
+    i32 offset;
+};
+
+inline void* read_memory(MemoryBuffer *buf, i32 size)
+{
+    PANIC_IF(buf->offset + size > buf->size, "reading beyond end of buffer");
+    void *ptr = (buf->data + buf->offset);
+    buf->offset += size;
+    return ptr;
+}
+
+inline void write_memory(MemoryBuffer *buf, const void *data, i32 size)
+{
+    PANIC_IF(buf->offset + size > buf->size, "reading beyond end of buffer");
+    memcpy(buf->data+buf->offset, data, size);
+    buf->offset += size;
+}
+
+
+template<typename T>
+inline T read_memory(MemoryBuffer *buf)
+{
+    PANIC_IF(buf->offset + (i32)sizeof(T) > buf->size, "reading beyond end of buffer");
+    T *val = (T*)(buf->data + buf->offset);
+    buf->offset += sizeof(T);
+    return *val;
+}
+
+template<typename T>
+inline void write_memory(MemoryBuffer *buf, T val)
+{
+    PANIC_IF(buf->offset + (i32)sizeof(T) > buf->size, "reading beyond end of buffer");
+    memcpy(buf->data+buf->offset, &val, sizeof(T));
+    buf->offset += sizeof(T);
+}
 
 #endif // MEMORY_H

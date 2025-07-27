@@ -1,6 +1,8 @@
 #ifndef HASH_H
 #define HASH_H
 
+#include "core.h"
+#include "string.h"
 #include "MurmurHash/MurmurHash3.h"
 
 #define MURMUR3_SEED (0xdeadbeef)

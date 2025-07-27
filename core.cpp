@@ -1,4 +1,5 @@
 #include "core.h"
+#include "string.h"
 
 #if defined(_WIN32)
 #include "win32_core.cpp"
@@ -88,17 +89,6 @@ void stdio_sink(const char *path, u32 line, LogType type, const char *msg)
     String filename = filename_of_sz(path);
     const char *type_s = sz_from_enum(type);
     fprintf(out, "%.*s:%d %s: %s\n", STRFMT(filename), line, type_s, msg);
-}
-
-String read_memory(MemoryBuffer *buf, Allocator mem) EXPORT
-{
-    i32 length = read_memory<i32>(buf);
-    if (length > 0) {
-        char* data = (char*)read_memory(buf, length);
-        return string(data, length, mem);
-    }
-
-    return {};
 }
 
 void sleep(i32 milliseconds) EXPORT;

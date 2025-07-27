@@ -1,5 +1,6 @@
 #include "thread.h"
 #include "core.h"
+#include "memory.h"
 
 #include <pthread.h>
 #include <errno.h>

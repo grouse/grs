@@ -457,4 +457,7 @@ void release_mouse(AppWindow *wnd);
 
 void push_cursor(MouseCursor c);
 
+void set_clipboard_data(String str);
+String read_clipboard_str(Allocator mem);
+
 #endif // WINDOW_H

@@ -4,6 +4,7 @@
 namespace PUBLIC {}
 using namespace PUBLIC;
 
+extern String read_memory(MemoryBuffer *buf, Allocator mem);
 extern String string(const char *str, i32 length, Allocator mem);
 extern String string(const char *sz_str, Allocator mem);
 extern String string(const char *begin, const char *end);
