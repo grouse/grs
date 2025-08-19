@@ -106,7 +106,7 @@ static_assert(sizeof(i16) == 2, "i16 sizeof mismatch");
 static_assert(sizeof(u8) == 1, "u8 sizeof mismatch");
 static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 
-#define typeid(T) type_id<T>(#T)
+#define jl_typeid(T) type_id<T>(#T)
 #define defer auto defer_( __LINE__ ) = DeferDummy( ) + [&]( )
 #define transmute(T, value) (*(T*)&(value))
 

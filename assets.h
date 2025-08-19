@@ -57,8 +57,8 @@ T* find_asset(String path)
 {
     Asset *asset = find_asset_by_path(path);
     if (!asset) return nullptr;
-    if (asset->type_id != typeid(T)) {
-        LOG_ERROR("mismatching asset type id for asset: '%.*s', got %d expected %d", STRFMT(asset->path), typeid(T), asset->type_id);
+    if (asset->type_id != jl_typeid(T)) {
+        LOG_ERROR("mismatching asset type id for asset: '%.*s', got %d expected %d", STRFMT(asset->path), jl_typeid(T), asset->type_id);
         return nullptr;
     }
 
@@ -70,8 +70,8 @@ T* get_asset(AssetHandle handle)
 {
     Asset *asset = get_asset(handle);
     if (!asset) return nullptr;
-    if (asset->type_id != typeid(T)) {
-        LOG_ERROR("mismatching asset type id for asset: '%.*s', got %d expected %d", STRFMT(asset->path), typeid(T), asset->type_id);
+    if (asset->type_id != jl_typeid(T)) {
+        LOG_ERROR("mismatching asset type id for asset: '%.*s', got %d expected %d", STRFMT(asset->path), jl_typeid(T), asset->type_id);
         return nullptr;
     }
     return (T*)asset->data;
