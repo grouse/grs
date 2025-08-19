@@ -1,4 +1,3 @@
-#include "platform.h"
 #include "memory.h"
 #include "core.h"
 #include "thread.h"

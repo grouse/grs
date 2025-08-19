@@ -1,7 +1,6 @@
 #ifndef WIN32_LITE_H
 #define WIN32_LITE_H
 
-#include "platform.h"
 #include "core.h"
 
 #define CALLBACK __stdcall
