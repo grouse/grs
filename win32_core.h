@@ -3,6 +3,7 @@
 
 #include "win32_lite.h"
 #include "array.h"
+#include "string.h"
 
 #define WIN32_ERR_STR GetLastError(), win32_system_error_message(GetLastError())
 
