@@ -146,3 +146,15 @@ i32 current_process_id() EXPORT
 {
     return (i32)GetCurrentProcessId();
 }
+
+int WINAPI WinMain(
+    HINSTANCE /*hInstance*/,
+    HINSTANCE /*hPrevInstance*/,
+    PWSTR /*pCmdLine*/,
+    int /*nCmdShow*/)
+{
+    extern int jl_main(Array<String> args);
+    init_default_allocators();
+    Array<String> args = win32_commandline_args(mem_dynamic);
+    return jl_main(args);
+}

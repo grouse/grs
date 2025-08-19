@@ -1,4 +1,5 @@
-#include "win32_opengl.h"
+#define WIN32_OPENGL_IMPL
+#include "core/win32_opengl.h"
 #include "win32_gdi32.h"
 
 #include "core.h"
