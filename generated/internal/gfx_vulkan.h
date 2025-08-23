@@ -45,5 +45,8 @@ extern u32 hash32(const GfxVkDescriptorSetDesc & desc, u32 seed =MURMUR3_SEED);
 extern u32 hash32(const VkDescriptorSetLayoutCreateInfo & info, u32 seed =MURMUR3_SEED);
 static VkAttachmentLoadOp vk_load_op(GfxLoadOp op);
 static VkAttachmentStoreOp vk_store_op(GfxStoreOp op);
+extern bool operator==(const VkExtensionProperties & lhs, const char *rhs);
+extern bool operator==(const VkLayerProperties & lhs, const char *rhs);
+extern bool operator==(const VkDescriptorSetLayoutCreateInfo & lhs, const VkDescriptorSetLayoutCreateInfo & rhs);
 
 #endif // GFX_VULKAN_INTERNAL_H

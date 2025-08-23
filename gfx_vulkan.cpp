@@ -1354,3 +1354,48 @@ const char* sz_from_enum(GfxStoreOp op) EXPORT
     LOG_ERROR("[gfx] unknown store op: %d", op);
     return "unknown";
 }
+
+extern bool operator==(const VkExtensionProperties &lhs, const char *rhs) INTERNAL
+{
+    return strcmp(lhs.extensionName, rhs) == 0;
+}
+
+extern bool operator==(const VkLayerProperties &lhs, const char *rhs) INTERNAL
+{
+    return strcmp(lhs.layerName, rhs) == 0;
+}
+
+extern bool operator==(
+    const VkDescriptorSetLayoutCreateInfo &lhs,
+    const VkDescriptorSetLayoutCreateInfo &rhs) INTERNAL
+{
+    if (lhs.sType != rhs.sType ||
+        lhs.flags != rhs.flags ||
+        lhs.bindingCount != rhs.bindingCount)
+    {
+        return false;
+    }
+
+    if (lhs.pNext != rhs.pNext) {
+        PANIC("unimplemented vulkan structure chain comparison");
+        return false;
+    }
+
+    for (u32 i = 0; i < lhs.bindingCount; i++) {
+        if (lhs.pBindings[i].binding != rhs.pBindings[i].binding ||
+            lhs.pBindings[i].descriptorType != rhs.pBindings[i].descriptorType ||
+            lhs.pBindings[i].descriptorCount != rhs.pBindings[i].descriptorCount ||
+            lhs.pBindings[i].stageFlags != rhs.pBindings[i].stageFlags)
+        {
+            return false;
+        }
+
+        if (lhs.pBindings[i].pImmutableSamplers != rhs.pBindings[i].pImmutableSamplers)
+        {
+            PANIC("unimplemented immutable sampler comparison");
+            return false;
+        }
+    }
+
+    return true;
+}
