@@ -12,7 +12,7 @@
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>
 
-String exe_path;
+String jl_exe_path;
 
 extern void stdio_sink(const char *path, u32 line, LogType type, const char *msg);
 FixedArray<sink_proc_t, 10> log_sinks{ stdio_sink };
@@ -60,13 +60,13 @@ int main(int argc, char **argv)
 
 	char *p = last_of(argv[0], '/');
 	if (argv[0][0] == '/') {
-		exe_path = { argv[0], (i32)(p-argv[0]) };
+		jl_exe_path = { argv[0], (i32)(p-argv[0]) };
 	} else {
 		char buffer[PATH_MAX];
 		char *wd = getcwd(buffer, sizeof buffer);
 		PANIC_IF(wd == nullptr, "current working dir exceeds PATH_MAX");
 
-		exe_path = join_path(
+		jl_exe_path = join_path(
 			{ wd, (i32)strlen(wd) },
 			{ argv[0], (i32)(p-argv[0]) },
 			mem_dynamic);

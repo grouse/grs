@@ -12,7 +12,7 @@
 #include <string.h>
 
 extern "C" char *realpath(const char *path, char *resolved_path);
-extern String exe_path;
+extern String jl_exe_path;
 
 bool file_exists_sz(const char *sz_path)
 {
@@ -227,7 +227,7 @@ bool is_directory(String path)
 
 String get_exe_folder(Allocator mem)
 {
-    return duplicate_string(exe_path, mem);
+    return duplicate_string(jl_exe_path, mem);
 }
 
 String get_working_dir(Allocator mem)
