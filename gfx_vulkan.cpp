@@ -1308,6 +1308,12 @@ void gfx_end_pass() EXPORT
     vkCmdEndRendering(cmd);
 }
 
+extern void vk_update_uniform_buffer(GfxVkBuffer buffer, void *data, i32 size) INTERNAL
+{
+    vmaMapMemory(vk.allocator, buffer.allocation, &buffer.allocation_info.pMappedData);
+    memcpy(buffer.allocation_info.pMappedData, data, size);
+    vmaUnmapMemory(vk.allocator, buffer.allocation);
+}
 
 VkAttachmentLoadOp vk_load_op(GfxLoadOp op) INTERNAL
 {
