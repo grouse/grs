@@ -257,7 +257,7 @@ f32 app_time_s();
 
 #include "generated/core.h"
 
-#ifndef JL_CORE_IMPL
+#if !defined(JL_CORE_IMPL) && !defined(JL_MAIN)
 #define main jl_main
 #endif
 

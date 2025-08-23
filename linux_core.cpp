@@ -54,6 +54,7 @@ i32 current_process_id() EXPORT
     return getpid();
 }
 
+#ifndef JL_MAIN
 int main(int argc, char **argv)
 {
     init_default_allocators();
@@ -83,3 +84,4 @@ int main(int argc, char **argv)
     extern int jl_main(Array<String> args);
     return jl_main(args);
 }
+#endif

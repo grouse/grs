@@ -147,6 +147,7 @@ i32 current_process_id() EXPORT
     return (i32)GetCurrentProcessId();
 }
 
+#ifndef JL_MAIN
 int WINAPI WinMain(
     HINSTANCE /*hInstance*/,
     HINSTANCE /*hPrevInstance*/,
@@ -159,3 +160,4 @@ int WINAPI WinMain(
     extern int jl_main(Array<String> args);
     return jl_main(args);
 }
+#endif

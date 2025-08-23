@@ -1,4 +1,6 @@
 #define TEST_H_IMPL
+#define JL_MAIN
+
 #include "test.h"
 
 #include "core.cpp"
@@ -10,7 +12,6 @@
 
 #include "generated/tests/tests.h"
 #include "MurmurHash/MurmurHash3.cpp"
-
 
 int main()
 {

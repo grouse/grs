@@ -69,6 +69,7 @@ extern void maths__quaternion__q_mul_q_conj_equals_v_sq_plus_s_sq();
 extern void maths__quaternion__q_inverse_equals_q_conj_if_q_unit();
 extern void maths__misc__angle_between();
 static void dynamic_map__set_invokes_copy_constructor_for_key_and_value();
+static void dynamic_map__growing_map_invokes_copy_constructors();
 static void dynamic_map__set_of_existing_key_invokes_copy_assign_for_value_and_nothing_for_key();
 
 TestSuite TESTS_array_tests[] = {
@@ -160,6 +161,7 @@ TestSuite TESTS_maths__misc_tests[] = {
 };
 TestSuite TESTS_dynamic_map_tests[] = {
 	{ "set_invokes_copy_constructor_for_key_and_value", dynamic_map__set_invokes_copy_constructor_for_key_and_value },
+	{ "growing_map_invokes_copy_constructors", dynamic_map__growing_map_invokes_copy_constructors },
 	{ "set_of_existing_key_invokes_copy_assign_for_value_and_nothing_for_key", dynamic_map__set_of_existing_key_invokes_copy_assign_for_value_and_nothing_for_key },
 };
 TestSuite TESTS_tests[] = {
