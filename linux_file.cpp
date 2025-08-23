@@ -12,8 +12,7 @@
 #include <string.h>
 
 extern "C" char *realpath(const char *path, char *resolved_path);
-String exe_path;
-
+extern String exe_path;
 
 bool file_exists_sz(const char *sz_path)
 {

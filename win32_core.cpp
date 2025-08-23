@@ -153,8 +153,9 @@ int WINAPI WinMain(
     PWSTR /*pCmdLine*/,
     int /*nCmdShow*/)
 {
-    extern int jl_main(Array<String> args);
     init_default_allocators();
     Array<String> args = win32_commandline_args(mem_dynamic);
+
+    extern int jl_main(Array<String> args);
     return jl_main(args);
 }

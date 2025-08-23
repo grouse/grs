@@ -259,8 +259,6 @@ f32 app_time_s();
 
 #ifndef JL_CORE_IMPL
 #define main jl_main
-#else
-extern int jl_main(Array<String> args);
 #endif
 
 #endif // CORE_H

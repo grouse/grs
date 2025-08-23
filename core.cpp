@@ -1,7 +1,7 @@
+#define JL_CORE_IMPL
+
 #include "core.h"
 #include "string.h"
-
-#define JL_CORE_IMPL
 
 #if defined(_WIN32)
 #include "win32_core.cpp"

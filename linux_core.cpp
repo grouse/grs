@@ -12,8 +12,11 @@
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>
 
+String exe_path;
+
 extern void stdio_sink(const char *path, u32 line, LogType type, const char *msg);
 FixedArray<sink_proc_t, 10> log_sinks{ stdio_sink };
+
 
 bool debugger_attached()
 {
@@ -77,5 +80,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-    return app_main(args);
+    extern int jl_main(Array<String> args);
+    return jl_main(args);
 }
