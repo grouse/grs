@@ -240,6 +240,9 @@ struct GfxVkAttachment {
 };
 
 struct GfxVkRenderPassDesc {
+    String debug_name;
+    f32 debug_color[4];
+
     GfxVkAttachment color[MAX_COLOR_ATTACHMENTS];
     GfxVkAttachment depth;
     struct { u32 x, y; } offset;
