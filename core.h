@@ -106,7 +106,7 @@ static_assert(sizeof(i16) == 2, "i16 sizeof mismatch");
 static_assert(sizeof(u8) == 1, "u8 sizeof mismatch");
 static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 
-#define jl_typeid(T) type_id<T>(#T)
+#define jl_typeid(T) jl_type_id<T>(#T)
 #define defer auto defer_( __LINE__ ) = DeferDummy( ) + [&]( )
 #define transmute(T, value) (*(T*)&(value))
 
@@ -150,14 +150,14 @@ static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 #define LOG_ERROR(...) logf(__FILE__, __LINE__, LOG_TYPE_ERROR, __VA_ARGS__)
 #define LOG_INFO(...)  logf(__FILE__, __LINE__, LOG_TYPE_INFO, __VA_ARGS__)
 
-typedef bool (*assert_handler_t)(const char *src, int line, const char *sz_cond);
-typedef bool (*panic_handler_t)(const char *src, int line, const char *sz_cond, const char *msg, ...);
+typedef bool (*jl_assert_handler_proc)(const char *src, int line, const char *sz_cond);
+typedef bool (*jl_panic_handler_proc)(const char *src, int line, const char *sz_cond, const char *msg, ...);
 
-extern assert_handler_t assert_handler;
-extern panic_handler_t panic_handler;
+extern jl_assert_handler_proc jl_assert_handler;
+extern jl_panic_handler_proc jl_panic_handler;
 
-#define ASSERT_HANDLER(cond) assert_handler(__FILE__, __LINE__, #cond)
-#define PANIC_HANDLER(sz_cond, ...) panic_handler(__FILE__, __LINE__, sz_cond, __VA_ARGS__)
+#define ASSERT_HANDLER(cond) jl_assert_handler(__FILE__, __LINE__, #cond)
+#define PANIC_HANDLER(sz_cond, ...) jl_panic_handler(__FILE__, __LINE__, sz_cond, __VA_ARGS__)
 
 #ifndef ASSERT
 #define ASSERT(...) do {\
@@ -235,14 +235,14 @@ void logv(const char *file, u32 line, LogType type, const char *fmt, va_list arg
 bool add_log_sink(sink_proc_t sink);
 
 template<typename T>
-i32 type_id(const char *type_name)
+i32 jl_type_id(const char *type_name)
 {
-    extern i32 next_type_id;
+    extern i32 jl_next_type_id;
 
-    i32 t = next_type_id;
-    static i32 id = ++next_type_id;
+    i32 t = jl_next_type_id;
+    static i32 id = ++jl_next_type_id;
 
-    if (t != next_type_id) LOG_INFO("registered type [%d] %s", t, type_name);
+    if (t != jl_next_type_id) LOG_INFO("registered type [%d] %s", t, type_name);
     return id;
 }
 

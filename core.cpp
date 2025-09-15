@@ -13,14 +13,14 @@
 
 #include <string.h>
 
-i32 next_type_id = 0;
+i32 jl_next_type_id = 0;
 
 bool default_assert_handler(const char *file, int line, const char *sz_cond)
 {
     logf(file, line, LOG_TYPE_ERROR, "assertion failed: %s", sz_cond);
     return true;
 }
-assert_handler_t assert_handler = default_assert_handler;
+jl_assert_handler_proc jl_assert_handler = default_assert_handler;
 
 bool default_panic_handler(
     const char *file, int line,
@@ -41,7 +41,7 @@ bool default_panic_handler(
 
     return true;
 }
-panic_handler_t panic_handler = default_panic_handler;
+jl_panic_handler_proc jl_panic_handler = default_panic_handler;
 
 
 bool add_log_sink(sink_proc_t sink)
