@@ -615,6 +615,8 @@ extern void vk_destroy_buffer(GfxVkBuffer buffer) INTERNAL
 
 extern void vk_set_image_label(VkImage image, String label) INTERNAL
 {
+    if (!vkSetDebugUtilsObjectNameEXT) return;
+
     VkDebugUtilsObjectNameInfoEXT name_info{
         VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
         .objectType = VK_OBJECT_TYPE_IMAGE,
@@ -627,6 +629,7 @@ extern void vk_set_image_label(VkImage image, String label) INTERNAL
 
 extern void vk_set_image_view_label(VkImageView view, String label) INTERNAL
 {
+    if (!vkSetDebugUtilsObjectNameEXT) return;
     SArena scratch = tl_scratch_arena();
 
     VkDebugUtilsObjectNameInfoEXT name_info{
@@ -647,6 +650,7 @@ extern void vk_set_texture_label(GfxVkTexture texture, String label) INTERNAL
 
 extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
 {
+    if (!vkSetDebugUtilsObjectNameEXT) return;
     SArena scratch = tl_scratch_arena();
 
     VkDebugUtilsObjectNameInfoEXT name_info{
@@ -661,7 +665,9 @@ extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
 
 extern void vk_set_pipeline_label(GfxPipeline handle, String label) INTERNAL
 {
+    if (!vkSetDebugUtilsObjectNameEXT) return;
     SArena scratch = tl_scratch_arena();
+
     VkPipeline pipeline = vk.pipelines[handle];
 
     VkDebugUtilsObjectNameInfoEXT name_info{
@@ -1301,12 +1307,18 @@ void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
         .pDepthAttachment = desc.depth.res ? &depth_attachment : nullptr
     };
 
-    VkDebugUtilsLabelEXT debug_label {
-        VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
-        .pLabelName = desc.debug_name ? sz_string(desc.debug_name, scratch) : "",
-        .color = { desc.debug_color[0], desc.debug_color[1], desc.debug_color[2], desc.debug_color[3] }
-    };
-    vkCmdBeginDebugUtilsLabelEXT(cmd, &debug_label);
+
+
+    if (vkCmdBeginDebugUtilsLabelEXT) {
+        VkDebugUtilsLabelEXT debug_label {
+            VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
+            .pLabelName = desc.debug_name ? sz_string(desc.debug_name, scratch) : "",
+            .color = { desc.debug_color[0], desc.debug_color[1], desc.debug_color[2], desc.debug_color[3] }
+        };
+
+        vkCmdBeginDebugUtilsLabelEXT(cmd, &debug_label);
+    }
+
     vkCmdBeginRendering(cmd, &render_info);
 }
 
@@ -1316,7 +1328,7 @@ void gfx_end_pass() EXPORT
     auto cmd = frame->cmd;
 
     vkCmdEndRendering(cmd);
-    vkCmdEndDebugUtilsLabelEXT(cmd);
+    if (vkCmdEndDebugUtilsLabelEXT) vkCmdEndDebugUtilsLabelEXT(cmd);
 }
 
 extern void vk_update_uniform_buffer(GfxVkBuffer buffer, void *data, i32 size) INTERNAL

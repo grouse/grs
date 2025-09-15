@@ -67,9 +67,9 @@ struct GfxVkTexture {
 };
 
 struct GfxVkMaterial {
-    GfxPipeline pipeline;
     VkDescriptorSet set;
 };
+
 
 struct GfxVkShader {
     GfxShader handle;
