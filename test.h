@@ -254,11 +254,11 @@ int run_tests(TestSuite *tests, int count)
     signal(SIGINT, test_sig_handler);
     signal(SIGSEGV, test_sig_handler);
 
-    extern assert_handler_t assert_handler;
-    extern panic_handler_t panic_handler;
+    extern jl_assert_handler_proc jl_assert_handler;
+    extern jl_panic_handler_proc jl_panic_handler;
 
-    assert_handler = test_assert_handler;
-    panic_handler = test_panic_handler;
+    jl_assert_handler = test_assert_handler;
+    jl_panic_handler = test_panic_handler;
 
     printf("\nRunning %d test procedures\n", count);
     int failed_tests = run_tests_int(tests, count);
