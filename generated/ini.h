@@ -1,9 +1,6 @@
 #ifndef INI_PUBLIC_H
 #define INI_PUBLIC_H
 
-namespace PUBLIC {}
-using namespace PUBLIC;
-
 extern IniSerializer ini_writer(Allocator mem);
 extern IniSerializer ini_reader(u8 *data, i32 size);
 extern IniSerializer ini_read_file(String path, Allocator mem);

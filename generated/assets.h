@@ -1,9 +1,6 @@
 #ifndef ASSETS_PUBLIC_H
 #define ASSETS_PUBLIC_H
 
-namespace PUBLIC {}
-using namespace PUBLIC;
-
 extern void init_assets(Array<String> folders, const AssetTypesDesc & desc);
 extern void register_asset_procs(const AssetTypesDesc & desc);
 extern bool is_asset_loaded(String path);

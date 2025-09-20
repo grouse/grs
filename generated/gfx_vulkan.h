@@ -1,9 +1,6 @@
 #ifndef GFX_VULKAN_PUBLIC_H
 #define GFX_VULKAN_PUBLIC_H
 
-namespace PUBLIC {}
-using namespace PUBLIC;
-
 extern Vector2 gfx_resolution();
 extern void gfx_wait_frame();
 extern GfxBuffer gfx_create_buffer(i32 size);

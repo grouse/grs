@@ -1,9 +1,6 @@
 #ifndef MATHS_PUBLIC_H
 #define MATHS_PUBLIC_H
 
-namespace PUBLIC {}
-using namespace PUBLIC;
-
 extern Vector2 abs(Vector2 v);
 extern Vector2 vec2_max(Vector2 lhs, Vector2 rhs);
 extern Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size);

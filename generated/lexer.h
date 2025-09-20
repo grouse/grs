@@ -1,9 +1,6 @@
 #ifndef LEXER_PUBLIC_H
 #define LEXER_PUBLIC_H
 
-namespace PUBLIC {}
-using namespace PUBLIC;
-
 extern Token next_token(Lexer *lexer, u32 flags);
 extern Token next_nth_token(Lexer *lexer, i32 n, u32 flags);
 extern Token peek_token(Lexer *lexer, u32 flags);

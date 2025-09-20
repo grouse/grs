@@ -1,9 +1,6 @@
 #ifndef WINDOW_PUBLIC_H
 #define WINDOW_PUBLIC_H
 
-namespace PUBLIC {}
-using namespace PUBLIC;
-
 extern String string_from_enum(GamepadButton button);
 extern String string_from_enum(GamepadAxis axis);
 extern String string_from_enum(WindowEventType type);
