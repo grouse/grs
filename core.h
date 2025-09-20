@@ -161,7 +161,7 @@ extern jl_panic_handler_proc jl_panic_handler;
 
 #ifndef ASSERT
 #define ASSERT(...) do {\
-    if (!(__VA_ARGS__) && ASSERT_HANDLER((__VA_ARGS__))) {\
+    if (bool result_ = __VA_ARGS__; !result_ && ASSERT_HANDLER(cond)) {\
         DEBUG_BREAK();\
     }\
 } while(0)
@@ -178,7 +178,7 @@ extern jl_panic_handler_proc jl_panic_handler;
 
 #ifndef PANIC_IF
 #define PANIC_IF(cond, ...) do {\
-    if ((cond) && PANIC_HANDLER(#cond, __VA_ARGS__)) {\
+    if (bool cond_ = cond; cond_ && PANIC_HANDLER(#cond, __VA_ARGS__)) {\
         DEBUG_BREAK();\
     }\
 } while(0)
