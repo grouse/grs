@@ -1,0 +1,5 @@
+#ifndef THREAD_INTERNAL_H
+#define THREAD_INTERNAL_H
+
+
+#endif // THREAD_INTERNAL_H
