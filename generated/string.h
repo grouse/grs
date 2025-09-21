@@ -1,5 +1,5 @@
-#ifndef STRING_PUBLIC_H
-#define STRING_PUBLIC_H
+#ifndef STRING_GENERATED_H
+#define STRING_GENERATED_H
 
 extern String read_memory(MemoryBuffer *buf, Allocator mem);
 extern String string(const char *str, i32 length, Allocator mem);
@@ -54,4 +54,4 @@ extern i32 first_of(const char *str, char c);
 extern bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2]);
 extern bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2]);
 
-#endif // STRING_PUBLIC_H
+#endif // STRING_GENERATED_H

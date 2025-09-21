@@ -1,5 +1,5 @@
-#ifndef WINDOW_PUBLIC_H
-#define WINDOW_PUBLIC_H
+#ifndef WINDOW_GENERATED_H
+#define WINDOW_GENERATED_H
 
 extern String string_from_enum(GamepadButton button);
 extern String string_from_enum(GamepadAxis axis);
@@ -25,4 +25,13 @@ extern bool get_input_held(InputId id, InputMapId map_id);
 extern bool get_input_mouse(MouseButton btn, InputType type = EDGE_DOWN);
 extern u32 hash32(const InputDesc & desc, u32 seed = MURMUR3_SEED);
 
-#endif // WINDOW_PUBLIC_H
+#endif // WINDOW_GENERATED_H
+
+#if defined(WINDOW_INTERNAL) && !defined(WINDOW_INTERNAL_ONCE)
+#define WINDOW_INTERNAL_ONCE
+
+static void reset_input_map(InputMapId map_id);
+static bool translate_input_event(DynamicArray<WindowEvent> *queue, InputMapId map_id, WindowEvent event);
+static bool translate_input_event(DynamicArray<WindowEvent> *queue, WindowEvent event);
+
+#endif

@@ -1,5 +1,5 @@
-#ifndef MATHS_PUBLIC_H
-#define MATHS_PUBLIC_H
+#ifndef MATHS_GENERATED_H
+#define MATHS_GENERATED_H
 
 extern Vector2 abs(Vector2 v);
 extern Vector2 vec2_max(Vector2 lhs, Vector2 rhs);
@@ -151,4 +151,4 @@ extern f32 linear_from_sRGB(f32 s);
 extern Vector3 linear_from_sRGB(Vector3 sRGB);
 extern Vector4 linear_from_sRGB(Vector4 sRGB);
 
-#endif // MATHS_PUBLIC_H
+#endif // MATHS_GENERATED_H

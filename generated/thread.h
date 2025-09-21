@@ -1,5 +1,0 @@
-#ifndef THREAD_PUBLIC_H
-#define THREAD_PUBLIC_H
-
-
-#endif // THREAD_PUBLIC_H

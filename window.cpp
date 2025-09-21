@@ -1,11 +1,10 @@
-#include "window.h"
-
 #include "array.h"
 #include "map.h"
 #include "string.h"
 #include "hash.h"
 
-#include "generated/internal/window.h"
+#define WINDOW_INTERNAL
+#include "window.h"
 
 struct InputCursor {
     f32 x, y;

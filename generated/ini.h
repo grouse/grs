@@ -1,5 +1,5 @@
-#ifndef INI_PUBLIC_H
-#define INI_PUBLIC_H
+#ifndef INI_GENERATED_H
+#define INI_GENERATED_H
 
 extern IniSerializer ini_writer(Allocator mem);
 extern IniSerializer ini_reader(u8 *data, i32 size);
@@ -13,4 +13,4 @@ extern bool ini_value(IniSerializer *ini, String name, String *value, Allocator 
 extern bool ini_in_section(IniSerializer *ini);
 extern bool ini_next(IniSerializer *ini);
 
-#endif // INI_PUBLIC_H
+#endif // INI_GENERATED_H

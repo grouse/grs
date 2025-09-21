@@ -1,6 +1,6 @@
-#ifndef FILE_PUBLIC_H
-#define FILE_PUBLIC_H
+#ifndef FILE_GENERATED_H
+#define FILE_GENERATED_H
 
 extern String uri_from_path(String path, Allocator mem);
 
-#endif // FILE_PUBLIC_H
+#endif // FILE_GENERATED_H

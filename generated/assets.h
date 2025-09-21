@@ -1,5 +1,5 @@
-#ifndef ASSETS_PUBLIC_H
-#define ASSETS_PUBLIC_H
+#ifndef ASSETS_GENERATED_H
+#define ASSETS_GENERATED_H
 
 extern void init_assets(Array<String> folders, const AssetTypesDesc & desc);
 extern void register_asset_procs(const AssetTypesDesc & desc);
@@ -36,4 +36,4 @@ extern Array<String> list_asset_files(Array<String> extensions, Allocator mem);
 extern void *load_string_asset(AssetHandle, void *existing, String, u8 *data, i32 size);
 extern u32 hash32(const AssetHandle & it, u32 seed = MURMUR3_SEED);
 
-#endif // ASSETS_PUBLIC_H
+#endif // ASSETS_GENERATED_H

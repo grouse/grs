@@ -1,5 +1,0 @@
-#ifndef MEMORY_PUBLIC_H
-#define MEMORY_PUBLIC_H
-
-
-#endif // MEMORY_PUBLIC_H

@@ -1,5 +1,0 @@
-#ifndef FILE_INTERNAL_H
-#define FILE_INTERNAL_H
-
-
-#endif // FILE_INTERNAL_H

@@ -1,5 +1,0 @@
-#ifndef MEMORY_INTERNAL_H
-#define MEMORY_INTERNAL_H
-
-
-#endif // MEMORY_INTERNAL_H

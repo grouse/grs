@@ -1,5 +1,5 @@
-#ifndef LEXER_PUBLIC_H
-#define LEXER_PUBLIC_H
+#ifndef LEXER_GENERATED_H
+#define LEXER_GENERATED_H
 
 extern Token next_token(Lexer *lexer, u32 flags);
 extern Token next_nth_token(Lexer *lexer, i32 n, u32 flags);
@@ -20,4 +20,4 @@ extern bool parse_string(Lexer *lexer, String *str);
 extern bool parse_string(Lexer *lexer, String *str, Allocator mem);
 extern bool parse_bool(Lexer *lexer, bool *value);
 
-#endif // LEXER_PUBLIC_H
+#endif // LEXER_GENERATED_H

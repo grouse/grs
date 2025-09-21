@@ -1,5 +1,0 @@
-#ifndef TESTS_INTERNAL_H
-#define TESTS_INTERNAL_H
-
-
-#endif // TESTS_INTERNAL_H

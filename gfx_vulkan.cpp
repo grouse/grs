@@ -1,5 +1,5 @@
+#define GFX_VULKAN_INTERNAL
 #include "gfx_vulkan.h"
-#include "generated/internal/gfx_vulkan.h"
 #include "gfx.h"
 #include "src/core/memory.h"
 #include "string.h"
