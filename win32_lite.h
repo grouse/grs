@@ -351,7 +351,9 @@
 #define CF_TEXT           1
 #define CF_UNICODETEXT    13
 
-#define NULL 0
+#ifndef NULL
+#define NULL (void*)0
+#endif
 
 typedef wchar_t WCHAR;
 typedef char CHAR;
