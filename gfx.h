@@ -146,6 +146,8 @@ GfxTexture gfx_create_texture(GfxTextureFormat format, GfxSwizzle swizzle, u32 w
 GfxTexture gfx_create_texture(void *pixels, GfxTextureFormat format, GfxSwizzle swizzle, u32 width, u32 height);
 void gfx_copy_texture(GfxTexture dst, u32 dst_x, u32 dst_y, u32 w, u32 h, const void *pixels);
 
+GfxTexture gfx_load_texture(String image_path, bool sRGB);
+
 GfxMaterial gfx_create_material(GfxMaterialDesc desc);
 
 GfxBuffer gfx_create_vertex_buffer(void *data, i32 size);
