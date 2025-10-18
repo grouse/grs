@@ -125,10 +125,11 @@ extern jmp_buf test_jmp_[2];
 extern int test_jmp_i;
 #define test_jmp test_jmp_[test_jmp_i]
 
+#define RUN_TESTS(tests) run_tests(tests, sizeof(tests)/sizeof(tests[0]))
+
 extern int run_tests(TestSuite *tests, int count);
 extern void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...);
 extern void report_failv(const char *file, int line, const char *sz_cond, const char *msg, va_list va_args);
-
 
 #define REPORT_FAIL(...) report_fail(__FILE__, __LINE__, __VA_ARGS__)
 
@@ -214,7 +215,7 @@ void report_failv(const char *file, int line, const char *sz_cond, const char *f
     test_current->result = rep;
 }
 
-static int run_tests_int(TestSuite *tests, int count, int depth = 0)
+static int run_tests_(TestSuite *tests, int count, int depth = 0)
 {
     int failed_tests = 0;
     for (int i = 0; i < count; i++) {
@@ -222,7 +223,9 @@ static int run_tests_int(TestSuite *tests, int count, int depth = 0)
 
         if (tests[i].children && tests[i].child_count) {
             printf("/%s\n", tests[i].name);
-            failed_tests += run_tests_int(tests[i].children, tests[i].child_count, depth+1);
+            failed_tests += run_tests_(
+                tests[i].children, tests[i].child_count, 
+                depth+1);
         }
 
         if (!tests[i].proc) continue;
@@ -260,8 +263,7 @@ int run_tests(TestSuite *tests, int count)
     jl_assert_handler = test_assert_handler;
     jl_panic_handler = test_panic_handler;
 
-    printf("\nRunning %d test procedures\n", count);
-    int failed_tests = run_tests_int(tests, count);
+    int failed_tests = run_tests_(tests, count);
     return failed_tests;
 }
 

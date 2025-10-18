@@ -1,21 +1,25 @@
 #define TEST_H_IMPL
-#define JL_MAIN
-
 #include "test.h"
 
-#include "core.cpp"
-#include "maths.cpp"
-#include "string.cpp"
-#include "memory.cpp"
-#include "thread.cpp"
+#include "array.h"
 #include "map.h"
+#include "maths.h"
 
-#include "generated/tests/tests.h"
+#include "generated/tests/array.h"
+#include "generated/tests/map.h"
+#include "generated/tests/maths.h"
+
 #include "MurmurHash/MurmurHash3.cpp"
 
-int main()
+int main(Array<String> args)
 {
+    extern Allocator mem_sys;
     mem_sys = malloc_allocator();
     mem_dynamic = malloc_allocator();
-    return run_tests(TESTS_tests, sizeof(TESTS_tests) / sizeof(TESTS_tests[0]));
+
+    int error = 0;
+    error |= RUN_TESTS(MATHS__tests);
+    error |= RUN_TESTS(MAP__tests);
+    error |= RUN_TESTS(ARRAY__tests);
+    return error;
 }
