@@ -358,7 +358,7 @@ void linux_input_event(DynamicArray<WindowEvent> *stream, AppWindow *wnd, XEvent
 			u8 keycode = keycode_from_x11_keycode(xevent.xkey.keycode, sym);
 
 			if (keycode == KC_UNKNOWN) {
-			    LOG_INFO("unknown xkey.keycode: 0x%x", xevent.xkey.keycode);
+			    LOG_INFO("unknown xkey.keycode: 0x%x, sym: 0x%x", xevent.xkey.keycode, sym);
 			    break;
             }
 
