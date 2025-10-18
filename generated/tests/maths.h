@@ -2,7 +2,6 @@
 #define MATHS_TEST_H
 
 extern void maths__vector2__operators();
-extern void maths__foobar();
 extern void maths__vector2__swizzle();
 extern void maths__vector3__operators();
 extern void maths__vector3__vec_mul_vec_equals_component_wise_mul();
@@ -51,10 +50,6 @@ extern void maths__misc__angle_between();
 TestSuite MATHS__maths__vector2__tests[] = {
 	{ "operators", maths__vector2__operators },
 	{ "swizzle", maths__vector2__swizzle },
-};
-
-TestSuite MATHS__maths__tests[] = {
-	{ "foobar", maths__foobar },
 };
 
 TestSuite MATHS__maths__vector3__tests[] = {
@@ -119,7 +114,6 @@ TestSuite MATHS__maths__misc__tests[] = {
 };
 
 TestSuite MATHS__tests[] = {
-	{ "maths", nullptr, MATHS__maths__tests, sizeof(MATHS__maths__tests)/sizeof(MATHS__maths__tests[0]) },
 	{ "maths/mat3", nullptr, MATHS__maths__mat3__tests, sizeof(MATHS__maths__mat3__tests)/sizeof(MATHS__maths__mat3__tests[0]) },
 	{ "maths/mat4", nullptr, MATHS__maths__mat4__tests, sizeof(MATHS__maths__mat4__tests)/sizeof(MATHS__maths__mat4__tests[0]) },
 	{ "maths/misc", nullptr, MATHS__maths__misc__tests, sizeof(MATHS__maths__misc__tests)/sizeof(MATHS__maths__misc__tests[0]) },
