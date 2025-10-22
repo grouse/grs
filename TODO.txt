@@ -14,7 +14,6 @@
     - statically allocated memory
     - push/pop as long as doing so doesn't exceed the fixed memory size
     - modeled after FixedArray
-- [ ] [assets] bring over asset APIs
 - [ ] [gui] bring over GUI APIs
     - aya is furthest along, with some minor fixes and changes in mimir
     - decide whether to keep or remove the dependency on font APIs
@@ -23,10 +22,6 @@
     - need to decide whether to have a dependency on gfx for creation/updating of the font atlas texture data, or if that should be done in a more separated way
     - depends on gfx
     - depends on font
-- [ ] [gfx] bring over core gfx APIs
-    - rely heavily on per-game management of actual complex rendering
-    - core API for management of resources, shaders, materials, etc. Aya is furthest along
-    - depends on assets
 - [ ] [input] lambda/function pointer mapping
     - can I do it such that I don't need to supply a mapping id? treat the function pointer as the id in some way
     - In some cases I might want to supply a function pointer but still query the input for the mapping, how to handle that if the function pointer acts as the mapping id?
@@ -47,6 +42,11 @@
 # DOING
 
 # DONE
+- [x] [gfx] bring over core gfx APIs
+    - rely heavily on per-game management of actual complex rendering
+    - core API for management of resources, shaders, materials, etc. Aya is furthest along
+    - depends on assets
+- [x] [assets] bring over asset APIs
 - [x] [maths] mat4_orthographic looks incorrectly flipped in the y-translation
     - -(max_y+min_y)/h_inv instead of -(max_y+min_y)*h_inv ?
 - [x] [input] query state for AXIS input events instead of relying on awkward, complicated, and above all broken logic
