@@ -183,6 +183,8 @@ struct GfxVkDescriptorSetDesc {
 };
 
 struct GfxVkPipelineDesc {
+    String debug_label;
+
     FixedArray<VkFormat, MAX_COLOR_ATTACHMENTS> color;
 
     struct {
