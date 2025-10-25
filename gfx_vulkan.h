@@ -20,6 +20,7 @@ constexpr i32 MAX_VERTEX_INPUT_ATTRIBUTES = 4;
 constexpr i32 MAX_PUSH_CONSTANTS          = 2;
 constexpr i32 MAX_DESCRIPTOR_SETS         = 4;
 constexpr i32 MAX_DESCRIPTOR_SET_BINDINGS = 4;
+constexpr i32 MAX_DYNAMIC_STATES          = 8;
 
 #define VK_CHECK(call)\
     do {\
@@ -198,6 +199,7 @@ struct GfxVkPipelineDesc {
     FixedArray<GfxVkVertexBindingDesc, MAX_VERTEX_INPUT_BINDINGS> inputs;
     FixedArray<GfxVkPushConstantDesc, MAX_PUSH_CONSTANTS> push_constants;
     FixedArray<GfxVkDescriptorSetLayoutDesc, MAX_DESCRIPTOR_SETS> descriptor_sets;
+    FixedArray<VkDynamicState, MAX_DYNAMIC_STATES> dynamic_states;
     VkPipelineColorBlendAttachmentState blend;
     VkPolygonMode polygon_mode = VK_POLYGON_MODE_FILL;
     VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
