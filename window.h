@@ -460,4 +460,7 @@ void push_cursor(MouseCursor c);
 void set_clipboard_data(String str);
 String read_clipboard_str(Allocator mem);
 
+String select_folder_dialog(Allocator mem);
+
+
 #endif // WINDOW_H

@@ -99,6 +99,4 @@ void set_working_dir(String path);
 
 u64 file_modified_timestamp(String path);
 
-String select_folder_dialog(Allocator mem);
-
 #endif //FILE_H

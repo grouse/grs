@@ -585,3 +585,10 @@ void push_cursor(MouseCursor c)
     extern MouseCursor current_cursor;
     current_cursor = c;
 }
+
+String select_folder_dialog(Allocator /*mem*/)
+{
+	LOG_ERROR("unimplemented");
+	return {};
+}
+

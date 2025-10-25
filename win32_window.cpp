@@ -904,3 +904,34 @@ void set_clipboard_data(String str)
 
     if (!SetClipboardData(CF_UNICODETEXT, clip_mem)) return;
 }
+
+String select_folder_dialog(Allocator mem)
+{
+    extern HWND win32_root_window;
+
+    SArena scratch = tl_scratch_arena(mem);
+
+    wchar_t display_name_buffer[WIN32_MAX_PATH];
+    BROWSEINFOW bi{
+        .hwndOwner = win32_root_window,
+        .pszDisplayName = display_name_buffer,
+        .lpszTitle = L"Select folder",
+        .ulFlags = BIF_USENEWUI|BIF_RETURNONLYFSDIRS,
+    };
+
+    PIDLIST_ABSOLUTE pidl = SHBrowseForFolderW(&bi);
+    if (pidl == NULL) return "";
+
+    wchar_t buffer[WIN32_MAX_PATH];
+
+    wchar_t *dst = buffer;
+    i32 dst_count = ARRAY_COUNT(buffer);
+
+    while (!SHGetPathFromIDListEx(pidl, dst, dst_count, 0)) {
+        if (dst == buffer) dst = ALLOC_ARR(*scratch, wchar_t, dst_count+10);
+        else dst = REALLOC_ARR(*scratch, wchar_t, dst, dst_count, dst_count+10);
+        dst_count += 10;
+    }
+
+    return string_from_utf16(dst, wcslen(dst), mem);
+}

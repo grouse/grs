@@ -285,12 +285,6 @@ void close_file(FileHandle handle)
 	close(fd);
 }
 
-String select_folder_dialog(Allocator /*mem*/)
-{
-	LOG_ERROR("unimplemented");
-	return {};
-}
-
 void create_filewatch(String folder, DynamicArray<FileEvent> *events, Mutex *events_mutex)
 {
     SArena scratch = tl_scratch_arena();
