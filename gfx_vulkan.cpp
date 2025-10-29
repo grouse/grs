@@ -387,7 +387,7 @@ extern GfxVkTexture vk_create_texture(
     u32 width, u32 height,
     VkImageUsageFlags usage) INTERNAL
 {
-    GfxVkTexture texture{ .format = format };
+    GfxVkTexture texture{ .format = format, .width = width, .height = height };
 
     VkImageCreateInfo image_info{
         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

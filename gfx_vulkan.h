@@ -56,6 +56,7 @@ struct GfxVkTexture {
     VkImage image;
     VkImageView view;
     VkFormat format;
+    u32 width, height;
 
     VmaAllocation allocation;
     VmaAllocationInfo allocation_info;
