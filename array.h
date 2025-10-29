@@ -289,7 +289,9 @@ void array_create(Array<T> *arr, i32 count, Allocator mem)
 template<typename T>
 Array<T> array_create(i32 count, Allocator mem)
 {
-    return { .data = ALLOC_ARR(mem, T, count), .count = count };
+    Array<T> arr = { .data = ALLOC_ARR(mem, T, count), .count = count };
+    for (auto &it : arr) new (&it) T{};
+    return arr;
 }
 
 template<typename T>
