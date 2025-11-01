@@ -170,11 +170,14 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
     }
     PANIC_IF(chosen_mode == -1, "no suitable present mode found");
     LOG_INFO("chosen present mode: %s", sz_from_enum(modes[chosen_mode]));
+    
+    PANIC_IF(surface_caps.minImageCount > MAX_SWAPCHAIN_IMAGES,
+             "[vk] minimum image count surface capability higher than supported number of swapchain images");
 
     VkSwapchainCreateInfoKHR swapchain_info{
         VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
         .surface            = vk.surface,
-        .minImageCount      = MAX(surface_caps.minImageCount, MAX_FRAMES_IN_FLIGHT),
+        .minImageCount      = MIN(surface_caps.minImageCount, MAX_SWAPCHAIN_IMAGES),
         .imageFormat        = formats[chosen_format].format,
         .imageColorSpace    = formats[chosen_format].colorSpace,
         .imageExtent        = vk.swapchain.extent,
@@ -201,16 +204,17 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
     VK_CHECK(vkCreateSwapchainKHR(vk.device, &swapchain_info, nullptr, &vk.swapchain.handle));
 
     u32 image_count = 0;
-    VK_CHECK(vkGetSwapchainImagesKHR(vk.device, vk.swapchain.handle, &image_count, nullptr));
+    VK_CHECK(vkGetSwapchainImagesKHR(
+            vk.device, vk.swapchain.handle, 
+            &image_count, nullptr));
 
-    if (vk.swapchain.images.count != (i32)image_count) {
-        FREE(mem_dynamic, vk.swapchain.images.data);
-        FREE(mem_dynamic, vk.swapchain.views.data);
+    vk.swapchain.images.count = image_count;
+    vk.swapchain.views.count = image_count;
+    vk.swapchain.render_finished.count = image_count;
 
-        vk.swapchain.images = array_create<VkImage>((i32)image_count, mem_dynamic);
-        vk.swapchain.views = array_create<VkImageView>((i32)image_count, mem_dynamic);
-    }
-    VK_CHECK(vkGetSwapchainImagesKHR(vk.device, vk.swapchain.handle, &image_count, vk.swapchain.images.data));
+    vkGetSwapchainImagesKHR(
+        vk.device, vk.swapchain.handle, 
+        &image_count, vk.swapchain.images.data);
 
     for (auto it : iterator(vk.swapchain.views)) {
         VkImageViewCreateInfo view_info{
@@ -228,6 +232,9 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
         };
 
         VK_CHECK(vkCreateImageView(vk.device, &view_info, nullptr, &it.elem()));
+
+        VkSemaphoreCreateInfo semaphore_info{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+        VK_CHECK(vkCreateSemaphore(vk.device, &semaphore_info, nullptr, &vk.swapchain.render_finished[it.index]));
     }
 
     vk.swapchain.depth = vk_create_depth_texture(vk.swapchain.extent);

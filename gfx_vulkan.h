@@ -13,6 +13,7 @@
 #include <shaderc/shaderc.h>
 
 constexpr i32 MAX_FRAMES_IN_FLIGHT        = 2;
+constexpr i32 MAX_SWAPCHAIN_IMAGES        = 3;
 constexpr i32 MAX_SHADER_STAGES           = 3;
 constexpr i32 MAX_COLOR_ATTACHMENTS       = 1;
 constexpr i32 MAX_VERTEX_INPUT_BINDINGS   = 4;
@@ -224,9 +225,8 @@ struct GfxVkFrame {
         i32 offset;
     } vertices;
 
-    VkFence     fence;
+    VkFence fence;
     VkSemaphore image_available;
-    VkSemaphore render_finished;
 };
 
 struct GfxTextureAssetDesc {
@@ -281,8 +281,9 @@ extern struct GfxVkContext {
         VkFormat format;
         VkExtent2D extent;
 
-        Array<VkImage> images;
-        Array<VkImageView> views;
+        FixedArray<VkImage, MAX_SWAPCHAIN_IMAGES> images;
+        FixedArray<VkImageView, MAX_SWAPCHAIN_IMAGES> views;
+        FixedArray<VkSemaphore, MAX_SWAPCHAIN_IMAGES> render_finished;
 
         GfxVkTexture depth;
     } swapchain;
