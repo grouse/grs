@@ -116,8 +116,11 @@ void gfx_wait_frame() EXPORT
 
 extern void vk_destroy_swapchain() INTERNAL
 {
+    for (auto it : vk.swapchain.views) 
+        vkDestroyImageView(vk.device, it, nullptr);
+    vk.swapchain.views.count = 0;
+
     if (vk.swapchain.handle) {
-        vkDeviceWaitIdle(vk.device);
         vkDestroySwapchainKHR(vk.device, vk.swapchain.handle, nullptr);
         vk.swapchain.handle = VK_NULL_HANDLE;
     }
@@ -125,6 +128,7 @@ extern void vk_destroy_swapchain() INTERNAL
 
 extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
 {
+    LOG_INFO("[vk] creating swapchain: %d, %d", extent.width, extent.height);
     SArena scratch = tl_scratch_arena();
 
     VkSurfaceCapabilitiesKHR surface_caps{};
@@ -238,6 +242,36 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
     }
 
     vk.swapchain.depth = vk_create_depth_texture(vk.swapchain.extent);
+}
+
+void gfx_wait_for_frame() EXPORT
+{
+    vk.current_frame = (vk.current_frame + 1) % vk.frames.count;
+
+    auto *frame = &vk.frames[vk.current_frame];
+    frame->vertices.offset = 0;
+
+    VK_CHECK(vkWaitForFences(vk.device, 1, &frame->fence, VK_TRUE, UINT64_MAX));
+
+}
+
+extern void vk_recreate_swapchain() INTERNAL
+{
+    vkDeviceWaitIdle(vk.device);
+
+    vk_destroy_swapchain();
+    for (auto& frame : vk.frames) {
+        vkDestroySemaphore(vk.device, frame.image_available, nullptr);
+        frame.image_available = nullptr;
+    }
+
+    vk_create_swapchain(vk.swapchain.extent);
+    for (auto &frame : vk.frames) {
+        VkSemaphoreCreateInfo semaphore_info{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+        VK_CHECK(vkCreateSemaphore(vk.device, &semaphore_info, nullptr, &frame.image_available));
+    }
+
+    vk.recreate_swapchain_requested = false;
 }
 
 extern void vk_copy_buffer(VkCommandBuffer cmd, VkBuffer dst, VkBuffer src, VkDeviceSize size) INTERNAL

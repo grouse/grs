@@ -319,6 +319,7 @@ extern struct GfxVkContext {
 
     FixedArray<GfxVkFrame, MAX_FRAMES_IN_FLIGHT> frames;
     u32 current_frame = 0;
+    bool recreate_swapchain_requested = false;
 } vk;
 
 

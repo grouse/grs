@@ -173,7 +173,8 @@ void linux_input_event(DynamicArray<WindowEvent> *stream, AppWindow *wnd, XEvent
         if (wnd->client_resolution.x != xevent.xconfigure.width ||
             wnd->client_resolution.y != xevent.xconfigure.height)
         {
-            LOG_INFO("window size change");
+            LOG_INFO("[x11] window size change: %d,%d",
+                     xevent.xconfigure.width, xevent.xconfigure.height);
             event.type = WE_RESIZE;
             event.resize = {
                 .width = (i16)xevent.xconfigure.width,
