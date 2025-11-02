@@ -23,7 +23,7 @@ extern bool has_input_cursor_delta(InputId id, InputMapId map_id = INPUT_MAP_ANY
 extern bool get_input_edge(InputId id, InputMapId map_id = INPUT_MAP_ANY);
 extern bool get_input_held(InputId id, InputMapId map_id);
 extern bool get_input_mouse(MouseButton btn, InputType type = EDGE_DOWN);
-extern u32 hash32(const InputDesc & desc, u32 seed = MURMUR3_SEED);
+extern u32 hash32(const InputDesc & desc, u32 seed = HASH32_SEED);
 
 #endif // WINDOW_GENERATED_H
 

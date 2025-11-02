@@ -902,7 +902,7 @@ bool get_input_mouse(MouseButton btn, InputType type /*= EDGE_DOWN*/) EXPORT
     return (*it & btn) == btn || (btn == MB_ANY && *it);
 }
 
-u32 hash32(const InputDesc &desc, u32 seed /*= MURMUR3_SEED */) EXPORT
+u32 hash32(const InputDesc &desc, u32 seed /*= HASH32_SEED */) EXPORT
 {
     u32 state = seed;
     state = hash32(desc.id, state);

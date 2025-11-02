@@ -533,7 +533,7 @@ void* load_string_asset(AssetHandle /*handle*/, void *existing, String /*identif
     return ALLOC_T(mem_dynamic, String) { (char*)data, size };
 }
 
-u32 hash32(const AssetHandle &it, u32 seed /*= MURMUR3_SEED*/) EXPORT
+u32 hash32(const AssetHandle &it, u32 seed /*= HASH32_SEED*/) EXPORT
 {
     u32 state = seed;
     state = hash32(it.index, state);

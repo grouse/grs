@@ -1216,7 +1216,7 @@ extern const char* sz_from_enum(VkPresentModeKHR mode) INTERNAL
     return "unknown";
 }
 
-extern u32 hash32(const GfxTextureAssetDesc &it, u32 seed /*= MURMUR3_SEED*/) INTERNAL
+extern u32 hash32(const GfxTextureAssetDesc &it, u32 seed /*= HASH32_SEED*/) INTERNAL
 {
     u32 state = seed;
     state = hash32(it.asset, state);
@@ -1224,7 +1224,7 @@ extern u32 hash32(const GfxTextureAssetDesc &it, u32 seed /*= MURMUR3_SEED*/) IN
     return state;
 }
 
-extern u32 hash32(const GfxVkBuffer &it, u32 seed /*= MURMUR3_SEED*/) INTERNAL
+extern u32 hash32(const GfxVkBuffer &it, u32 seed /*= HASH32_SEED*/) INTERNAL
 {
     u32 state = seed;
     state = hash32(it.handle, state);
@@ -1232,7 +1232,7 @@ extern u32 hash32(const GfxVkBuffer &it, u32 seed /*= MURMUR3_SEED*/) INTERNAL
     return state;
 }
 
-extern u32 hash32(const GfxVkTexture &it, u32 seed /*= MURMUR3_SEED*/) INTERNAL
+extern u32 hash32(const GfxVkTexture &it, u32 seed /*= HASH32_SEED*/) INTERNAL
 {
     u32 state = seed;
     state = hash32(it.image, state);
@@ -1240,7 +1240,7 @@ extern u32 hash32(const GfxVkTexture &it, u32 seed /*= MURMUR3_SEED*/) INTERNAL
     return state;
 }
 
-extern u32 hash32(const GfxVkDescriptorDesc &desc, u32 seed /*= MURMUR3_SEED*/) INTERNAL
+extern u32 hash32(const GfxVkDescriptorDesc &desc, u32 seed /*= HASH32_SEED*/) INTERNAL
 {
     u32 state = seed;
     state = hash32(desc.binding, state);
@@ -1266,7 +1266,7 @@ extern u32 hash32(const GfxVkDescriptorDesc &desc, u32 seed /*= MURMUR3_SEED*/) 
     return state;
 }
 
-extern u32 hash32(const GfxVkDescriptorSetDesc &desc, u32 seed /*=MURMUR3_SEED*/) INTERNAL
+extern u32 hash32(const GfxVkDescriptorSetDesc &desc, u32 seed /*=HASH32_SEED*/) INTERNAL
 {
     u32 state = seed;
     state = hash32(desc.pipeline_layout, state);
@@ -1275,7 +1275,7 @@ extern u32 hash32(const GfxVkDescriptorSetDesc &desc, u32 seed /*=MURMUR3_SEED*/
     return state;
 }
 
-extern u32 hash32(const VkDescriptorSetLayoutCreateInfo &info, u32 seed /*=MURMUR3_SEED*/) INTERNAL
+extern u32 hash32(const VkDescriptorSetLayoutCreateInfo &info, u32 seed /*= HASH32_SEED*/) INTERNAL
 {
     u32 state = seed;
     PANIC_IF(info.pNext, "unimplemented path; need to go through the chain of vulkan structures here and hash it all");

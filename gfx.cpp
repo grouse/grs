@@ -93,7 +93,7 @@ const char* sz_from_enum(GfxTextureFormat format) EXPORT
     return "unknown";
 }
 
-u32 hash32(const GfxMaterialParameters &it, u32 seed /*= MURMUR3_SEED*/) EXPORT
+u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/) EXPORT
 {
     u32 state = seed;
     state = hash32(&it.albedo_factor, sizeof it.albedo_factor, state);
@@ -103,7 +103,7 @@ u32 hash32(const GfxMaterialParameters &it, u32 seed /*= MURMUR3_SEED*/) EXPORT
     return state;
 }
 
-u32 hash32(const GfxSamplerDesc &it, u32 seed /*= MURMUR3_SEED*/) EXPORT
+u32 hash32(const GfxSamplerDesc &it, u32 seed /*= HASH32_SEED*/) EXPORT
 {
     u32 state = seed;
     state = hash32(it.min_filter, state);

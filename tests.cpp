@@ -9,8 +9,6 @@
 #include "generated/tests/map.h"
 #include "generated/tests/maths.h"
 
-#include "MurmurHash/MurmurHash3.cpp"
-
 int main(Array<String> args)
 {
     extern Allocator mem_sys;
