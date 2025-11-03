@@ -23,9 +23,6 @@ inline bool operator==(const h128 &lhs, const h128 &rhs)
 #define HASH32_SEED ((h32)0)
 #define HASH64_SEED ((h64)0)
 
-
-
-
 inline h32 hash32(const void *data, i32 size, h32 seed = HASH32_SEED)
 {
     XXH32_hash_t val = XXH32(data, size, (XXH32_hash_t)seed);
@@ -98,149 +95,54 @@ inline h128 hash128_digest(h128s *state)
 }
 
 
-inline h32 hash32(i16 value, h32 seed = HASH32_SEED)
+template<typename T>
+inline h32 hash32(const T &value, h32 seed = HASH32_SEED)
 {
     return hash32(&value, sizeof value, seed);
 }
 
-inline h32 hash32(i32 value, h32 seed = HASH32_SEED)
+template<typename T>
+inline void hash32_update(h32s *state, const T &value)
 {
-    return hash32(&value, sizeof value, seed);
+    hash32_update(state, &value, sizeof value);
 }
 
-inline h32 hash32(i64 value, h32 seed = HASH32_SEED)
+
+template<typename T>
+inline h64 hash64(const T &value, h64 seed = HASH64_SEED)
 {
-    return hash32(&value, sizeof value, seed);
+    return hash64(&value, sizeof value, seed);
 }
 
-inline h32 hash32(u8 value, h32 seed = HASH32_SEED)
+template<typename T>
+inline void hash64_update(h64s *state, const T &value)
 {
-    return hash32(&value, sizeof value, seed);
+    hash64_update(state, &value, sizeof value);
 }
 
-inline h32 hash32(u16 value, h32 seed = HASH32_SEED)
+
+template<typename T>
+inline h128 hash128(const T &value, h64 seed = HASH64_SEED)
 {
-    return hash32(&value, sizeof value, seed);
+    return hash128(&value, sizeof value, seed);
 }
 
-inline h32 hash32(u32 value, h32 seed = HASH32_SEED)
+template<typename T>
+inline void hash128_update(h128s *state, const T &value)
 {
-    return hash32(&value, sizeof value, seed);
+    hash128_update(state, &value, sizeof value);
 }
 
-inline h32 hash32(u64 value, h32 seed = HASH32_SEED)
-{
-    return hash32(&value, sizeof value, seed);
-}
-
-inline h32 hash32(f32 value, h32 seed = HASH32_SEED)
-{
-    return hash32(&value, sizeof value, seed);
-}
-
-inline h32 hash32(f64 value, h32 seed = HASH32_SEED)
-{
-    return hash32(&value, sizeof value, seed);
-}
 
 inline h32 hash32(String str, h32 seed = HASH32_SEED)
 {
     return hash32(str.data, str.length, seed);
 }
 
-
-inline h64 hash64(i16 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-inline h64 hash64(i32 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-inline h64 hash64(i64 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-inline h64 hash64(u16 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-inline h64 hash64(u32 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-inline h64 hash64(u64 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-inline h64 hash64(f32 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-inline h64 hash64(f64 value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
 inline h64 hash64(String str, h64 seed = HASH64_SEED)
 {
     return hash64(str.data, str.length, seed);
 }
-
-
-
-inline h128 hash128(i16 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(i32 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(i64 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(u8 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(u16 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(u32 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(u64 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(f32 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-inline h128 hash128(f64 value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
 inline h128 hash128(String str, h64 seed = HASH64_SEED)
 {
     return hash128(str.data, str.length, seed);
