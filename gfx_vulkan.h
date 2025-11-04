@@ -323,6 +323,74 @@ extern struct GfxVkContext {
 } vk;
 
 
+HASH32_DECL(GfxTextureAssetDesc, state, it)
+{
+    hash32_update(state, it.asset);
+    hash32_update(state, it.sRGB);
+}
+
+HASH32_DECL(GfxVkBuffer, state, it)
+{
+    hash32_update(state, it.handle);
+    hash32_update(state, it.size);
+}
+
+HASH32_DECL(GfxVkTexture, state, it)
+{
+    hash32_update(state, it.image);
+    hash32_update(state, it.view);
+}
+
+HASH32_DECL(GfxVkDescriptorDesc, state, desc)
+{
+    hash32_update(state, desc.binding);
+    hash32_update(state, desc.type);
+
+    switch (desc.type) {
+    case GFX_TEXTURE:
+        hash32_update(state, desc.texture.texture);
+        hash32_update(state, desc.texture.sampler);
+        break;
+    case GFX_TEXTURE_ARRAY:
+        hash32_update(state, desc.texture_array.count);
+        for (i32 i = 0; i < desc.texture_array.count; i++) {
+            hash32_update(state, desc.texture_array.textures[i]);
+            hash32_update(state, desc.texture_array.samplers[i]);
+        }
+        break;
+    case GFX_UNIFORM:
+        hash32_update(state, desc.uniform);
+        break;
+    }
+}
+
+HASH32_DECL(GfxVkDescriptorSetDesc, state, desc)
+{
+    hash32_update(state, desc.pipeline_layout);
+    hash32_update(state, desc.set_layout);
+    for (auto it : desc.bindings) hash32_update(state, it);
+}
+
+HASH32_DECL(VkDescriptorSetLayoutCreateInfo, state, info)
+{
+    PANIC_IF(info.pNext, "unimplemented path; need to go through the chain of vulkan structures here and hash it all");
+
+    hash32_update(state, info.sType);
+    hash32_update(state, info.flags);
+
+    for (u32 i = 0; i < info.bindingCount; i++) {
+        auto &binding = info.pBindings[i];
+
+        hash32_update(state, binding.binding);
+        hash32_update(state, binding.descriptorType);
+        hash32_update(state, binding.descriptorCount);
+        hash32_update(state, binding.stageFlags);
+
+        PANIC_IF(binding.pImmutableSamplers, "unimplemented path, double check that pImmuteableSamplers is an array of binding.descriptorCount length, and add it to hash");
+    }
+}
+
+
 #include "generated/gfx_vulkan.h"
 
 #endif // GFX_VULKAN_H

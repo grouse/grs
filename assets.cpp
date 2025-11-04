@@ -535,8 +535,13 @@ void* load_string_asset(AssetHandle /*handle*/, void *existing, String /*identif
 
 u32 hash32(const AssetHandle &it, u32 seed /*= HASH32_SEED*/) EXPORT
 {
-    u32 state = seed;
-    state = hash32(it.index, state);
-    state = hash32(it.gen, state);
-    return state;
+    h32s state = hash32_start(seed);
+    hash32_update(&state, it);
+    return hash32_digest(&state);
+}
+
+void hash32_update(h32s *state, const AssetHandle &it) EXPORT
+{
+    hash32_update(state, it.index);
+    hash32_update(state, it.gen);
 }

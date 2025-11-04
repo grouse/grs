@@ -904,31 +904,29 @@ bool get_input_mouse(MouseButton btn, InputType type /*= EDGE_DOWN*/) EXPORT
 
 u32 hash32(const InputDesc &desc, u32 seed /*= HASH32_SEED */) EXPORT
 {
-    u32 state = seed;
-    state = hash32(desc.id, state);
-    state = hash32(desc.input.device, state);
-    state = hash32(desc.input.type, state);
+    h32s state = hash32_start(seed);
+    hash32_update(&state, desc.id);
+    hash32_update(&state, desc.input.device);
+    hash32_update(&state, desc.input.type);
 
-    auto ihash = [](IUnion input, u32 seed) -> u32
+    auto ihash = [](h32s *state, IUnion input) 
     {
-        u32 state = seed;
-
         switch (input.device) {
         case KEYBOARD:
-            state = hash32(input.key.code, state);
-            state = hash32(input.key.modifiers, state);
-            state = hash32(input.key.axis, state);
-            state = hash32(input.key.faxis, state);
+            hash32_update(state, input.key.code);
+            hash32_update(state, input.key.modifiers);
+            hash32_update(state, input.key.axis);
+            hash32_update(state, input.key.faxis);
             break;
         case MOUSE:
-            state = hash32(input.mouse.button, state);
-            state = hash32(input.mouse.modifiers, state);
+            hash32_update(state, input.mouse.button);
+            hash32_update(state, input.mouse.modifiers);
             break;
         case GAMEPAD:
-            state = hash32(input.pad.button, state);
+            hash32_update(state, input.pad.button);
             break;
         case VAXIS:
-            state = hash32(input.axis.id, state);
+            hash32_update(state, input.axis.id);
             break;
         case VTEXT:
             break;
@@ -942,15 +940,16 @@ u32 hash32(const InputDesc &desc, u32 seed /*= HASH32_SEED */) EXPORT
     };
 
     if (desc.input.type == CHORD) {
-        state = hash32(desc.input.chord.length, state);
+        hash32_update(&state, desc.input.chord.device);
+        hash32_update(&state, desc.input.chord.type);
+        hash32_update(&state, desc.input.chord.length);
         for (i32 i = 0; i < desc.input.chord.length; i++) {
-            state = ihash(desc.input.chord.seq[i], state);
+            ihash(&state, desc.input.chord.seq[i]);
         }
     } else {
-        state = ihash(desc.input, state);
+        ihash(&state, desc.input);
     }
 
-    state = hash32(desc.flags, state);
-    return state;
-
+    hash32_update(&state, desc.flags);
+    return hash32_digest(&state);
 }

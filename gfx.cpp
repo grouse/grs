@@ -95,21 +95,21 @@ const char* sz_from_enum(GfxTextureFormat format) EXPORT
 
 u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/) EXPORT
 {
-    u32 state = seed;
-    state = hash32(&it.albedo_factor, sizeof it.albedo_factor, state);
-    state = hash32(&it.metallic_roughness_factor, sizeof it.metallic_roughness_factor, state);
-    state = hash32(it.alpha_cutoff, state);
-    state = hash32(it.normal_scale, state);
-    return state;
+    h32s state = hash32_start(seed);
+    hash32_update(&state, &it.albedo_factor, sizeof it.albedo_factor);
+    hash32_update(&state, &it.metallic_roughness_factor, sizeof it.metallic_roughness_factor);
+    hash32_update(&state, it.alpha_cutoff);
+    hash32_update(&state, it.normal_scale);
+    return hash32_digest(&state);
 }
 
 u32 hash32(const GfxSamplerDesc &it, u32 seed /*= HASH32_SEED*/) EXPORT
 {
-    u32 state = seed;
-    state = hash32(it.min_filter, state);
-    state = hash32(it.mag_filter, state);
-    state = hash32(it.wrap_u, state);
-    state = hash32(it.wrap_v, state);
-    state = hash32(it.border_color, state);
-    return state;
+    h32s state = hash32_start(seed);
+    hash32_update(&state, it.min_filter);
+    hash32_update(&state, it.mag_filter);
+    hash32_update(&state, it.wrap_u);
+    hash32_update(&state, it.wrap_v);
+    hash32_update(&state, it.border_color);
+    return hash32_digest(&state);
 }
