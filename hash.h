@@ -131,6 +131,16 @@ inline h128 hash128_digest(h128s *state)
     HASH64_DECL_PRIM(T)\
     HASH128_DECL_PRIM(T)
 
+#define HASH32_DECL(T, state, var)\
+void hash32_update(h32s *state, const T &var);\
+inline u32 hash32(const T &var, u32 seed = HASH32_SEED)\
+{\
+    h32s state = hash32_start(seed);\
+    hash32_update(&state, var);\
+    return hash32_digest(&state);\
+}\
+inline void hash32_update(h32s *state, const T &var)\
+
 
 HASH_DECL_PRIM(i8);
 HASH_DECL_PRIM(i16);
@@ -175,5 +185,6 @@ inline void hash128_update(h128s *state, const String str)
 {
     return hash128_update(state, str.data, str.length);
 }
+
 
 #endif // HASH_H
