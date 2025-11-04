@@ -23,6 +23,7 @@ inline bool operator==(const h128 &lhs, const h128 &rhs)
 #define HASH32_SEED ((h32)0)
 #define HASH64_SEED ((h64)0)
 
+// NOTE(jesper): results in unexpected overload resolution for cases like hash32(ptr, seed) if ptr does not implicitly cast to void*, in which case it takes the void* prim overload declared below
 inline h32 hash32(const void *data, i32 size, h32 seed = HASH32_SEED)
 {
     XXH32_hash_t val = XXH32(data, size, (XXH32_hash_t)seed);
@@ -95,57 +96,84 @@ inline h128 hash128_digest(h128s *state)
 }
 
 
-template<typename T>
-inline h32 hash32(const T &value, h32 seed = HASH32_SEED)
-{
-    return hash32(&value, sizeof value, seed);
-}
+#define HASH32_DECL_PRIM(T)\
+    inline h32 hash32(const T value, h32 seed = HASH32_SEED)\
+    {\
+        return hash32(&value, sizeof value, seed);\
+    }\
+    inline void hash32_update(h32s *state, const T value)\
+    {\
+        hash32_update(state, &value, sizeof value);\
+    }
 
-template<typename T>
-inline void hash32_update(h32s *state, const T &value)
-{
-    hash32_update(state, &value, sizeof value);
-}
+#define HASH64_DECL_PRIM(T)\
+    inline h64 hash64(const T value, h64 seed = HASH64_SEED)\
+    {\
+        return hash64(&value, sizeof value, seed);\
+    }\
+    inline void hash64_update(h64s *state, const T value)\
+    {\
+        hash64_update(state, &value, sizeof value);\
+    }
 
+#define HASH128_DECL_PRIM(T)\
+    inline h128 hash128(const T value, h64 seed = HASH64_SEED)\
+    {\
+        return hash128(&value, sizeof value, seed);\
+    }\
+    inline void hash128_update(h128s *state, const T value)\
+    {\
+        hash128_update(state, &value, sizeof value);\
+    }
 
-template<typename T>
-inline h64 hash64(const T &value, h64 seed = HASH64_SEED)
-{
-    return hash64(&value, sizeof value, seed);
-}
-
-template<typename T>
-inline void hash64_update(h64s *state, const T &value)
-{
-    hash64_update(state, &value, sizeof value);
-}
-
-
-template<typename T>
-inline h128 hash128(const T &value, h64 seed = HASH64_SEED)
-{
-    return hash128(&value, sizeof value, seed);
-}
-
-template<typename T>
-inline void hash128_update(h128s *state, const T &value)
-{
-    hash128_update(state, &value, sizeof value);
-}
+#define HASH_DECL_PRIM(T)\
+    HASH32_DECL_PRIM(T)\
+    HASH64_DECL_PRIM(T)\
+    HASH128_DECL_PRIM(T)
 
 
-inline h32 hash32(String str, h32 seed = HASH32_SEED)
+HASH_DECL_PRIM(i8);
+HASH_DECL_PRIM(i16);
+HASH_DECL_PRIM(i32);
+HASH_DECL_PRIM(i64);
+
+HASH_DECL_PRIM(u8);
+HASH_DECL_PRIM(u16);
+HASH_DECL_PRIM(u32);
+HASH_DECL_PRIM(u64);
+
+HASH_DECL_PRIM(f32);
+HASH_DECL_PRIM(f64);
+
+// NOTE(jesper): I don't like having this here. it hashes the pointer address, not the contents, but currently mandatory to not completely break on hash32((void*)ptr, seed) cases
+HASH_DECL_PRIM(void*);
+
+
+inline h32 hash32(const String str, h32 seed = HASH32_SEED)
 {
     return hash32(str.data, str.length, seed);
 }
+inline void hash32_update(h32s *state, const String str)
+{
+    return hash32_update(state, str.data, str.length);
+}
 
-inline h64 hash64(String str, h64 seed = HASH64_SEED)
+inline h64 hash64(const String str, h64 seed = HASH64_SEED)
 {
     return hash64(str.data, str.length, seed);
 }
-inline h128 hash128(String str, h64 seed = HASH64_SEED)
+inline void hash64_update(h64s *state, const String str)
+{
+    return hash64_update(state, str.data, str.length);
+}
+
+inline h128 hash128(const String str, h64 seed = HASH64_SEED)
 {
     return hash128(str.data, str.length, seed);
+}
+inline void hash128_update(h128s *state, const String str)
+{
+    return hash128_update(state, str.data, str.length);
 }
 
 #endif // HASH_H
