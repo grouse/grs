@@ -90,6 +90,9 @@ constexpr f32 f32_PI = (f32)f64_PI;
 #define u32_MAX (u32)0xFFFFFFFF
 #define u64_MAX (u64)0xFFFFFFFFFFFFFFFF
 
+#define jl_all(val, bits) (((val) & (bits)) == bits)
+#define jl_any(val, bits) ((val) & (bits))
+
 
 
 static_assert(sizeof(u64) == 8, "u64 sizeof mismatch");
