@@ -256,7 +256,7 @@ void write_file(String path, StringBuilder *sb)
     }
 }
 
-void write_file(String path, void *data, i32 size)
+void write_file(String path, const void *data, i32 size)
 {
     SArena scratch = tl_scratch_arena();
     char *sz_path = sz_string(path, scratch);
@@ -425,28 +425,34 @@ bool file_exists(String path)
     return file_exists_sz(sz_path);
 }
 
-FileHandle open_file(String path, FileOpenMode mode)
+FileHandle open_file(String path, u32 mode)
 {
     SArena scratch = tl_scratch_arena();
     char *sz_path = sz_string(path, scratch);
 
     u32 creation_mode = 0;
-    switch (mode) {
-    case FILE_OPEN_CREATE:
-        creation_mode = CREATE_NEW;
-        break;
-    case FILE_OPEN_TRUNCATE:
-        creation_mode = CREATE_ALWAYS;
-        break;
-    }
+    if (mode & FILE_OPEN_CREATE) creation_mode = CREATE_NEW;
+    else if (mode & FILE_OPEN_TRUNCATE) creation_mode = CREATE_ALWAYS;
+
+    u32 access_mode = 0;
+    if (mode & FILE_OPEN_READ) access_mode |= GENERIC_READ;
+    if (mode & FILE_OPEN_WRITE) access_mode |= GENERIC_WRITE;
 
     PANIC_IF(creation_mode == 0, "invalid creation mode");
-    return win32_open_file(sz_path, creation_mode, GENERIC_WRITE|GENERIC_READ);
+    return win32_open_file(sz_path, creation_mode, access_mode);
 }
 
 void write_file(FileHandle handle, char *data, i32 bytes)
 {
     WriteFile(handle, data, bytes, nullptr, nullptr);
+}
+
+void read_file(FileHandle handle, void *buffer, i32 size)
+{
+    DWORD bytes_read;
+    ReadFile(handle, buffer, size, &bytes_read, nullptr);
+
+    PANIC_IF(bytes_read != size, "expected to read %d bytes, read %d", size, bytes_read);
 }
 
 void close_file(FileHandle handle)

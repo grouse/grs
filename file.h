@@ -19,8 +19,12 @@ struct FileInfo {
 };
 
 enum FileOpenMode {
-    FILE_OPEN_CREATE = 1,
-    FILE_OPEN_TRUNCATE,
+    FILE_OPEN_READ     = 1 << 0,
+    FILE_OPEN_WRITE    = 1 << 1,
+    FILE_OPEN_CREATE   = 1 << 2,
+    FILE_OPEN_TRUNCATE = 1 << 3,
+
+    FILE_OPEN_RW = FILE_OPEN_READ | FILE_OPEN_WRITE
 };
 
 enum ListFileFlags : u32 {
@@ -80,8 +84,9 @@ void create_filewatch(String folder, DynamicArray<FileEvent> *events, Mutex *eve
 
 String absolute_path(String relative, Allocator mem);
 
-FileHandle open_file(String path, FileOpenMode mode);
-void write_file(FileHandle handle, char *data, i32 bytes);
+FileHandle open_file(String path, u32 mode = FILE_OPEN_RW);
+void write_file(FileHandle handle, const void *data, i32 bytes);
+void read_file(FileHandle handle, void *data, i32 bytes);
 void close_file(FileHandle handle);
 
 void write_file(String path, void *data, i32 bytes);

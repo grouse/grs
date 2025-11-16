@@ -162,7 +162,6 @@ void list_folders(DynamicArray<String> *dst, String dir, Allocator mem, u32 flag
     	closedir(d);
 	}
 }
-
 void write_file(String path, StringBuilder *sb)
 {
     SArena scratch = tl_scratch_arena(sb->alloc);
@@ -249,16 +248,26 @@ void set_working_dir(String path)
 	}
 }
 
-FileHandle open_file(String path, FileOpenMode mode)
+FileHandle open_file(String path, u32 mode)
 {
     SArena scratch = tl_scratch_arena();
 	char *sz_path = sz_string(path, scratch);
 
-	int flags = O_RDWR;
-	if (mode == FILE_OPEN_CREATE) flags |= O_CREAT;
-	if (mode == FILE_OPEN_TRUNCATE) flags |= O_TRUNC;
+	int flags = 0;
+	if (jl_all(mode, FILE_OPEN_RW)) flags |= O_RDWR;
+    else if (mode & FILE_OPEN_READ) flags |= O_RDONLY;
+    else if (mode & FILE_OPEN_WRITE) flags |= O_WRONLY;
+    else flags |= O_RDWR;
 
-	int fd = open(sz_path, flags);
+	if (mode & FILE_OPEN_CREATE)   flags |= O_CREAT;
+	if (mode & FILE_OPEN_TRUNCATE) flags |= O_CREAT|O_TRUNC;
+
+    int mode_t = 0;
+    if (flags & O_CREAT) {
+        mode_t |= S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH;
+    }
+
+	int fd = open(sz_path, flags, mode_t);
 
 	if (fd == -1) {
 		LOG_ERROR("unhandled error opening file '%s', errono: %d: '%s'", sz_path, errno, strerror(errno));
@@ -268,7 +277,16 @@ FileHandle open_file(String path, FileOpenMode mode)
 	return (FileHandle)(i64)fd;
 }
 
-void write_file(FileHandle handle, char *data, i32 bytes)
+void read_file(FileHandle handle, void *buffer, i32 size)
+{
+    int fd = (int)(i64)handle;
+	ASSERT(fd != -1);
+
+	ssize_t res = read(fd, buffer, size);
+}
+
+
+void write_file(FileHandle handle, const void *data, i32 bytes)
 {
 	int fd = (int)(i64)handle;
 	ASSERT(fd != -1);
