@@ -442,7 +442,7 @@ FileHandle open_file(String path, u32 mode)
     return win32_open_file(sz_path, creation_mode, access_mode);
 }
 
-void write_file(FileHandle handle, char *data, i32 bytes)
+void write_file(FileHandle handle, const void *data, i32 bytes)
 {
     WriteFile(handle, data, bytes, nullptr, nullptr);
 }
