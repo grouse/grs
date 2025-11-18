@@ -70,7 +70,7 @@ void list_files(DynamicArray<String> *dst, String dir, Array<String> extensions,
         DIR *d = opendir(sz_path);
 
         if (!d) {
-            LOG_ERROR("unable to open directory: %s", sz_path);
+            LOG_ERROR("unable to open directory: %s - %s", sz_path, strerror(errno));
             continue;
         }
 
