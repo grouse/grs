@@ -15,6 +15,16 @@ bool operator==(String lhs, String rhs)
     return lhs.length == rhs.length && memcmp(lhs.data, rhs.data, lhs.length) == 0;
 }
 
+bool operator>(String rhs)
+{
+    return strncmp(bytes, rhs.bytes, MIN(length, rhs.length)) > 0;
+}
+
+bool operator<(String rhs)
+{
+    return strncmp(bytes, rhs.bytes, MIN(length, rhs.length)) < 0;
+}
+
 String string(const char *str, i32 length, Allocator mem) EXPORT
 {
     String s;

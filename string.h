@@ -63,6 +63,8 @@ struct StringBuilder {
 
 bool operator!=(String lhs, String rhs);
 bool operator==(String lhs, String rhs);
+bool operator>(String rhs);
+bool operator<(String rhs);
 
 bool starts_with(String lhs, String rhs);
 bool starts_with(const char *lhs, const char *rhs);
