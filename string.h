@@ -76,8 +76,6 @@ void string_copy(String *dst, String src, Allocator mem);
 String to_lower(String s, Allocator mem);
 char to_lower(char c);
 
-bool is_whitespace(i32 c);
-bool is_number(i32 c);
 
 String stringf(char *buffer, i32 size, const char *fmt, ...);
 String stringf(Allocator mem, const char *fmt, ...);
