@@ -85,8 +85,14 @@ void list_files(DynamicArray<String> *dst, String dir, Array<String> extensions,
                 // TODO(jesper): should I read the target linux address and return that instead?
             case DT_REG: {
                 String filename = string(it->d_name);
-                for (auto ext : extensions) if (ends_with(filename, ext)) goto pass_ext_filter;
-                continue;
+
+                if (extensions.count) {
+                    for (auto ext : extensions) {
+                        if (ends_with(filename, ext)) 
+                            goto pass_ext_filter;
+                    }
+                    continue;
+                }
 
             pass_ext_filter:
 
