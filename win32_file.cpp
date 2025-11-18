@@ -413,6 +413,59 @@ void remove_file(String path)
     DeleteFileA(sz_path);
 }
 
+void remove_files(String in_dir)
+{
+    SArena scratch = tl_scratch_arena();
+
+    DynamicArray<String> folders{ .alloc = scratch };
+    array_add(&folders, in_dir);
+
+    for (i32 i = 0; i < folders.count; i++) {
+        String dir = folders[i];
+        i32 length = dir.length;
+
+        char sz_dir[2048];
+        memcpy(sz_dir, dir.data, length);
+
+        bool eslash = dir[length-1] == '\\';
+        String root{ sz_dir, eslash ? length : length+1 };
+
+        if (!eslash) sz_dir[length++] = '\\';
+        sz_dir[length++] = '*';
+        sz_dir[length++] = '.';
+        sz_dir[length++] = '*';
+        sz_dir[length++] = '\0';
+
+        WIN32_FIND_DATA fd;
+        HANDLE h = FindFirstFile(sz_dir, &fd);
+        if (h != INVALID_HANDLE_VALUE) {
+            defer { FindClose(h); };
+
+            do {
+                if (fd.cFileName[0] == '.') continue;
+
+                String path = join_path(root, String{ fd.cFileName, (i32)strlen(fd.cFileName) });
+                if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                    array_add(&folders, path);
+                } else {
+                    char *sz_file = sz_string(path);
+                    defer{
+                        free(sz_file);
+                        destroy_string(path);
+                    };
+
+                    if (DeleteFileA(sz_file) == 0) {
+                        LOG_ERROR("failed removing file: '%s', win32 error: '%s'", sz_file, win32_system_error_message(GetLastError()));
+                    } else {
+                        LOG_INFO("deleted folder: %s", sz_file);
+                    }
+
+                }
+            } while(FindNextFile(h, &fd));
+        }
+    }
+}
+
 bool file_exists_sz(const char *path)
 {
     return PathFileExistsA(path);
@@ -516,4 +569,3 @@ void set_working_dir(String path)
         LOG_ERROR("unable to change working dir to '%S': (%d) %s", wsz_path, WIN32_ERR_STR);
     }
 }
-
