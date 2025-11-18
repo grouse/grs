@@ -1144,6 +1144,11 @@ bool is_number(i32 c) EXPORT
     return c >= '0' && c <= '9';
 }
 
+bool is_alpha(i32 c) EXPORT
+{
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
 bool is_newline(i32 c) EXPORT
 {
     return c == '\n' || c == '\r';

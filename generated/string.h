@@ -46,6 +46,7 @@ extern void append_char(StringBuilder *sb, char c);
 extern void append_stringf(StringBuilder *sb, const char *fmt);
 extern bool is_whitespace(i32 c);
 extern bool is_number(i32 c);
+extern bool is_alpha(i32 c);
 extern bool is_newline(i32 c);
 extern String to_lower(String s, Allocator mem);
 extern i32 last_of(String str, char c);
