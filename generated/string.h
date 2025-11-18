@@ -42,6 +42,7 @@ extern i32 utf32_it_next(char **utf8, char *end);
 extern void reset_string_builder(StringBuilder *sb);
 extern String create_string(StringBuilder *sb, Allocator mem);
 extern char *sz_string(StringBuilder *sb, Allocator mem);
+extern void append_char(StringBuilder *sb, char c);
 extern void append_stringf(StringBuilder *sb, const char *fmt);
 extern bool is_whitespace(i32 c);
 extern bool is_number(i32 c);

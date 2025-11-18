@@ -1068,6 +1068,22 @@ char* sz_string(StringBuilder *sb, Allocator mem) EXPORT
     return str;
 }
 
+void append_char(StringBuilder *sb, char c) EXPORT
+{
+    i32 available = sizeof sb->current->data - sb->current->written;
+
+    if (available < 1) {
+        StringBuilder::Block *block = (StringBuilder::Block*)malloc(sizeof(StringBuilder::Block));
+        memset(block, 0, sizeof *block);
+
+        sb->current->next = block;
+        sb->current = block;
+    }
+
+    *(sb->current->data+sb->current->written) = c;
+    sb->current->written += 1;
+}
+
 void append_string(StringBuilder *sb, String str)
 {
     i32 available = MIN((i32)sizeof sb->current->data - sb->current->written, str.length);
