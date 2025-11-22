@@ -170,21 +170,16 @@ void list_folders(DynamicArray<String> *dst, String dir, Allocator mem, u32 flag
 }
 void write_file(String path, StringBuilder *sb)
 {
-    SArena scratch = tl_scratch_arena(sb->alloc);
-    char *sz_path = sz_string(path, scratch);
-    i32 fd = open(sz_path, O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH);
-    if (fd < 0) {
-        LOG_ERROR("unable to open file descriptor for file: '%s' - '%s'", sz_path, strerror(errno));
-        return;
+    FileHandle fd = open_file(path, FILE_OPEN_WRITE|FILE_OPEN_CREATE|FILE_OPEN_TRUNCATE);
+    if (fd) {
+        StringBuilder::Block *it = &sb->head;
+        while (it && it->written > 0) {
+            write_file(fd, it->data, it->written);
+            it = it->next;
+        }
     }
 
-    StringBuilder::Block *it = &sb->head;
-    while (it && it->written > 0) {
-        write(fd, it->data, it->written);
-        it = it->next;
-    }
-
-    close(fd);
+    close_file(fd);
 }
 
 void remove_file(String path)
@@ -319,6 +314,13 @@ void write_file(FileHandle handle, const void *data, i32 bytes)
 	if (res == -1) {
 		LOG_ERROR("unhandled write error %d: '%s'", errno, strerror(errno));
 	}
+}
+
+void write_file(String path, const void *data, i32 bytes)
+{
+    FileHandle fd = open_file(path, FILE_OPEN_WRITE|FILE_OPEN_CREATE|FILE_OPEN_TRUNCATE);
+    write_file(fd, data, bytes);
+    close_file(fd);
 }
 
 void close_file(FileHandle handle)
