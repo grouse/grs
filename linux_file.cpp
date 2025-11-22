@@ -190,6 +190,14 @@ void remove_file(String path)
     if (result != 0) LOG_ERROR("error removing file: '%s'", sz_path);
 }
 
+void remove_files(String root)
+{
+    SArena scratch = tl_scratch_arena();
+
+    Array<String> files = list_files(root, scratch);
+    for (auto it : files) remove_file(it);
+}
+
 String absolute_path(String relative, Allocator mem)
 {
     SArena scratch = tl_scratch_arena(mem);
