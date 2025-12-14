@@ -97,7 +97,7 @@ bool file_exists_sz(const char *path);
 bool file_exists(String path);
 
 void remove_file(String path);
-void remove_files(String path);
+void remove_files(String path, u32 flags = 0);
 
 String get_exe_folder(Allocator mem);
 String get_working_dir(Allocator mem);

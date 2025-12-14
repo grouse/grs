@@ -413,7 +413,7 @@ void remove_file(String path)
     DeleteFileA(sz_path);
 }
 
-void remove_files(String in_dir)
+void remove_files(String in_dir, u32 flags)
 {
     SArena scratch = tl_scratch_arena();
 
@@ -446,7 +446,7 @@ void remove_files(String in_dir)
 
                 String path = join_path(root, String{ fd.cFileName, (i32)strlen(fd.cFileName) });
                 if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                    array_add(&folders, path);
+                    if (flags & FILE_LIST_RECURSIVE) array_add(&folders, path);
                 } else {
                     char *sz_file = sz_string(path);
                     defer{
