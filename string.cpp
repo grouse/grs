@@ -823,7 +823,7 @@ String directory_of(String path) EXPORT
     return path;
 }
 
-String path_relative_to(String path, String root)
+String path_relative_to(String path, String root) EXPORT
 {
     ASSERT(path.length > root.length);
     String proot = slice(path, 0, root.length);

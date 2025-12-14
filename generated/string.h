@@ -33,6 +33,7 @@ extern const char *sz_extension_of(const char *path);
 extern String filename_of(String path);
 extern String filename_of_sz(const char *path);
 extern String directory_of(String path);
+extern String path_relative_to(String path, String root);
 extern String join_path(String root, String filename, Allocator mem);
 extern char *join_path(const char *sz_root, const char *sz_filename, Allocator mem);
 extern i32 utf8_from_utf32(u8 utf8[4], i32 utf32);
