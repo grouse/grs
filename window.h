@@ -444,6 +444,8 @@ struct WindowEvent {
 
 #include "generated/window.h"
 
+extern void init_input_map_(InputMapId *dst, String name, std::initializer_list<InputDesc> descriptors);
+
 AppWindow* create_window(WindowCreateDesc desc);
 void present_window(AppWindow *wnd);
 

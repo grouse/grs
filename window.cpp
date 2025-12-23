@@ -226,7 +226,7 @@ String string_from_enum(MouseButton btn)
 #error "unsupported platform"
 #endif
 
-void init_input_map_(InputMapId *dst, String name, std::initializer_list<InputDesc> descriptors) EXPORT
+void init_input_map_(InputMapId *dst, String name, std::initializer_list<InputDesc> descriptors)
 {
     InputMap map{ .name = name };
     for (auto it : descriptors) {

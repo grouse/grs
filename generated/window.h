@@ -6,7 +6,6 @@ extern String string_from_enum(GamepadAxis axis);
 extern String string_from_enum(WindowEventType type);
 extern String string_from_enum(InputType type);
 extern String string_from_enum(KeyCode_ kc);
-extern void init_input_map_(InputMapId *dst, String name, std::initializer_list<InputDesc> descriptors);
 extern void input_begin_frame();
 extern void set_input_map(InputMapId id);
 extern void push_input_layer(InputMapId layer);
