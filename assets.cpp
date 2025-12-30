@@ -20,12 +20,31 @@ struct {
     DynamicMap<String, asset_save_t> save_procs;
 } assets{};
 
+void init_assets() EXPORT
+{
+    SArena scratch = tl_scratch_arena();
+    String exe_folder = get_exe_folder(scratch);
+    String folders[] = { "./", exe_folder, join_path(exe_folder, "assets", scratch) };
+    register_asset_folders({ folders, ARRAY_COUNT(folders) });
+}
+
+void init_assets(Array<String> folders) EXPORT
+{
+    init_assets();
+    register_asset_folders(folders);
+}
 
 void init_assets(Array<String> folders, const AssetTypesDesc &desc) EXPORT
 {
+    init_assets();
+    register_asset_folders(folders);
+    register_asset_procs(desc);
+}
+
+void register_asset_folders(Array<String> folders) EXPORT
+{
     SArena scratch = tl_scratch_arena();
 
-    assets.folders = { .alloc = mem_dynamic };
     array_reserve(&assets.folders, folders.count);
     for (auto it : folders) {
         String path = absolute_path(it, scratch);
@@ -36,11 +55,6 @@ void init_assets(Array<String> folders, const AssetTypesDesc &desc) EXPORT
         LOG_INFO("adding asset folder: %.*s", STRFMT(path));
         array_add(&assets.folders, duplicate_string(path, mem_dynamic));
     }
-
-    assets.load_procs.alloc = mem_dynamic;
-    assets.save_procs.alloc = mem_dynamic;
-
-    register_asset_procs(desc);
 }
 
 void register_asset_procs(const AssetTypesDesc &desc) EXPORT

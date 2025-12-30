@@ -1,7 +1,10 @@
 #ifndef ASSETS_GENERATED_H
 #define ASSETS_GENERATED_H
 
+extern void init_assets();
+extern void init_assets(Array<String> folders);
 extern void init_assets(Array<String> folders, const AssetTypesDesc & desc);
+extern void register_asset_folders(Array<String> folders);
 extern void register_asset_procs(const AssetTypesDesc & desc);
 extern bool is_asset_loaded(String path);
 extern AssetHandle find_loaded_asset(String path);
