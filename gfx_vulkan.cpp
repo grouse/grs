@@ -1391,3 +1391,255 @@ extern bool operator==(
 
     return true;
 }
+
+extern VkSampler vk_sampler(GfxSamplerDesc desc) INTERNAL
+{
+    auto *it = map_find_emplace(&vk.samplers, desc, {});
+
+    if (!*it) {
+        VkSamplerCreateInfo sampler_info{
+            VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+            .magFilter    = vk_filter(desc.mag_filter),
+            .minFilter    = vk_filter(desc.min_filter),
+            .addressModeU = vk_wrap_mode(desc.wrap_u),
+            .addressModeV = vk_wrap_mode(desc.wrap_v),
+            .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+            .borderColor  = vk_border_color(desc.border_color),
+        };
+
+        VK_CHECK(vkCreateSampler(vk.device, &sampler_info, nullptr, it));
+    }
+
+    return *it;
+}
+
+extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc) INTERNAL
+{
+    PANIC_IF(!desc.set_layout, "descriptor set layout is invalid");
+
+    auto *set = map_find_emplace(&vk.descriptor_sets, desc, {});
+    if (!*set) {
+        *set = vk_create_descriptor_set(desc.set_layout);
+
+        u32 binding = 0;
+        for (auto it : desc.bindings) {
+            if (!it.binding) it.binding = binding++;
+            else binding = it.binding+1;
+
+            switch (it.type) {
+            case GFX_TEXTURE:
+                vk_set_images(
+                    *set, it.binding, 1, &it.texture.texture, &it.texture.sampler,
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                break;
+            case GFX_TEXTURE_ARRAY:
+                vk_set_images(
+                    *set, it.binding, it.texture_array.count, it.texture_array.textures, it.texture_array.samplers,
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                break;
+            case GFX_UNIFORM:
+                vk_set_uniform(*set, it.binding, it.uniform, 0, it.uniform.size);
+                break;
+            }
+        }
+    }
+
+    return *set;
+}
+
+extern VkDescriptorSetLayout vk_descriptor_layout(
+    FixedArray<VkDescriptorSetLayoutBinding, MAX_DESCRIPTOR_SET_BINDINGS> *bindings) INTERNAL
+{
+    VkDescriptorSetLayoutCreateInfo dsl_info{
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = (u32)bindings->count,
+        .pBindings    = bindings->data,
+    };
+
+#if 0
+    // TODO(jesper): for this caching to work the map needs to store the bindings by doing a deep copy
+    VkDescriptorSetLayout *layout = map_find_emplace(&vk.descriptor_layouts, dsl_info, {});
+
+    if (!*layout) {
+        VK_CHECK(vkCreateDescriptorSetLayout(vk.device, &dsl_info, nullptr, layout));
+    }
+
+    return *layout;
+#else
+    VkDescriptorSetLayout layout{};
+    VK_CHECK(vkCreateDescriptorSetLayout(vk.device, &dsl_info, nullptr, &layout));
+    return layout;
+#endif
+}
+
+extern void vk_set_images(
+    VkDescriptorSet set,
+    u32 binding,
+    u32 descriptor_count,
+    GfxVkTexture *textures,
+    VkSampler *samplers,
+    VkImageLayout layout) INTERNAL
+{
+    SArena scratch = tl_scratch_arena();
+    auto image_infos = array_create<VkDescriptorImageInfo>(descriptor_count, scratch);
+    for (i32 i = 0; i < descriptor_count; i++) {
+        image_infos[i] = {
+            .sampler = samplers[i],
+            .imageView = textures[i].view,
+            .imageLayout = layout,
+        };
+    }
+
+    VkWriteDescriptorSet write{
+        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet          = set,
+        .dstBinding      = binding,
+        .descriptorCount = descriptor_count,
+        .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .pImageInfo      = image_infos.data,
+    };
+
+    LOG_INFO("[gfx][vk] vkUpdateDescriptorSets { set: %lx, binding: %d, count: %d }", set, binding, write.descriptorCount);
+    vkUpdateDescriptorSets(vk.device, 1, &write, 0, nullptr);
+}
+
+extern VkDescriptorSet vk_create_descriptor_set(VkDescriptorSetLayout layout) INTERNAL
+{
+    VkDescriptorSetAllocateInfo alloc_info{
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool     = vk.descriptor_pool,
+        .descriptorSetCount = 1,
+        .pSetLayouts        = &layout,
+    };
+
+    VkDescriptorSet set;
+    VkResult result = vkAllocateDescriptorSets(vk.device, &alloc_info, &set);
+    if (result == VK_ERROR_OUT_OF_POOL_MEMORY) {
+        LOG_INFO("[vulkan] descriptor pool out of memory");
+        vk.descriptor_pool = vk_descriptor_pool();
+
+        alloc_info.descriptorPool = vk.descriptor_pool;
+        VK_CHECK(vkAllocateDescriptorSets(vk.device, &alloc_info, &set));
+    } else if (result != VK_SUCCESS) {
+        PANIC("vulkan fatal error: '%s' [%u] from vkAllocateDescriptorSets",
+              sz_from_enum(result), result);
+        return VK_NULL_HANDLE;
+    }
+
+    return set;
+}
+
+extern VkBool32 vk_debug_proc(
+    VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    VkDebugUtilsMessageTypeFlagsEXT type,
+    const VkDebugUtilsMessengerCallbackDataEXT *data,
+    void* /*user_data*/) INTERNAL
+{
+    const char* sz_type = "unknown";
+    switch (type) {
+    case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT: sz_type = "general"; break;
+    case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT: sz_type = "validation"; break;
+    case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT: sz_type = "performance"; break;
+    }
+
+
+    LogType ltype = LOG_TYPE_ERROR;
+    switch (severity) {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+        ltype = LOG_TYPE_INFO;
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        ltype = LOG_TYPE_ERROR;
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
+        PANIC("invalid severity");
+        break;
+    }
+
+    LOG(ltype, "[%s] %s: %s", data->pMessageIdName, sz_type, data->pMessage);
+    if (ltype == LOG_TYPE_ERROR) DEBUG_BREAK();
+    return VK_FALSE;
+}
+
+
+extern void vk_set_uniform(
+    VkDescriptorSet set,
+    u32 binding,
+    VkBuffer buffer,
+    VkDeviceSize offset,
+    VkDeviceSize range) INTERNAL
+{
+    VkDescriptorBufferInfo buffer_info{
+        .buffer = buffer,
+        .offset = offset,
+        .range  = range,
+    };
+
+    VkWriteDescriptorSet write{
+        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet          = set,
+        .dstBinding      = binding,
+        .descriptorCount = 1,
+        .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .pBufferInfo     = &buffer_info,
+    };
+
+    LOG_INFO("[gfx][vk] vkUpdateDescriptorSets { set: %lx, binding: %d, count: %d }", set, binding, write.descriptorCount);
+    vkUpdateDescriptorSets(vk.device, 1, &write, 0, nullptr);
+}
+
+
+
+extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params) INTERNAL
+{
+    GfxVkBuffer *uniform = map_find_emplace(&vk.material_parameters, params, {});
+    if (!uniform->handle) {
+        *uniform = vk_create_buffer(
+            &params, sizeof params,
+            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VMA_MEMORY_USAGE_CPU_TO_GPU,
+            VMA_ALLOCATION_CREATE_MAPPED_BIT);
+    }
+
+    return *uniform;
+}
+
+
+extern VkDescriptorPool vk_descriptor_pool(u32 set_count /*=100*/) INTERNAL
+{
+    struct DescriptorPoolSizeRatio {
+        VkDescriptorType type;
+        f32 ratio;
+    };
+
+    DescriptorPoolSizeRatio ratios[] = {
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         2.0f },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4.0f },
+    };
+
+    FixedArray<VkDescriptorPoolSize, ARRAY_COUNT(ratios)> sizes{};
+    for (auto it : ratios)  {
+        array_add(&sizes, { it.type, u32(it.ratio * set_count) });
+    }
+
+    VkDescriptorPoolCreateInfo pool_info{
+        VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets       = set_count,
+        .poolSizeCount = u32(sizes.count),
+        .pPoolSizes    = sizes.data,
+    };
+
+    LOG_INFO("[vulkan] creating descriptor pool with %u sets", set_count);
+
+    VkDescriptorPool pool;
+    VK_CHECK(vkCreateDescriptorPool(vk.device, &pool_info, nullptr, &pool));
+
+    array_add(&vk.descriptor_pools, pool);
+    return pool;
+}
+
+// defined in [win32/linux]_vk_window.cpp
+extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance) INTERNAL;
+

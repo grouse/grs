@@ -63,5 +63,15 @@ static VkAttachmentStoreOp vk_store_op(GfxStoreOp op);
 extern bool operator==(const VkExtensionProperties & lhs, const char *rhs);
 extern bool operator==(const VkLayerProperties & lhs, const char *rhs);
 extern bool operator==(const VkDescriptorSetLayoutCreateInfo & lhs, const VkDescriptorSetLayoutCreateInfo & rhs);
+extern VkSampler vk_sampler(GfxSamplerDesc desc);
+extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc);
+extern VkDescriptorSetLayout vk_descriptor_layout(FixedArray<VkDescriptorSetLayoutBinding, MAX_DESCRIPTOR_SET_BINDINGS> *bindings);
+extern void vk_set_images(VkDescriptorSet set, u32 binding, u32 descriptor_count, GfxVkTexture *textures, VkSampler *samplers, VkImageLayout layout);
+extern VkDescriptorSet vk_create_descriptor_set(VkDescriptorSetLayout layout);
+extern VkBool32 vk_debug_proc(VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT *data, void *);
+extern void vk_set_uniform(VkDescriptorSet set, u32 binding, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range);
+extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params);
+extern VkDescriptorPool vk_descriptor_pool(u32 set_count =100);
+extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance);
 
 #endif
