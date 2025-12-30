@@ -6,6 +6,7 @@
 #include "array.h"
 #include "map.h"
 #include "assets.h"
+#include "window.h"
 
 #include <volk/volk.h>
 #define VULKAN_H_ 1

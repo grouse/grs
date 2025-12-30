@@ -1,8 +1,9 @@
 #define GFX_VULKAN_INTERNAL
 #include "gfx_vulkan.h"
 #include "gfx.h"
-#include "src/core/memory.h"
 #include "string.h"
+#include "memory.h"
+
 #include "vulkan/vulkan_core.h"
 
 GfxVkContext vk;
