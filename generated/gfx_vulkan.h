@@ -14,6 +14,8 @@ extern void gfx_begin_pass(const GfxVkRenderPassDesc & desc);
 extern void gfx_end_pass();
 extern const char *sz_from_enum(GfxLoadOp op);
 extern const char *sz_from_enum(GfxStoreOp op);
+extern GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
+extern GfxMesh gfx_cube(f32 width, f32 height, f32 depth);
 
 #endif // GFX_VULKAN_GENERATED_H
 

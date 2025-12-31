@@ -1644,3 +1644,57 @@ extern VkDescriptorPool vk_descriptor_pool(u32 set_count /*=100*/) INTERNAL
 // defined in [win32/linux]_vk_window.cpp
 extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance) INTERNAL;
 
+
+GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count) EXPORT
+{
+    return GfxMesh{
+        .vertex_buffer = gfx_create_vertex_buffer(vertices.data, vertices.count*sizeof vertices[0]),
+        .index_buffer  = gfx_create_index_buffer(indices.data, indices.count*sizeof indices[0]),
+        .index_count   = index_count
+    };
+}
+
+GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
+{
+    f32 w2 = width  / 2.0f;
+    f32 h2 = height / 2.0f;
+    f32 d2 = depth  / 2.0f;
+
+    MeshVertex vertices[] = {
+        // Front face
+        // position.xyz        uv              normal.xyz            tangent.xyz       wind
+        { { -w2, -h2,  d2 }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2, -h2,  d2 }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2,  h2,  d2 }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { { -w2,  h2,  d2 }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+
+        // Back face
+        { { -w2, -h2, -d2 }, { 1.0f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { -1.0f, 0.0f, 0.0f, 1.0f } },
+        { { -w2,  h2, -d2 }, { 1.0f, 1.0f }, { 0.0f, 0.0f,-1.0f }, { -1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2,  h2, -d2 }, { 0.0f, 1.0f }, { 0.0f, 0.0f,-1.0f }, { -1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2, -h2, -d2 }, { 0.0f, 0.0f }, { 0.0f, 0.0f,-1.0f }, { -1.0f, 0.0f, 0.0f, 1.0f } },
+
+        // Top face
+        { { -w2,  h2, -d2 }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { { -w2,  h2,  d2 }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2,  h2,  d2 }, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2,  h2, -d2 }, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+
+        // Bottom face
+        { { -w2, -h2, -d2 }, { 1.0f, 1.0f }, { 0.0f,-1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2, -h2, -d2 }, { 0.0f, 1.0f }, { 0.0f,-1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { {  w2, -h2,  d2 }, { 0.0f, 0.0f }, { 0.0f,-1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+        { { -w2, -h2,  d2 }, { 1.0f, 0.0f }, { 0.0f,-1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+    };
+
+    u32 indices[] = {
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6, 6, 7, 4,
+        8, 9,10,10,11, 8,
+        12,13,14,14,15,12,
+        1, 7, 6, 6, 2, 1,
+        4, 0, 3, 3, 5, 4,
+    };
+
+    return gfx_create_mesh({ vertices, ARRAY_COUNT(vertices) }, { indices, ARRAY_COUNT(indices) }, ARRAY_COUNT(indices));
+}

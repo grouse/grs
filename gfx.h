@@ -1,9 +1,10 @@
 #ifndef GFX_H
 #define GFX_H
 
+#include "array.h"
 #include "core.h"
-#include "maths.h"
 #include "hash.h"
+#include "maths.h"
 
 #define GFX_HANDLE(name, underlying_t)\
     struct name {\
@@ -150,6 +151,7 @@ GfxTexture gfx_load_texture(String image_path, bool sRGB);
 
 GfxMaterial gfx_create_material(GfxMaterialDesc desc);
 
+GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
 GfxBuffer gfx_create_vertex_buffer(void *data, i32 size);
 GfxBuffer gfx_create_index_buffer(void *data, i32 size);
 
