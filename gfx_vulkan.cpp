@@ -1698,3 +1698,46 @@ GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
 
     return gfx_create_mesh({ vertices, ARRAY_COUNT(vertices) }, { indices, ARRAY_COUNT(indices) }, ARRAY_COUNT(indices));
 }
+
+GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
+{
+    SArena scratch = tl_scratch_arena();
+
+    i32 num_vertices = (detail + 1) * (detail + 1);
+    i32 num_indices = detail * detail * 6;
+
+    Array<MeshVertex> vertices = array_create<MeshVertex>(num_vertices, scratch);
+    Array<u32> indices = array_create<u32>(num_indices, scratch);
+
+    i32 vtx = 0, idx = 0;
+    for (i32 y = 0; y <= detail; y++) {
+        for (i32 x = 0; x <= detail; x++) {
+            f32 x_segment = f32(x) / f32(detail);
+            f32 y_segment = f32(y) / f32(detail);
+
+            f32 x_pos = cosf(x_segment * 2.0f * f32_PI) * sinf(y_segment * f32_PI);
+            f32 y_pos = cosf(y_segment * f32_PI);
+            f32 z_pos = sinf(x_segment * 2.0f * f32_PI) * sinf(y_segment * f32_PI);
+
+            vertices[vtx++] = {
+                .position = { x_pos * radius, y_pos * radius, z_pos * radius },
+                .uv       = { x_segment, y_segment },
+                .normal   = { x_pos, y_pos, z_pos },
+                .tangent  = { -sinf(x_segment * 2.0f * f32_PI), 0.0f, cosf(x_segment * 2.0f * f32_PI), 1.0f },
+            };
+        }
+    }
+
+    for (i32 y = 0; y < detail; y++) {
+        for (i32 x = 0; x < detail; x++) {
+            indices[idx++] = (y + 1) * (detail + 1) + x;
+            indices[idx++] = y       * (detail + 1) + x;
+            indices[idx++] = y       * (detail + 1) + x + 1;
+            indices[idx++] = (y + 1) * (detail + 1) + x;
+            indices[idx++] = y       * (detail + 1) + x + 1;
+            indices[idx++] = (y + 1) * (detail + 1) + x + 1;
+        }
+    }
+
+    return gfx_create_mesh(vertices, indices, num_indices);
+}
