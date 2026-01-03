@@ -820,7 +820,7 @@ String directory_of(String path) EXPORT
         }
     }
 
-    return path;
+    return "";
 }
 
 String path_relative_to(String path, String root) EXPORT

@@ -276,22 +276,23 @@ FileHandle open_file(String path, u32 mode)
         mode_t |= S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH;
     }
 
-    String dir = directory_of(path);
-    char *sz_dir = sz_string(dir, scratch);
+    if (String dir = directory_of(path)) {
+        char *sz_dir = sz_string(dir, scratch);
 
-    if (struct stat st = {}; stat(sz_dir, &st) == -1) {
-        for (char *ptr = sz_dir; *ptr; ptr++) {
-            if (*ptr == '/') {
-                char c = *ptr;
-                *ptr = '\0';
+        if (struct stat st = {}; stat(sz_dir, &st) == -1) {
+            for (char *ptr = sz_dir; *ptr; ptr++) {
+                if (*ptr == '/') {
+                    char c = *ptr;
+                    *ptr = '\0';
 
-                mkdir(sz_dir, 0700);
+                    mkdir(sz_dir, 0700);
 
-                *ptr = c;
+                    *ptr = c;
+                }
             }
-        }
 
-        mkdir(sz_dir, 0700);
+            mkdir(sz_dir, 0700);
+        }
     }
 
 	int fd = open(sz_path, flags, mode_t);
