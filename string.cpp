@@ -179,6 +179,25 @@ bool i32_from_string(String s, i32 *dst)
     return true;
 }
 
+bool i64_from_string(String s, i64 *dst) EXPORT
+{
+    i64 sign = 1;
+    i64 result = 0;
+
+    i64 i = 0;
+    if (s[0] == '-') {
+        sign = -1;
+        i = 1;
+    }
+
+    for (; i < s.length; i++) {
+        result = result * 10 + (s[i] - '0');
+    }
+
+    *dst = sign*result;
+    return true;
+}
+
 bool u32_from_string(String s, u32 *dst) EXPORT
 {
     u32 result = 0;
@@ -236,12 +255,22 @@ bool u64_from_string(String s, u64 *dst) EXPORT
     return true;
 }
 
-bool f32_from_string(String s, f32 *dst)
+bool f32_from_string(String s, f32 *dst) EXPORT
 {
     SArena scratch = tl_scratch_arena();
     char *sz_s = sz_string(s, scratch);
     int r = sscanf(sz_s, "%f", dst);
     return r == 1;
+}
+
+bool f64_from_string(String s, f64 *dst) EXPORT
+{
+    if (f32 value; f32_from_string(s, &value)) {
+        *dst = (f64)value;
+        return true;
+    }
+
+    return false;
 }
 
 i32 find_first(String s, char c) EXPORT
