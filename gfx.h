@@ -149,7 +149,7 @@ void gfx_copy_texture(GfxTexture dst, u32 dst_x, u32 dst_y, u32 w, u32 h, const 
 
 GfxTexture gfx_load_texture(String image_path, bool sRGB);
 
-GfxMaterial gfx_create_material(GfxMaterialDesc desc);
+GfxMaterial gfx_material(GfxMaterialDesc desc);
 
 GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
 GfxBuffer gfx_create_vertex_buffer(void *data, i32 size);
