@@ -5,6 +5,8 @@
 #include "string.h"
 #include "maths.h"
 #include "hash.h"
+#include "array.h"
+#include "map.h"
 
 #include <initializer_list>
 
@@ -441,6 +443,37 @@ struct WindowEvent {
         } resize;
     };
 };
+
+struct InputCursor {
+    f32 x, y;
+    f32 dx, dy;
+};
+
+struct InputMap {
+    String name;
+
+    DynamicArray<InputDesc> by_device[IDEVICE_MAX][ITYPE_MAX];
+    DynamicArray<InputDesc> by_type[ITYPE_MAX][IDEVICE_MAX];
+
+    DynamicMap<InputId, i32> edges;
+    DynamicMap<InputId, bool> held;
+    DynamicMap<InputId, f32[2]> axes;
+    DynamicMap<InputId, InputCursor> cursors;
+    DynamicMap<InputDesc, bool> active;
+    DynamicMap<InputId, DynamicArray<TextEvent>> text;
+};
+
+struct InputContext {
+    DynamicMap<InputType, u8> mouse;
+
+    DynamicArray<InputMap> maps;
+    DynamicArray<InputMapId> layers;
+    DynamicArray<InputMapId> queued_layers;
+    InputMapId active_map = -1;
+};
+
+extern InputContext input;
+
 
 #include "generated/window.h"
 
