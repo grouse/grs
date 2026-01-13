@@ -6,14 +6,14 @@
 IniSerializer ini_writer(Allocator mem) EXPORT
 {
     return {
-        .mode = INI_WRITE_STRING,
+        .mode = INI_WRITE,
         .out.alloc = mem,
     };
 }
 
 IniSerializer ini_reader(u8 *data, i32 size) EXPORT
 {
-    IniSerializer ini = { .mode = INI_PARSE };
+    IniSerializer ini = { .mode = INI_READ };
     ini.lexer = Lexer{ data, size, "ini" };
     ini.prev_t = {};
     next_token(&ini.lexer);
@@ -24,7 +24,7 @@ IniSerializer ini_read_file(String path, Allocator mem) EXPORT
 {
     FileInfo f = read_file(path, mem);
 
-    IniSerializer ini = { .mode = INI_PARSE };
+    IniSerializer ini = { .mode = INI_READ };
     ini.lexer = Lexer{ f.data, f.size, path };
     next_token(&ini.lexer);
     return ini;
@@ -33,7 +33,7 @@ IniSerializer ini_read_file(String path, Allocator mem) EXPORT
 bool ini_section_begin(IniSerializer *ini, String name) EXPORT
 {
     switch (ini->mode) {
-    case INI_WRITE_STRING:
+    case INI_WRITE:
         array_add(&ini->sections, name);
 
         append_stringf(&ini->out, "[%.*s", STRFMT(ini->sections[0]));
@@ -42,7 +42,7 @@ bool ini_section_begin(IniSerializer *ini, String name) EXPORT
         }
         append_string(&ini->out, "]\n");
         break;
-    case INI_PARSE:
+    case INI_READ:
         if (ini->lexer.t == '[') {
             i32 parent_depth = 0;
             while (ini->lexer.t != ']' && ini->lexer.t != TOKEN_EOF) {
@@ -78,10 +78,10 @@ bool ini_section_end(IniSerializer *ini) EXPORT
 bool ini_value(IniSerializer *ini, String name, bool *value) EXPORT
 {
     switch (ini->mode) {
-    case INI_WRITE_STRING:
+    case INI_WRITE:
         append_stringf(&ini->out, "%.*s = %s\n", STRFMT(name), *value ? "true" : "false");
         return true;
-    case INI_PARSE:
+    case INI_READ:
         if (is_identifier(ini->lexer.t, name)) {
             if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
             if (!parse_bool(&ini->lexer, value)) return false;
@@ -100,12 +100,12 @@ bool ini_value(
     i32 *value, int count /*= 1*/) EXPORT
 {
     switch (ini->mode) {
-    case INI_WRITE_STRING:
+    case INI_WRITE:
         append_stringf(&ini->out, "%.*s = %d", STRFMT(name), *value);
         for (i32 i = 1; i < count; i++) append_stringf(&ini->out, ", %d", value[i]);
         append_string(&ini->out, "\n");
         return true;
-    case INI_PARSE:
+    case INI_READ:
         if (is_identifier(ini->lexer.t, name)) {
             if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
             for (i32 i = 0; i < count; i++) {
@@ -128,12 +128,12 @@ bool ini_value(
     f32 *value, i32 count /*= 1*/) EXPORT
 {
     switch (ini->mode) {
-    case INI_WRITE_STRING:
+    case INI_WRITE:
         append_stringf(&ini->out, "%.*s = %f", STRFMT(name), *value);
         for (i32 i = 1; i < count; i++) append_stringf(&ini->out, ", %f", value[i]);
         append_string(&ini->out, "\n");
         return true;
-    case INI_PARSE:
+    case INI_READ:
         if (is_identifier(ini->lexer.t, name)) {
             if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
             for (i32 i = 0; i < count; i++) {
@@ -152,10 +152,10 @@ bool ini_value(
 bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem) EXPORT
 {
     switch (ini->mode) {
-    case INI_WRITE_STRING:
+    case INI_WRITE:
         append_stringf(&ini->out, "%.*s = \"%.*s\"\n", STRFMT(name), STRFMT(*value));
         return true;
-    case INI_PARSE:
+    case INI_READ:
         if (is_identifier(ini->lexer.t, name)) {
             if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
             String str;
@@ -174,8 +174,8 @@ bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem) EX
 bool ini_in_section(IniSerializer *ini) EXPORT
 {
     switch (ini->mode) {
-    case INI_WRITE_STRING: return false;
-    case INI_PARSE:
+    case INI_WRITE: return false;
+    case INI_READ:
         if (ini->lexer.t == '[') return false;
         return ini->lexer.t != TOKEN_EOF;
     }
@@ -184,9 +184,9 @@ bool ini_in_section(IniSerializer *ini) EXPORT
 bool ini_next(IniSerializer *ini) EXPORT
 {
     switch (ini->mode) {
-    case INI_WRITE_STRING:
+    case INI_WRITE:
         return false;
-    case INI_PARSE:
+    case INI_READ:
         if (ini->lexer.t == TOKEN_EOF) return false;
 
         if (ini->prev_t == ini->lexer.t) {

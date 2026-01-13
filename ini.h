@@ -6,8 +6,8 @@
 #include "array.h"
 
 enum IniMode {
-    INI_PARSE,
-    INI_WRITE_STRING,
+    INI_READ,
+    INI_WRITE,
 };
 
 struct IniSerializer {
