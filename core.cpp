@@ -32,8 +32,10 @@ bool default_panic_handler(
     if (!sz_cond) logv(file, line, LOG_TYPE_PANIC, fmt, args);
     else {
         char buffer[2048] = "";
-        strncat(buffer, fmt, sizeof buffer-1);
-        strncat(buffer, ": ", sizeof buffer-1);
+        if (fmt) {
+            strncat(buffer, fmt, sizeof buffer-1);
+            strncat(buffer, ": ", sizeof buffer-1);
+        }
         strncat(buffer, sz_cond, sizeof buffer-1);
         logv(file, line, LOG_TYPE_PANIC, buffer, args);
     }
