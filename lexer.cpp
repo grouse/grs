@@ -208,14 +208,7 @@ bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version) EXPORT
     return true;
 }
 
-bool parse_float(Lexer *lexer, f32 *value) EXPORT
-{
-    if (!require_next_token(lexer, TOKEN_NUMBER)) return false;
-    if (!f32_from_string(lexer->t.str, value)) return false;
-    return true;
-}
-
-bool parse_floatn(Lexer *lexer, i32 n, f32 *value) EXPORT
+bool parse_float(Lexer *lexer, f32 *value, i32 n /*= 1*/) EXPORT
 {
     for (i32 i = 0; i < n; i++) {
         if (!require_next_token(lexer, TOKEN_NUMBER)) return false;
@@ -224,10 +217,28 @@ bool parse_floatn(Lexer *lexer, i32 n, f32 *value) EXPORT
     return true;
 }
 
-bool parse_int(Lexer *lexer, i32 *value) EXPORT
+bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/) EXPORT
 {
-    if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
-    if (!i32_from_string(lexer->t.str, value)) return false;
+    for (i32 i = 0; i < n; i++) {
+        if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
+        if (!i32_from_string(lexer->t.str, &value[i])) return false;
+    }
+    return true;
+}
+
+bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 0*/) EXPORT
+{
+    for (i32 i = 0; i < n; i++) {
+        if (!require_next_token(lexer, TOKEN_IDENTIFIER)) return false;
+
+        if (lexer->t == "true") value[i] = true;
+        else if (lexer->t == "false") value[i] = false;
+        else {
+            PARSE_ERROR(lexer, "parsing boolean; expected 'true' or 'false', got '%.*s'", STRFMT(lexer->t.str));
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -261,16 +272,3 @@ bool parse_string(Lexer *lexer, String *str, Allocator mem) EXPORT
     return true;
 }
 
-bool parse_bool(Lexer *lexer, bool *value) EXPORT
-{
-    if (!require_next_token(lexer, TOKEN_IDENTIFIER)) return false;
-
-    if (lexer->t == "true") *value = true;
-    else if (lexer->t == "false") *value = false;
-    else {
-        PARSE_ERROR(lexer, "parsing boolean; expected 'true' or 'false', got '%.*s'", STRFMT(lexer->t.str));
-        return false;
-    }
-
-    return true;
-}
