@@ -226,7 +226,7 @@ bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/) EXPORT
     return true;
 }
 
-bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 0*/) EXPORT
+bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 1*/) EXPORT
 {
     for (i32 i = 0; i < n; i++) {
         if (!require_next_token(lexer, TOKEN_IDENTIFIER)) return false;
