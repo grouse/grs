@@ -38,6 +38,9 @@
 - [ ] [input] revisit chord-actions
     - they don't appear to work the way I expect, usage in mimir
         - ICHORD(IKEY(KC_G), IKEY(KC_D))
+- [ ] @input @linux key repeat flag for KEY_DOWN
+- [ ] @input @win32 double check repeat flag; looks wrong
+- [ ] @input handle key repeat flag; don't send EDGE_DOWN events on repeat
 
 # DOING
 

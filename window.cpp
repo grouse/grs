@@ -509,7 +509,7 @@ bool translate_input_event(
             }
             break;
         case WE_KEY_PRESS:
-            if (event.key.prev_state) break;
+            if (event.key.prev_state || event.key.repeat) break;
 
             for (auto &it : map->by_type[CHORD][0]) {
                 auto &curr = it.input.chord.seq[it.input.chord.at];
