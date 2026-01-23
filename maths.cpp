@@ -1033,6 +1033,16 @@ Matrix4 mat4_rotate3_quat(Quaternion q) EXPORT
     }};
 }
 
+Vector3 mat4_translate3(Matrix4 m, Vector3 p) EXPORT
+{
+    return (m*Vector4{ .xyz = p, 1 }).xyz;
+}
+
+Vector3 mat4_scale3(Matrix4 m, Vector3 v) EXPORT
+{
+    return (m*Vector4{ .xyz = v, 0 }).xyz;
+}
+
 Matrix4 mat4_translate3(Vector3 v) EXPORT
 {
     Matrix4 r = mat4_identity();

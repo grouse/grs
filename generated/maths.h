@@ -81,6 +81,8 @@ extern Matrix4 mat4_transform2(const Matrix3 & m0);
 extern Matrix4 mat4_rows(Vector4 r0, Vector4 r1, Vector4 r2, Vector4 r3);
 extern Matrix4 mat4_mat3_extend(Matrix3 m);
 extern Matrix4 mat4_rotate3_quat(Quaternion q);
+extern Vector3 mat4_translate3(Matrix4 m, Vector3 p);
+extern Vector3 mat4_scale3(Matrix4 m, Vector3 v);
 extern Matrix4 mat4_translate3(Vector3 v);
 extern Matrix4 mat4_scale3(Vector3 v);
 extern Matrix4 mat4_transform3(Quaternion rotation, Vector3 position);
