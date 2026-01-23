@@ -1012,11 +1012,6 @@ Matrix4 mat4_mat3_extend(Matrix3 m) EXPORT
     }};
 }
 
-Vector3 mat4_x(Matrix4 m) EXPORT { return { m.m00, m.m10, m.m20 }; }
-Vector3 mat4_y(Matrix4 m) EXPORT { return { m.m01, m.m11, m.m21 }; }
-Vector3 mat4_z(Matrix4 m) EXPORT { return { m.m02, m.m12, m.m22 }; }
-
-
 Matrix4 mat4_rotate3_quat(Quaternion q) EXPORT
 {
     f32 xx = q.x*q.x;
