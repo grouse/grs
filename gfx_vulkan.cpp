@@ -1772,3 +1772,77 @@ GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
 
     return gfx_create_mesh(vertices, indices, num_indices);
 }
+
+GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
+{
+    SArena scratch = tl_scratch_arena();
+    i32 num_vertices = 2 + detail * 2; // top center, bottom center, top rim, bottom rim
+    i32 num_indices = detail * 12;
+
+    Array<MeshVertex> vertices = array_create<MeshVertex>(num_vertices, scratch);
+
+    // top center
+    vertices[0] = {
+        .position = { 0.0f, height / 2.0f, 0.0f },
+        .uv       = { 0.5f, 0.5f },
+        .normal   = { 0.0f, 1.0f, 0.0f },
+        .tangent  = { 1.0f, 0.0f, 0.0f, 1.0f },
+    };
+
+    // bottom center
+    vertices[1] = {
+        .position = { 0.0f, -height / 2.0f, 0.0f },
+        .uv       = { 0.5f, 0.5f },
+        .normal   = { 0.0f, -1.0f, 0.0f },
+        .tangent  = { 1.0f, 0.0f, 0.0f, 1.0f },
+    };
+
+    for (i32 i = 0; i < detail; i++) {
+        f32 angle = (f32(i) / f32(detail)) * 2.0f * f32_PI;
+        f32 x = cosf(angle) * radius;
+        f32 z = sinf(angle) * radius;
+        f32 u = (f32)i / f32(detail);
+
+        // Top rim
+        vertices[2 + i] = {
+            .position = { x, height / 2.0f, z },
+            .uv       = { u, 0.0f },
+            .normal   = { 0.0f, 1.0f, 0.0f },
+            .tangent  = { -sinf(angle), 0.0f, cosf(angle), 1.0f },
+        };
+
+        // Bottom rim
+        vertices[2 + detail + i] = {
+            .position = { x, -height / 2.0f, z },
+            .uv       = { u, 1.0f },
+            .normal   = { 0.0f, -1.0f, 0.0f },
+            .tangent  = { -sinf(angle), 0.0f, cosf(angle), 1.0f },
+        };
+    }
+
+    Array<u32> indices = array_create<u32>(num_indices, scratch);
+    for (i32 i = 0, idx = 0; i < detail; i++) {
+        i32 next = (i + 1) % detail;
+
+        // Side quad (two triangles)
+        indices[idx++] = 2 + i;
+        indices[idx++] = 2 + detail + next;
+        indices[idx++] = 2 + detail + i;
+
+        indices[idx++] = 2 + i;
+        indices[idx++] = 2 + next;
+        indices[idx++] = 2 + detail + next;
+
+        // Top face (triangle fan)
+        indices[idx++] = 0;         // top center
+        indices[idx++] = 2 + next;
+        indices[idx++] = 2 + i;
+
+        // Bottom face (triangle fan)
+        indices[idx++] = 1;         // bottom center
+        indices[idx++] = 2 + detail + i;
+        indices[idx++] = 2 + detail + next;
+    }
+
+    return gfx_create_mesh(vertices, indices, indices.count);
+}

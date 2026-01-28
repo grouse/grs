@@ -17,6 +17,7 @@ extern const char *sz_from_enum(GfxStoreOp op);
 extern GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
 extern GfxMesh gfx_cube(f32 width, f32 height, f32 depth);
 extern GfxMesh gfx_sphere(f32 radius, i32 detail);
+extern GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail);
 
 #endif // GFX_VULKAN_GENERATED_H
 
