@@ -1658,6 +1658,16 @@ GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 inde
 
 GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
 {
+    GfxPrimitiveDesc desc{ 
+        .type = GFX_CUBE,
+        .cube.width = width,
+        .cube.height = height,
+        .cube.depth = depth,
+    };
+
+    GfxMesh *mesh = map_find_emplace(&vk.primitives, desc);
+    if (*mesh) return *mesh;
+
     f32 w2 = width  / 2.0f;
     f32 h2 = height / 2.0f;
     f32 d2 = depth  / 2.0f;
@@ -1727,11 +1737,21 @@ GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
         44,45,46, 46,47,44,
     };
 
-    return gfx_create_mesh({ vertices, ARRAY_COUNT(vertices) }, { indices, ARRAY_COUNT(indices) }, ARRAY_COUNT(indices));
+    *mesh = gfx_create_mesh({ vertices, ARRAY_COUNT(vertices) }, { indices, ARRAY_COUNT(indices) }, ARRAY_COUNT(indices));
+    return *mesh;
 }
 
 GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
 {
+    GfxPrimitiveDesc desc{ 
+        .type = GFX_SPHERE,
+        .sphere.radius = radius,
+        .sphere.detail = detail,
+    };
+
+    GfxMesh *mesh = map_find_emplace(&vk.primitives, desc);
+    if (*mesh) return *mesh;
+
     SArena scratch = tl_scratch_arena();
 
     i32 num_vertices = (detail + 1) * (detail + 1);
@@ -1770,11 +1790,22 @@ GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
         }
     }
 
-    return gfx_create_mesh(vertices, indices, num_indices);
+    *mesh = gfx_create_mesh(vertices, indices, num_indices);
+    return *mesh;
 }
 
 GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
 {
+    GfxPrimitiveDesc desc{ 
+        .type = GFX_CYLINDER,
+        .cylinder.radius = radius,
+        .cylinder.height = height,
+        .cylinder.detail = detail,
+    };
+
+    GfxMesh *mesh = map_find_emplace(&vk.primitives, desc);
+    if (*mesh) return *mesh;
+
     SArena scratch = tl_scratch_arena();
     i32 num_vertices = 2 + detail * 2; // top center, bottom center, top rim, bottom rim
     i32 num_indices = detail * 12;
@@ -1844,5 +1875,18 @@ GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
         indices[idx++] = 2 + detail + next;
     }
 
-    return gfx_create_mesh(vertices, indices, indices.count);
+    *mesh = gfx_create_mesh(vertices, indices, indices.count);
+    return *mesh;
+}
+
+bool operator==(const GfxPrimitiveDesc &lhs, const GfxPrimitiveDesc &rhs) EXPORT
+{
+    if (lhs.type != rhs.type) return false;
+    switch (lhs.type) {
+    case GFX_SPHERE: return lhs.sphere == rhs.sphere;
+    case GFX_CUBE: return lhs.cube == rhs.cube;
+    case GFX_CYLINDER: return lhs.cylinder == rhs.cylinder;
+    }
+
+    return false;
 }

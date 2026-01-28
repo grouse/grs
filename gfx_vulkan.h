@@ -255,6 +255,44 @@ struct GfxVkRenderPassDesc {
     struct { u32 w, h; } extent;
 };
 
+enum GfxPrimitive : u8 {
+    GFX_SPHERE,
+    GFX_CUBE,
+    GFX_CYLINDER
+};
+
+struct GfxSphere {
+    f32 radius;
+    i32 detail;
+
+    bool operator==(const GfxSphere&) const = default;
+};
+
+struct GfxCube {
+    f32 width;
+    f32 height;
+    f32 depth;
+
+    bool operator==(const GfxCube&) const = default;
+};
+
+struct GfxCylinder {
+    f32 radius;
+    f32 height;
+    i32 detail;
+
+    bool operator==(const GfxCylinder&) const = default;
+};
+
+struct GfxPrimitiveDesc {
+    GfxPrimitive type;
+    union {
+        GfxSphere sphere;
+        GfxCube cube;
+        GfxCylinder cylinder;
+    };
+};
+
 extern struct GfxVkContext {
     VkDevice device;
     VkInstance instance;
@@ -317,6 +355,8 @@ extern struct GfxVkContext {
     DynamicArray<VkDescriptorPool> descriptor_pools;
     DynamicMap<VkDescriptorSetLayoutCreateInfo, VkDescriptorSetLayout> descriptor_layouts;
     DynamicMap<GfxVkDescriptorSetDesc, VkDescriptorSet> descriptor_sets;
+
+    DynamicMap<GfxPrimitiveDesc, GfxMesh> primitives;
 
     FixedArray<GfxVkFrame, MAX_FRAMES_IN_FLIGHT> frames;
     u32 current_frame = 0;
@@ -388,6 +428,27 @@ HASH32_DECL(VkDescriptorSetLayoutCreateInfo, state, info)
         hash32_update(state, binding.stageFlags);
 
         PANIC_IF(binding.pImmutableSamplers, "unimplemented path, double check that pImmuteableSamplers is an array of binding.descriptorCount length, and add it to hash");
+    }
+}
+
+HASH32_DECL(GfxPrimitiveDesc, state, desc)
+{
+    hash32_update(state, desc.type);
+    switch (desc.type) {
+    case GFX_SPHERE: 
+        hash32_update(state, desc.sphere.radius);
+        hash32_update(state, desc.sphere.detail);
+        break;
+    case GFX_CUBE: 
+        hash32_update(state, desc.cube.width);
+        hash32_update(state, desc.cube.height);
+        hash32_update(state, desc.cube.depth);
+        break;
+    case GFX_CYLINDER: 
+        hash32_update(state, desc.cylinder.radius);
+        hash32_update(state, desc.cylinder.height);
+        hash32_update(state, desc.cylinder.detail);
+        break;
     }
 }
 
