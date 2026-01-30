@@ -92,7 +92,14 @@ void stdio_sink(const char *path, u32 line, LogType type, const char *msg)
 
     String filename = filename_of_sz(path);
     const char *type_s = sz_from_enum(type);
-    fprintf(out, "%.*s:%d %s: %s\n", STRFMT(filename), line, type_s, msg);
+
+    char color = 49;
+    switch (type) {
+    case LOG_TYPE_ERROR: color = 31; break;
+    case LOG_TYPE_INFO:  color = 36; break;
+    case LOG_TYPE_PANIC: color = 91; break;
+    }
+    fprintf(out, "%.*s:%d \033[%dm%s\033[m: %s\n", STRFMT(filename), line, color, type_s, msg);
 }
 
 void sleep(i32 milliseconds) EXPORT;
