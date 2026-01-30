@@ -117,7 +117,7 @@ void gfx_wait_frame() EXPORT
 
 extern void vk_destroy_swapchain() INTERNAL
 {
-    for (auto it : vk.swapchain.views) 
+    for (auto it : vk.swapchain.views)
         vkDestroyImageView(vk.device, it, nullptr);
     vk.swapchain.views.count = 0;
 
@@ -175,7 +175,7 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
     }
     PANIC_IF(chosen_mode == -1, "no suitable present mode found");
     LOG_INFO("chosen present mode: %s", sz_from_enum(modes[chosen_mode]));
-    
+
     PANIC_IF(surface_caps.minImageCount > MAX_SWAPCHAIN_IMAGES,
              "[vk] minimum image count surface capability higher than supported number of swapchain images");
 
@@ -210,7 +210,7 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
 
     u32 image_count = 0;
     VK_CHECK(vkGetSwapchainImagesKHR(
-            vk.device, vk.swapchain.handle, 
+            vk.device, vk.swapchain.handle,
             &image_count, nullptr));
 
     vk.swapchain.images.count = image_count;
@@ -218,7 +218,7 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
     vk.swapchain.render_finished.count = image_count;
 
     vkGetSwapchainImagesKHR(
-        vk.device, vk.swapchain.handle, 
+        vk.device, vk.swapchain.handle,
         &image_count, vk.swapchain.images.data);
 
     for (auto it : iterator(vk.swapchain.views)) {
@@ -1649,16 +1649,23 @@ extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance) INTER
 
 GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count) EXPORT
 {
+    Vector3 min = vec3_MAX, max = -vec3_MAX;
+    for (i32 i = 0; i < vertices.count; i++) {
+        min = vec3_min(min, vertices[i].position);
+        max = vec3_max(max, vertices[i].position);
+    }
+
     return GfxMesh{
         .vertex_buffer = gfx_create_vertex_buffer(vertices.data, vertices.count*sizeof vertices[0]),
         .index_buffer  = gfx_create_index_buffer(indices.data, indices.count*sizeof indices[0]),
-        .index_count   = index_count
+        .index_count   = index_count,
+        .bounds = { min, max }
     };
 }
 
 GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
 {
-    GfxPrimitiveDesc desc{ 
+    GfxPrimitiveDesc desc{
         .type = GFX_CUBE,
         .cube.width = width,
         .cube.height = height,
@@ -1712,7 +1719,7 @@ GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
     };
 
     u32 indices[] = {
-        // front 
+        // front
         0, 1, 2,  2, 3, 0,
         4, 5, 6,  6, 7, 4,
 
@@ -1743,7 +1750,7 @@ GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
 
 GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
 {
-    GfxPrimitiveDesc desc{ 
+    GfxPrimitiveDesc desc{
         .type = GFX_SPHERE,
         .sphere.radius = radius,
         .sphere.detail = detail,
@@ -1796,7 +1803,7 @@ GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
 
 GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
 {
-    GfxPrimitiveDesc desc{ 
+    GfxPrimitiveDesc desc{
         .type = GFX_CYLINDER,
         .cylinder.radius = radius,
         .cylinder.height = height,

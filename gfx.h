@@ -136,6 +136,10 @@ struct GfxMesh {
     i32 first_index;
     i32 vertex_offset;
 
+    struct {
+        Vector3 min, max;
+    } bounds;
+
     explicit operator bool() { return vertex_buffer != GfxBuffer_INVALID; }
 };
 
