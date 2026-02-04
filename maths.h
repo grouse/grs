@@ -31,6 +31,8 @@ extern "C" CRTIMP float fmodf( float x, float y ) NOTHROW;
 #define vec3_MAX Vector3{ f32_MAX, f32_MAX, f32_MAX }
 #define vec4_MAX Vector4{ f32_MAX, f32_MAX, f32_MAX, f32_MAX }
 
+#define rad_from_deg(theta) ((theta) * (f32)f32_PI / 180.0f)
+
 #define M_ADD_OPS(R, T_l, T_r)\
     R operator+(T_l lhs,   T_r rhs);\
     R operator+=(T_l &lhs, T_r rhs)\
