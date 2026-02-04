@@ -1814,7 +1814,7 @@ GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
     if (*mesh) return *mesh;
 
     SArena scratch = tl_scratch_arena();
-    i32 num_vertices = 2 + detail * 2; // top center, bottom center, top rim, bottom rim
+    i32 num_vertices = 2 + (detail+1) * 4; // top center, bottom center, top rim, top side, bottom rim, bottom side
     i32 num_indices = detail * 12;
 
     Array<MeshVertex> vertices = array_create<MeshVertex>(num_vertices, scratch);
@@ -1835,51 +1835,63 @@ GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
         .tangent  = { 1.0f, 0.0f, 0.0f, 1.0f },
     };
 
-    for (i32 i = 0; i < detail; i++) {
-        f32 angle = (f32(i) / f32(detail)) * 2.0f * f32_PI;
-        f32 x = cosf(angle) * radius;
-        f32 z = sinf(angle) * radius;
-        f32 u = (f32)i / f32(detail);
+    for (i32 i = 0, vtx = 2; i <= detail; i++) {
+        f32 theta = (f32(i) / f32(detail)) * 2.0f * f32_PI;
+        f32 cos_t = cosf(theta);
+        f32 sin_t = sinf(theta);
+        f32 x = cos_t * radius;
+        f32 z = sin_t * radius;
 
-        // Top rim
-        vertices[2 + i] = {
+        f32 u = f32(i)/detail;
+        f32 cap_u = 0.5f + 0.5f * cos_t;
+        f32 cap_v = 0.5f + 0.5f * sin_t;
+
+        vertices[vtx++] = {
+            .position = { x, height / 2.0f, z },
+            .uv       = { cap_u, cap_v },
+            .normal   = vertices[0].normal,
+            .tangent  = vertices[0].tangent,
+        };
+        vertices[vtx++] = {
             .position = { x, height / 2.0f, z },
             .uv       = { u, 0.0f },
-            .normal   = { 0.0f, 1.0f, 0.0f },
-            .tangent  = { -sinf(angle), 0.0f, cosf(angle), 1.0f },
+            .normal   = { x, 0.0f, z },
+            .tangent  = { -sin_t, 0.0f, cos_t, 1.0f },
         };
 
-        // Bottom rim
-        vertices[2 + detail + i] = {
+        vertices[vtx++] = {
             .position = { x, -height / 2.0f, z },
             .uv       = { u, 1.0f },
-            .normal   = { 0.0f, -1.0f, 0.0f },
-            .tangent  = { -sinf(angle), 0.0f, cosf(angle), 1.0f },
+            .normal   = { x, 0.0f, z },
+            .tangent  = { -sin_t, 0.0f, cos_t, 1.0f },
+        };
+        vertices[vtx++] = {
+            .position = { x, -height / 2.0f, z },
+            .uv       = { cap_u, cap_v },
+            .normal   = vertices[1].normal,
+            .tangent  = vertices[1].tangent,
         };
     }
 
     Array<u32> indices = array_create<u32>(num_indices, scratch);
     for (i32 i = 0, idx = 0; i < detail; i++) {
-        i32 next = (i + 1) % detail;
+        i32 in = i+1;
 
-        // Side quad (two triangles)
-        indices[idx++] = 2 + i;
-        indices[idx++] = 2 + detail + next;
-        indices[idx++] = 2 + detail + i;
+        indices[idx++] = 0;
+        indices[idx++] = 2+(in*4);
+        indices[idx++] = 2+(i*4);
 
-        indices[idx++] = 2 + i;
-        indices[idx++] = 2 + next;
-        indices[idx++] = 2 + detail + next;
+        indices[idx++] = 2+1+(in*4);
+        indices[idx++] = 2+2+(in*4);
+        indices[idx++] = 2+2+(i*4);
 
-        // Top face (triangle fan)
-        indices[idx++] = 0;         // top center
-        indices[idx++] = 2 + next;
-        indices[idx++] = 2 + i;
+        indices[idx++] = 2+2+(i*4);
+        indices[idx++] = 2+1+(i*4);
+        indices[idx++] = 2+1+(in*4);
 
-        // Bottom face (triangle fan)
-        indices[idx++] = 1;         // bottom center
-        indices[idx++] = 2 + detail + i;
-        indices[idx++] = 2 + detail + next;
+        indices[idx++] = 1;
+        indices[idx++] = 2+3+(i*4);
+        indices[idx++] = 2+3+(in*4);
     }
 
     *mesh = gfx_create_mesh(vertices, indices, indices.count);
