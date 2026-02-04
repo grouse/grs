@@ -608,37 +608,35 @@ Quaternion quat_euler(f32 x_angle, f32 y_angle, f32 z_angle) EXPORT
 Quaternion quat_from_mat4(Matrix4 M) EXPORT
 {
     Quaternion q;
-
     if (f32 sum = M.m00 + M.m11 + M.m22; sum > 0) {
-        f32 s = sqrtf(sum + 1.0f);
-        f32 f = 0.25f / s;
-        q.x = (M.m21 - M.m12) * f;
-        q.y = (M.m02 - M.m20) * f;
-        q.z = (M.m10 - M.m01) * f;
-        q.w = s;
+        f32 s = sqrtf(sum + 1.0f) * 2.0f; 
+        f32 denom = 1/s; 
+        q.x = (M.m21 - M.m12) * denom;
+        q.y = (M.m02 - M.m20) * denom;
+        q.z = (M.m10 - M.m01) * denom;
+        q.w = 0.25f * s;
     } else if (M.m00 > M.m11 && M.m00 > M.m22) {
-        f32 s = sqrtf(M.m00 - M.m11 - M.m22 + 1.0f) * 0.5f;
-        f32 f = 0.25f / s;
-        q.x = s;
-        q.y = (M.m01 + M.m10) * f;
-        q.z = (M.m02 + M.m20) * f;
-        q.w = (M.m21 - M.m12) * f;
+        f32 s = sqrtf(1.0f + M.m00 - M.m11 - M.m22) * 2.0f; 
+        f32 denom = 1/s;
+        q.x = 0.25f * s;
+        q.y = (M.m01 + M.m10) * denom;
+        q.z = (M.m02 + M.m20) * denom;
+        q.w = (M.m21 - M.m12) * denom;
     } else if (M.m11 > M.m22) {
-        f32 s = sqrtf(M.m11 - M.m00 - M.m22 + 1.0f) * 0.5f;
-        f32 f = 0.25f / s;
-        q.x = (M.m01 + M.m10) * f;
-        q.y = s;
-        q.z = (M.m12 + M.m21) * f;
-        q.w = (M.m02 - M.m20) * f;
+        f32 s = sqrtf(1.0f + M.m11 - M.m00 - M.m22) * 2.0f; 
+        f32 denom = 1/s;
+        q.x = (M.m01 + M.m10) * denom;
+        q.y = 0.25f * s;
+        q.z = (M.m12 + M.m21) * denom;
+        q.w = (M.m02 - M.m20) * denom;
     } else {
-        f32 s = sqrtf(M.m22 - M.m00 - M.m11 + 1.0f) * 0.5f;
-        f32 f = 0.25f / s;
-        q.x = (M.m02 + M.m20) * f;
-        q.y = (M.m12 + M.m21) * f;
-        q.z = s;
-        q.w = (M.m10 - M.m01) * f;
+        f32 s = sqrtf(1.0f + M.m22 - M.m00 - M.m11) * 2.0f; 
+        f32 denom = 1/s;
+        q.x = (M.m02 + M.m20) * denom;
+        q.y = (M.m12 + M.m21) * denom;
+        q.z = 0.25f * s;
+        q.w = (M.m10 - M.m01) * denom;
     }
-
     return q;
 }
 
@@ -1090,6 +1088,7 @@ void mat4_trs_decompose(
     trs[0] = { .xyz = trs[0].xyz / scale->x, 0 };
     trs[1] = { .xyz = trs[1].xyz / scale->y, 0 };
     trs[2] = { .xyz = trs[2].xyz / scale->z, 0 };
+
 
     *rot = quat_from_mat4(trs);
 }
@@ -2275,7 +2274,6 @@ Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
     return l;
 }
 
-
 /// test suite
 #include "test.h"
 TEST_PROC(maths__vector2__operators)
@@ -3452,3 +3450,5 @@ TEST_PROC(maths__misc__angle_between)
         ASSERT(angle == f32_PI/2.0f);
     }
 }
+
+
