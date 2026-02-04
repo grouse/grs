@@ -186,22 +186,25 @@ bool is_identifier(Token t, String str) EXPORT
 
 bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version) EXPORT
 {
-    if (!require_next_token(lexer, '#', &lexer->t)) return false;
-    if (!require_next_token(lexer, TOKEN_IDENTIFIER, &lexer->t)) return false;
-    if (lexer->t != "version") return false;
-
+    if (!require_next_token(lexer, '#', &lexer->t)) {
+        return PARSE_ERROR(lexer, "invalid version decl; expected '#', got %.*s", STRFMT(lexer->t.str)), false;
+    }
+    if (!require_next_token(lexer, TOKEN_IDENTIFIER, &lexer->t)) {
+        return PARSE_ERROR(lexer, "invalid version decl; expected identifier got '%.*s'", STRFMT(lexer->t.str)), false;
+    }
+    if (lexer->t != "version") {
+        return PARSE_ERROR(lexer, "invalid identifier for version decl, expected 'version' got %.*s", STRFMT(lexer->t.str)), false;
+    }
+    
     Token version_token;
-    if (!require_next_token(lexer, TOKEN_INTEGER, &version_token)) return false;
+    if (!require_next_token(lexer, TOKEN_INTEGER, &version_token)) {
+        return PARSE_ERROR(lexer, "invaid token in version decl, expected INTEGER got '%.*s'", STRFMT(lexer->t.str)), false;
+    }
     i32 version = i32_from_string(version_token.str);
 
-    if (version < 0) {
-        PARSE_ERROR(lexer, "version cannot be a negative number");
-        return false;
-    }
-
+    if (version < 0) return PARSE_ERROR(lexer, "version cannot be a negative number"), false;
     if (version > max_version) {
-        PARSE_ERROR(lexer, "version (%d) is higher than currently supported (%d)", version, max_version);
-        return false;
+        return PARSE_ERROR(lexer, "version (%d) is higher than currently supported (%d)", version, max_version), false;
     }
 
     *version_out = version;
