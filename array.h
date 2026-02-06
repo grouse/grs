@@ -260,6 +260,9 @@ ReverseIterator<T> reverse(T (&arr)[N]) { return { arr, N }; }
 
 // -- array procedures
 template<typename T>
+Array<T> array(T *data, i32 count) { return Array<T>{ data, count }; }
+
+template<typename T>
 T array_pop(Array<T> *arr)
 {
     ASSERT_BOUNDS(arr->count, 1, arr->count);
