@@ -511,7 +511,7 @@ DynamicArray<T> array_duplicate(Array<T> src, Allocator mem)
 {
     DynamicArray<T> dst{ .alloc = mem };
     array_copy(&dst, src);
-    return src;
+    return dst;
 }
 
 template<typename T>
