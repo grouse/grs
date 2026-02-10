@@ -40,6 +40,7 @@ extern Vector4 vec4_min(Vector4 lhs, Vector4 rhs);
 extern Vector4 calc_center(Vector4 *points, i32 point_count);
 extern f32 length(Quaternion q);
 extern f32 length_sq(Quaternion q);
+extern Quaternion lerp(Quaternion p, Quaternion q, f32 t);
 extern Quaternion quat_identity();
 extern Quaternion quat_angle_axis(f32 theta, Vector3 v);
 extern Quaternion quat_axis_angle(Vector3 v, f32 theta);

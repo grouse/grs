@@ -588,6 +588,16 @@ Vector4 calc_center(Vector4 *points, i32 point_count) EXPORT
 f32 length(Quaternion q) EXPORT { return sqrtf(dot(q.xyzw, q.xyzw)); }
 f32 length_sq(Quaternion q) EXPORT { return dot(q.xyzw, q.xyzw); }
 
+Quaternion lerp(Quaternion p, Quaternion q, f32 t) EXPORT
+{
+    Quaternion r;
+    r.x = lerp(p.x, q.x, t);
+    r.y = lerp(p.y, q.y, t);
+    r.z = lerp(p.z, q.z, t);
+    r.w = lerp(p.w, q.w, t);
+    return r;
+}
+
 Quaternion quat_identity() EXPORT { return { 0, 0, 0, 1 }; }
 
 Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
