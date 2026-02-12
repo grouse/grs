@@ -111,6 +111,8 @@ struct GfxSamplerDesc {
 };
 
 struct GfxMaterialDesc {
+    GfxPipeline pipeline;
+
     GfxTexture albedo;
     GfxTexture metallic_roughness;
     GfxTexture normal;
