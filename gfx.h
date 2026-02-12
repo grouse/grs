@@ -145,6 +145,31 @@ struct GfxMesh {
     explicit operator bool() { return vertex_buffer != GfxBuffer_INVALID; }
 };
 
+struct GfxContext {
+    GfxPipeline triangle;
+    GfxPipeline rect_tex;
+
+    GfxPipeline static_mesh;
+    GfxPipeline static_mesh_pbr;
+    GfxPipeline static_mesh_depth;
+    GfxPipeline static_mesh_wireframe;
+
+    GfxPipeline skybox;
+
+    GfxPipeline gui_prim2;
+    GfxPipeline gui_prim3;
+    GfxPipeline gui_rect;
+    GfxPipeline gui_image;
+    GfxPipeline gui_line;
+    GfxPipeline gui_line_strip;
+    GfxPipeline gui_point;
+    GfxPipeline gui_text;
+
+    GfxPipeline prim_3d_wire;
+};
+
+extern GfxContext gfx;
+
 #include "generated/gfx.h"
 
 Vector2 gfx_resolution();
