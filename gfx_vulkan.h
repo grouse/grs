@@ -258,7 +258,8 @@ struct GfxVkRenderPassDesc {
 enum GfxPrimitive : u8 {
     GFX_SPHERE,
     GFX_CUBE,
-    GFX_CYLINDER
+    GFX_CYLINDER,
+    GFX_RAMP,
 };
 
 struct GfxSphere {
@@ -284,12 +285,21 @@ struct GfxCylinder {
     bool operator==(const GfxCylinder&) const = default;
 };
 
+struct GfxRamp {
+    f32 length;
+    f32 height;
+    f32 width;
+
+    bool operator==(const GfxRamp&) const = default;
+};
+
 struct GfxPrimitiveDesc {
     GfxPrimitive type;
     union {
         GfxSphere sphere;
         GfxCube cube;
         GfxCylinder cylinder;
+        GfxRamp ramp;
     };
 };
 

@@ -1898,6 +1898,43 @@ GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
     return *mesh;
 }
 
+GfxMesh gfx_ramp(f32 length, f32 height, f32 width) EXPORT
+{
+    GfxPrimitiveDesc desc{
+        .type = GFX_RAMP,
+        .ramp.length = length,
+        .ramp.height = height,
+        .ramp.width = width,
+    };
+
+    GfxMesh *mesh = map_find_emplace(&vk.primitives, desc);
+    if (*mesh) return *mesh;
+
+    f32 hl = length*0.5f, hh = height*0.5f, hw = width*0.5f;
+    MeshVertex vertices[] = {
+        // position            uv        normal       tangent
+        { { -hw, -hh,  hl }, { 0, 0 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
+        { {  hw, -hh,  hl }, { 1, 0 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
+        { {  hw,  hh, -hl }, { 1, 1 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
+        { { -hw,  hh, -hl }, { 0, 1 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
+
+        { { -hw, -hh, -hl }, { 1, 1 }, { 0, 1, 1 }, { 1, 0, 0, 1 } },
+        { {  hw, -hh, -hl }, { 0, 1 }, { 0, 1, 1 }, { 1, 0, 0, 1 } },
+    };
+
+    u32 indices[] = {
+        0, 1, 2, 2, 3, 0, // top
+        0, 4, 1, 1, 4, 5, // bottom
+        2, 5, 3, 3, 5, 4, // back
+        2, 1, 5,          // rhs
+        3, 4, 0,          // lhs
+
+    };
+
+    *mesh = gfx_create_mesh({ vertices, ARRAY_COUNT(vertices) }, { indices, ARRAY_COUNT(indices) }, ARRAY_COUNT(indices));
+    return *mesh;
+}
+
 bool operator==(const GfxPrimitiveDesc &lhs, const GfxPrimitiveDesc &rhs) EXPORT
 {
     if (lhs.type != rhs.type) return false;
@@ -1905,6 +1942,7 @@ bool operator==(const GfxPrimitiveDesc &lhs, const GfxPrimitiveDesc &rhs) EXPORT
     case GFX_SPHERE: return lhs.sphere == rhs.sphere;
     case GFX_CUBE: return lhs.cube == rhs.cube;
     case GFX_CYLINDER: return lhs.cylinder == rhs.cylinder;
+    case GFX_RAMP: return lhs.ramp == rhs.ramp;
     }
 
     return false;
