@@ -1,4 +1,4 @@
-#define GFX_VULKAN_INTERNAL
+#define GFX_VULKAN_GENERATED_IMPL
 #include "gfx_vulkan.h"
 #include "gfx.h"
 #include "string.h"

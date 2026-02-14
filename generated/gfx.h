@@ -8,3 +8,7 @@ extern u32 hash32(const GfxMaterialParameters & it, u32 seed = HASH32_SEED);
 extern u32 hash32(const GfxSamplerDesc & it, u32 seed = HASH32_SEED);
 
 #endif // GFX_GENERATED_H
+
+#ifdef GFX_GENERATED_IMPL
+#define GFX_INTERNAL
+#endif

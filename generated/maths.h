@@ -155,3 +155,7 @@ extern Vector3 linear_from_sRGB(Vector3 sRGB);
 extern Vector4 linear_from_sRGB(Vector4 sRGB);
 
 #endif // MATHS_GENERATED_H
+
+#ifdef MATHS_GENERATED_IMPL
+#define MATHS_INTERNAL
+#endif

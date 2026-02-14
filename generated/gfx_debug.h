@@ -7,3 +7,7 @@ extern void gfx_debug_draw_cube(Vector3 position, Vector3 extents, Vector3 color
 extern void gfx_debug_draw_line(Vector3 p0, Vector3 p1, f32 thickness, Vector3 color, f32 duration);
 
 #endif // GFX_DEBUG_GENERATED_H
+
+#ifdef GFX_DEBUG_GENERATED_IMPL
+#define GFX_DEBUG_INTERNAL
+#endif

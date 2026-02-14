@@ -1,0 +1,4 @@
+
+#ifdef THREAD_GENERATED_IMPL
+#define THREAD_INTERNAL
+#endif

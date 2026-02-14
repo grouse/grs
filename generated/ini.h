@@ -14,3 +14,7 @@ extern bool ini_in_section(IniSerializer *ini);
 extern bool ini_next(IniSerializer *ini);
 
 #endif // INI_GENERATED_H
+
+#ifdef INI_GENERATED_IMPL
+#define INI_INTERNAL
+#endif

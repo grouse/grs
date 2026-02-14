@@ -26,6 +26,10 @@ extern u32 hash32(const InputDesc & desc, u32 seed = HASH32_SEED);
 
 #endif // WINDOW_GENERATED_H
 
+#ifdef WINDOW_GENERATED_IMPL
+#define WINDOW_INTERNAL
+#endif
+
 #if defined(WINDOW_INTERNAL) && !defined(WINDOW_INTERNAL_ONCE)
 #define WINDOW_INTERNAL_ONCE
 

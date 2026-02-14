@@ -61,3 +61,7 @@ extern bool parse_cmd_argument(String *args, i32 count, String name, i32 values[
 extern bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2]);
 
 #endif // STRING_GENERATED_H
+
+#ifdef STRING_GENERATED_IMPL
+#define STRING_INTERNAL
+#endif

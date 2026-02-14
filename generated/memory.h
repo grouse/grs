@@ -1,0 +1,4 @@
+
+#ifdef MEMORY_GENERATED_IMPL
+#define MEMORY_INTERNAL
+#endif

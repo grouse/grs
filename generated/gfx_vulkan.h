@@ -23,6 +23,10 @@ extern bool operator==(const GfxPrimitiveDesc & lhs, const GfxPrimitiveDesc & rh
 
 #endif // GFX_VULKAN_GENERATED_H
 
+#ifdef GFX_VULKAN_GENERATED_IMPL
+#define GFX_VULKAN_INTERNAL
+#endif
+
 #if defined(GFX_VULKAN_INTERNAL) && !defined(GFX_VULKAN_INTERNAL_ONCE)
 #define GFX_VULKAN_INTERNAL_ONCE
 

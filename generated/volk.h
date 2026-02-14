@@ -1,0 +1,4 @@
+
+#ifdef VOLK_GENERATED_IMPL
+#define VOLK_INTERNAL
+#endif

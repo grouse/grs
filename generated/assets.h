@@ -41,3 +41,7 @@ extern u32 hash32(const AssetHandle & it, u32 seed = HASH32_SEED);
 extern void hash32_update(h32s *state, const AssetHandle & it);
 
 #endif // ASSETS_GENERATED_H
+
+#ifdef ASSETS_GENERATED_IMPL
+#define ASSETS_INTERNAL
+#endif

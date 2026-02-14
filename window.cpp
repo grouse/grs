@@ -3,7 +3,7 @@
 #include "string.h"
 #include "hash.h"
 
-#define WINDOW_INTERNAL
+#define WINDOW_GENERATED_IMPL
 #include "window.h"
 
 InputContext input;

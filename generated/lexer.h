@@ -20,3 +20,7 @@ extern bool parse_string(Lexer *lexer, String *str);
 extern bool parse_string(Lexer *lexer, String *str, Allocator mem);
 
 #endif // LEXER_GENERATED_H
+
+#ifdef LEXER_GENERATED_IMPL
+#define LEXER_INTERNAL
+#endif
