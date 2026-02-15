@@ -1,13 +1,12 @@
 #define TEST_H_IMPL
-#include "test.h"
+#include "core/test.h"
 
-#include "array.h"
-#include "map.h"
-#include "maths.h"
+#include "core/array.h"
+#include "core/string.h"
 
+#include "generated/tests/maths.h"
 #include "generated/tests/array.h"
 #include "generated/tests/map.h"
-#include "generated/tests/maths.h"
 
 int main(Array<String> args)
 {

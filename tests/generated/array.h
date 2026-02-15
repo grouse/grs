@@ -1,0 +1,4 @@
+
+#ifdef ARRAY_GENERATED_IMPL
+#define ARRAY_INTERNAL
+#endif

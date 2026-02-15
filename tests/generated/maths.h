@@ -1,0 +1,4 @@
+
+#ifdef MATHS_GENERATED_IMPL
+#define MATHS_INTERNAL
+#endif

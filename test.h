@@ -8,18 +8,10 @@
 
 #endif // TEST_H
 
-#ifdef TEST_H_IMPL
-#undef TEST_H_IMPL
-#define DO_TESTS
+#if defined(DO_TESTS) && !defined(TEST_H_DECL)
+#define TEST_H_DECL
 
 #include <setjmp.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <new>
-
 #include "core.h"
 #include "hash.h"
 
@@ -147,6 +139,24 @@ extern void report_failv(const char *file, int line, const char *sz_cond, const 
     test_jmp_i=0;\
 } while(0)
 
+#endif // DO_TESTS && !TEST_H_DECL
+
+#ifdef TEST_H_IMPL
+#undef TEST_H_IMPL
+#ifndef DO_TESTS
+#define DO_TESTS
+#endif
+
+#include <setjmp.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <new>
+
+#include "test.h"
+
 jmp_buf test_jmp_[2];  int test_jmp_i = 0;
 
 TestSuite *test_current = nullptr;
@@ -224,7 +234,7 @@ static int run_tests_(TestSuite *tests, int count, int depth = 0)
         if (tests[i].children && tests[i].child_count) {
             printf("/%s\n", tests[i].name);
             failed_tests += run_tests_(
-                tests[i].children, tests[i].child_count, 
+                tests[i].children, tests[i].child_count,
                 depth+1);
         }
 
