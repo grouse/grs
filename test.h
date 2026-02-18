@@ -145,7 +145,6 @@ extern int test_expect_fail;
 
 extern int run_tests(TestSuite *tests, int count);
 extern void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...);
-extern void report_failv(const char *file, int line, const char *sz_cond, const char *msg, va_list va_args);
 
 #define REPORT_FAIL(...) report_fail(__FILE__, __LINE__, __VA_ARGS__)
 
@@ -213,33 +212,31 @@ bool test_panic_handler(
     if (!test_expect_fail) {
         va_list va_args;
         va_start(va_args, msg);
-        report_failv(file, line, sz_cond, msg, va_args);
+        char buf[2048];
+        int length = vsnprintf(buf, sizeof buf - 1, msg, va_args);
         va_end(va_args);
+        buf[length > (int)sizeof buf - 1 ? (int)sizeof buf - 1 : length] = '\0';
+        report_fail(file, line, sz_cond, "%s", buf);
     } else longjmp(test_jmp, 1);
 
     return false;
 }
 
-void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...)
+void report_fail(const char *file, int line, const char *sz_cond, const char *fmt, ...)
 {
     va_list va_args;
-    va_start(va_args, msg);
-    report_failv(file, line, sz_cond, msg, va_args);
-    va_end(va_args);
-}
-
-void report_failv(const char *file, int line, const char *sz_cond, const char *fmt, va_list va_args)
-{
+    va_start(va_args, fmt);
+    
     int length = 0;
     char msg[2048];
-
     if (fmt) {
-        length = vsnprintf(msg, sizeof msg-1, fmt, va_args);
-        length = length > sizeof msg-1 ? sizeof msg-1 : length;
-    };
+        length = vsnprintf(msg, sizeof msg - 1, fmt, va_args);
+        length = length > (int)sizeof msg - 1 ? (int)sizeof msg - 1 : length;
+    }
     msg[length] = '\0';
+    va_end(va_args);
 
-    TestResult *rep = new (malloc(sizeof *rep + length+1)) TestResult {
+    TestResult *rep = new (malloc(sizeof *rep + length + 1)) TestResult {
         .src = file, .line = line, .cond = sz_cond,
         .next = test_current->result
     };
@@ -350,28 +347,28 @@ void test_sig_handler(int sig) {
     }
 }
 
-void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...)
+void report_fail(const char *file, int line, const char *sz_cond, const char *fmt, ...)
 {
     va_list va_args;
-    va_start(va_args, msg);
+    va_start(va_args, fmt);
     
     int length = 0;
-    char buf[2048];
-    if (msg) {
-        length = vsnprintf(buf, sizeof buf - 1, msg, va_args);
-        length = length > (int)sizeof buf - 1 ? (int)sizeof buf - 1 : length;
+    char msg[2048];
+    if (fmt) {
+        length = vsnprintf(msg, sizeof msg - 1, fmt, va_args);
+        length = length > (int)sizeof msg - 1 ? (int)sizeof msg - 1 : length;
     }
-    buf[length] = '\0';
+    msg[length] = '\0';
     va_end(va_args);
 
-    auto *rep = new (malloc(sizeof(TestResult) + length + 1)) TestResult {
+    TestResult *rep = new (malloc(sizeof *rep + length + 1)) TestResult {
         .src = file, .line = line, .cond = sz_cond,
         .next = test_current->result
     };
 
     if (length > 0) {
         rep->msg = (char*)rep + sizeof *rep;
-        strcpy(rep->msg, buf);
+        strcpy(rep->msg, msg);
     }
 
     test_current->result = rep;
