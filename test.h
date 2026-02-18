@@ -185,11 +185,8 @@ void test_sig_handler(int sig) {
     }
 }
 
-void report_fail(const char *file, int line, const char *sz_cond, const char *fmt, ...)
+void report_failv(const char *file, int line, const char *sz_cond, const char *fmt, va_list va_args)
 {
-    va_list va_args;
-    va_start(va_args, fmt);
-    
     int length = 0;
     char msg[2048];
     if (fmt) {
@@ -197,7 +194,6 @@ void report_fail(const char *file, int line, const char *sz_cond, const char *fm
         length = length > (int)sizeof msg - 1 ? (int)sizeof msg - 1 : length;
     }
     msg[length] = '\0';
-    va_end(va_args);
 
     TestResult *rep = new (malloc(sizeof *rep + length + 1)) TestResult {
         .src = file, .line = line, .cond = sz_cond,
@@ -212,6 +208,15 @@ void report_fail(const char *file, int line, const char *sz_cond, const char *fm
     test_current->result = rep;
     test_current->passed = false;
 }
+
+void report_fail(const char *file, int line, const char *sz_cond, const char *fmt, ...)
+{
+    va_list va_args;
+    va_start(va_args, fmt);
+    report_failv(file, line, sz_cond, fmt, va_args);
+    va_end(va_args);
+}
+
 
 #endif // TEST_H_IMPL || INTEGRATION_TEST_H_IMPL
 
@@ -244,11 +249,8 @@ static bool test_panic_handler(
     if (!test_expect_fail) {
         va_list va_args;
         va_start(va_args, msg);
-        char buf[2048];
-        int length = vsnprintf(buf, sizeof buf - 1, msg, va_args);
+        report_failv(file, line, sz_cond, msg, va_args);
         va_end(va_args);
-        buf[length > (int)sizeof buf - 1 ? (int)sizeof buf - 1 : length] = '\0';
-        report_fail(file, line, sz_cond, "%s", buf);
     } else longjmp(test_jmp, 1);
 
     return false;
@@ -356,12 +358,10 @@ static bool itest_assert_handler(const char *src, int line, const char *sz_cond)
 static bool itest_panic_handler(const char *src, int line, const char *sz_cond, const char *msg, ...)
 {
     if (msg) {
-        va_list va;
-        va_start(va, msg);
-        char buf[2048];
-        vsnprintf(buf, sizeof buf, msg, va);
-        va_end(va);
-        report_fail(src, line, sz_cond, "%s", buf);
+        va_list va_args;
+        va_start(va_args, msg);
+        report_failv(src, line, sz_cond, msg, va_args);
+        va_end(va_args);
     } else {
         report_fail(src, line, sz_cond, nullptr);
     }
