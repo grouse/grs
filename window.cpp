@@ -753,7 +753,7 @@ bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id /*= INPUT_MAP_ANY*
     if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
     f32 *axis = map_find(&map->axes, id);
-    if (!axis || axis[0] == 0.0f) return false;
+    if (!axis) return false;
 
     dst[0] = axis[0];
     return true;
@@ -769,7 +769,7 @@ bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_AN
     if (map_id == INPUT_MAP_INVALID) return false;
     InputMap *map = &input.maps[map_id];
     f32 *axis = map_find(&map->axes, id);
-    if (!axis || (axis[0] == 0.0f && axis[1] == 0.0f)) return false;
+    if (!axis) return false;
 
     dst[0] = axis[0];
     dst[1] = axis[1];
