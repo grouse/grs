@@ -41,6 +41,7 @@ extern volatile sig_atomic_t test_in_progress;
 #define test_jmp test_jmp_[test_jmp_i]
 
 void test_sig_handler(int sig);
+void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...);
 
 #define INTEGRATION_TEST_PROC(name) \
     void name() __attribute__((annotate("integration_test")))
@@ -144,7 +145,6 @@ extern int test_expect_fail;
 #define RUN_TESTS(tests) run_tests(tests, sizeof(tests)/sizeof(tests[0]))
 
 extern int run_tests(TestSuite *tests, int count);
-extern void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...);
 
 #define REPORT_FAIL(...) report_fail(__FILE__, __LINE__, __VA_ARGS__)
 
@@ -164,11 +164,7 @@ extern void report_fail(const char *file, int line, const char *sz_cond, const c
 
 #endif // DO_TESTS && !TEST_H_DECL
 
-#ifdef TEST_H_IMPL
-#undef TEST_H_IMPL
-#ifndef DO_TESTS
-#define DO_TESTS
-#endif
+#if defined(TEST_H_IMPL) || defined(INTEGRATION_TEST_H_IMPL)
 
 #include <setjmp.h>
 #include <signal.h>
@@ -178,48 +174,15 @@ extern void report_fail(const char *file, int line, const char *sz_cond, const c
 #include <string.h>
 #include <new>
 
-#include "test.h"
-
 jmp_buf test_jmp_[2];  int test_jmp_i = 0;
-
-TestSuite *test_current = nullptr;
-int test_expect_fail = 0;
 volatile sig_atomic_t test_in_progress = 0;
+TestSuite *test_current = nullptr;
 
 void test_sig_handler(int sig) {
     if (test_in_progress) {
         signal(sig, test_sig_handler);
         longjmp(test_jmp, sig);
     }
-}
-
-bool test_assert_handler(
-    const char *file, int line,
-    const char *sz_cond)
-{
-    if (!test_expect_fail) {
-        report_fail(file, line, sz_cond, nullptr);
-    } else longjmp(test_jmp, 1);
-
-    return false;
-}
-
-bool test_panic_handler(
-    const char *file, int line,
-    const char *sz_cond,
-    const char *msg, ...)
-{
-    if (!test_expect_fail) {
-        va_list va_args;
-        va_start(va_args, msg);
-        char buf[2048];
-        int length = vsnprintf(buf, sizeof buf - 1, msg, va_args);
-        va_end(va_args);
-        buf[length > (int)sizeof buf - 1 ? (int)sizeof buf - 1 : length] = '\0';
-        report_fail(file, line, sz_cond, "%s", buf);
-    } else longjmp(test_jmp, 1);
-
-    return false;
 }
 
 void report_fail(const char *file, int line, const char *sz_cond, const char *fmt, ...)
@@ -248,6 +211,47 @@ void report_fail(const char *file, int line, const char *sz_cond, const char *fm
 
     test_current->result = rep;
     test_current->passed = false;
+}
+
+#endif // TEST_H_IMPL || INTEGRATION_TEST_H_IMPL
+
+#ifdef TEST_H_IMPL
+#undef TEST_H_IMPL
+#ifndef DO_TESTS
+#define DO_TESTS
+#endif
+
+#include "test.h"
+
+int test_expect_fail = 0;
+
+static bool test_assert_handler(
+    const char *file, int line,
+    const char *sz_cond)
+{
+    if (!test_expect_fail) {
+        report_fail(file, line, sz_cond, nullptr);
+    } else longjmp(test_jmp, 1);
+
+    return false;
+}
+
+static bool test_panic_handler(
+    const char *file, int line,
+    const char *sz_cond,
+    const char *msg, ...)
+{
+    if (!test_expect_fail) {
+        va_list va_args;
+        va_start(va_args, msg);
+        char buf[2048];
+        int length = vsnprintf(buf, sizeof buf - 1, msg, va_args);
+        va_end(va_args);
+        buf[length > (int)sizeof buf - 1 ? (int)sizeof buf - 1 : length] = '\0';
+        report_fail(file, line, sz_cond, "%s", buf);
+    } else longjmp(test_jmp, 1);
+
+    return false;
 }
 
 static int run_tests_(TestSuite *tests, int count, int depth = 0)
@@ -327,53 +331,6 @@ int run_tests(TestSuite *tests, int count)
 #include "string.h"
 #include "array.h"
 #include "memory.h"
-
-#include <new>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-#include <setjmp.h>
-#include <stdarg.h>
-
-jmp_buf test_jmp_[2];  int test_jmp_i = 0;
-volatile sig_atomic_t test_in_progress = 0;
-TestSuite *test_current = nullptr;
-
-void test_sig_handler(int sig) {
-    if (test_in_progress) {
-        signal(sig, test_sig_handler);
-        longjmp(test_jmp, sig);
-    }
-}
-
-void report_fail(const char *file, int line, const char *sz_cond, const char *fmt, ...)
-{
-    va_list va_args;
-    va_start(va_args, fmt);
-    
-    int length = 0;
-    char msg[2048];
-    if (fmt) {
-        length = vsnprintf(msg, sizeof msg - 1, fmt, va_args);
-        length = length > (int)sizeof msg - 1 ? (int)sizeof msg - 1 : length;
-    }
-    msg[length] = '\0';
-    va_end(va_args);
-
-    TestResult *rep = new (malloc(sizeof *rep + length + 1)) TestResult {
-        .src = file, .line = line, .cond = sz_cond,
-        .next = test_current->result
-    };
-
-    if (length > 0) {
-        rep->msg = (char*)rep + sizeof *rep;
-        strcpy(rep->msg, msg);
-    }
-
-    test_current->result = rep;
-    test_current->passed = false;
-}
 
 extern FixedArray<sink_proc_t, 10> log_sinks;
 
