@@ -6,6 +6,55 @@
 // no-op EXPECT_FAIL macros to avoid compiling unnecessary code when included in translation units outside the test-suite
 #define EXPECT_FAIL(...)
 
+#include "core.h"
+#include <setjmp.h>
+#include <signal.h>
+
+struct TestResult {
+    const char *src; int line;
+    const char *cond;
+    char *msg;
+
+    TestResult *next;
+};
+
+typedef void (*test_proc_t)();
+
+struct TestSuite {
+    const char *name;
+    test_proc_t proc;
+
+    TestSuite *children = nullptr;
+    int child_count = 0;
+
+    bool passed = true;
+    TestResult *result = nullptr;
+};
+
+// NOTE: exposed so tests can inspect error counts mid-run
+extern TestSuite *test_current;
+
+// Shared signal handling for both unit and integration tests
+extern jmp_buf test_jmp_[2];
+extern int test_jmp_i;
+extern volatile sig_atomic_t test_in_progress;
+#define test_jmp test_jmp_[test_jmp_i]
+
+void test_sig_handler(int sig);
+
+#define INTEGRATION_TEST_PROC(name) \
+    void name() __attribute__((annotate("integration_test")))
+
+int run_integration_tests_(TestSuite *tests, int count);
+
+#define run_integration_tests(MODULE) \
+    run_integration_tests_(MODULE##__integration_tests, ARRAY_COUNT(MODULE##__integration_tests))
+
+#define run_integration_test(proc) do { \
+    TestSuite t_ = { #proc, proc, nullptr, 0, true }; \
+    run_integration_tests_(&t_, 1); \
+} while (0)
+
 #endif // TEST_H
 
 #if defined(DO_TESTS) && !defined(TEST_H_DECL)
@@ -14,26 +63,6 @@
 #include <setjmp.h>
 #include "core.h"
 #include "hash.h"
-
-typedef void (*test_proc_t)();
-
-struct TestResult {
-    const char *src; int line;
-    const char *cond;
-    char *msg;
-
-    struct TestResult *next;
-};
-
-struct TestSuite {
-    const char *name;
-    test_proc_t proc;
-
-    TestSuite *children;
-    int child_count;
-
-    TestResult *result = nullptr;
-};
 
 //#define TEST_TYPE_LOG(...) LOG_INFO(__VA_ARGS__)
 
@@ -110,12 +139,7 @@ inline u32 hash32(const TestType &value, u32 seed = 0xdeadbeef)
     return hash32(value.value, seed);
 }
 
-extern TestSuite *test_current;
 extern int test_expect_fail;
-
-extern jmp_buf test_jmp_[2];
-extern int test_jmp_i;
-#define test_jmp test_jmp_[test_jmp_i]
 
 #define RUN_TESTS(tests) run_tests(tests, sizeof(tests)/sizeof(tests[0]))
 
@@ -131,8 +155,8 @@ extern void report_failv(const char *file, int line, const char *sz_cond, const 
     test_jmp_i=1;\
     bool failed = false;\
     switch (setjmp(test_jmp)) {\
-    case 1: failed=true; break;\
     case 0: { body; } break;\
+    default: failed=true; break;\
     }\
     if (!failed) REPORT_FAIL(nullptr, "expected failure");\
     test_expect_fail=false;\
@@ -161,10 +185,13 @@ jmp_buf test_jmp_[2];  int test_jmp_i = 0;
 
 TestSuite *test_current = nullptr;
 int test_expect_fail = 0;
+volatile sig_atomic_t test_in_progress = 0;
 
 void test_sig_handler(int sig) {
-    signal(sig, test_sig_handler);
-    longjmp(test_jmp, 1);
+    if (test_in_progress) {
+        signal(sig, test_sig_handler);
+        longjmp(test_jmp, sig);
+    }
 }
 
 bool test_assert_handler(
@@ -223,6 +250,7 @@ void report_failv(const char *file, int line, const char *sz_cond, const char *f
     }
 
     test_current->result = rep;
+    test_current->passed = false;
 }
 
 static int run_tests_(TestSuite *tests, int count, int depth = 0)
@@ -230,6 +258,7 @@ static int run_tests_(TestSuite *tests, int count, int depth = 0)
     int failed_tests = 0;
     for (int i = 0; i < count; i++) {
         test_current = &tests[i];
+        tests[i].passed = true;
 
         if (tests[i].children && tests[i].child_count) {
             printf("/%s\n", tests[i].name);
@@ -240,8 +269,16 @@ static int run_tests_(TestSuite *tests, int count, int depth = 0)
 
         if (!tests[i].proc) continue;
 
-        if (setjmp(test_jmp) == 0) tests[i].proc();
-        bool result = tests[i].result == nullptr;
+        test_in_progress = 1;
+        int sig = setjmp(test_jmp);
+        if (sig == 0) {
+            tests[i].proc();
+        } else {
+            report_fail(nullptr, 0, nullptr, "crashed with signal %d", sig);
+        }
+        test_in_progress = 0;
+
+        bool result = tests[i].passed;
         printf("%*s%-*s : [%s]\n", depth*2, "", 80-depth*2, tests[i].name, result ? "OK" : "ERROR");
 
         if (!result) {
@@ -256,6 +293,7 @@ static int run_tests_(TestSuite *tests, int count, int depth = 0)
                     printf("\t%s:%d test failed\n", res->src, res->line);
                 }
             }
+            failed_tests++;
         }
     }
 
@@ -264,8 +302,9 @@ static int run_tests_(TestSuite *tests, int count, int depth = 0)
 
 int run_tests(TestSuite *tests, int count)
 {
-    signal(SIGINT, test_sig_handler);
-    signal(SIGSEGV, test_sig_handler);
+    auto prev_sigint = signal(SIGINT, test_sig_handler);
+    auto prev_sigsegv = signal(SIGSEGV, test_sig_handler);
+    auto prev_sigabrt = signal(SIGABRT, test_sig_handler);
 
     extern jl_assert_handler_proc jl_assert_handler;
     extern jl_panic_handler_proc jl_panic_handler;
@@ -274,7 +313,180 @@ int run_tests(TestSuite *tests, int count)
     jl_panic_handler = test_panic_handler;
 
     int failed_tests = run_tests_(tests, count);
+
+    signal(SIGINT, prev_sigint);
+    signal(SIGSEGV, prev_sigsegv);
+    signal(SIGABRT, prev_sigabrt);
+
     return failed_tests;
 }
 
 #endif // TEST_H_IMPL
+
+#ifdef INTEGRATION_TEST_H_IMPL
+#undef INTEGRATION_TEST_H_IMPL
+
+#include "core.h"
+#include "string.h"
+#include "array.h"
+#include "memory.h"
+
+#include <new>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
+#include <setjmp.h>
+#include <stdarg.h>
+
+jmp_buf test_jmp_[2];  int test_jmp_i = 0;
+volatile sig_atomic_t test_in_progress = 0;
+TestSuite *test_current = nullptr;
+
+void test_sig_handler(int sig) {
+    if (test_in_progress) {
+        signal(sig, test_sig_handler);
+        longjmp(test_jmp, sig);
+    }
+}
+
+void report_fail(const char *file, int line, const char *sz_cond, const char *msg, ...)
+{
+    va_list va_args;
+    va_start(va_args, msg);
+    
+    int length = 0;
+    char buf[2048];
+    if (msg) {
+        length = vsnprintf(buf, sizeof buf - 1, msg, va_args);
+        length = length > (int)sizeof buf - 1 ? (int)sizeof buf - 1 : length;
+    }
+    buf[length] = '\0';
+    va_end(va_args);
+
+    auto *rep = new (malloc(sizeof(TestResult) + length + 1)) TestResult {
+        .src = file, .line = line, .cond = sz_cond,
+        .next = test_current->result
+    };
+
+    if (length > 0) {
+        rep->msg = (char*)rep + sizeof *rep;
+        strcpy(rep->msg, buf);
+    }
+
+    test_current->result = rep;
+    test_current->passed = false;
+}
+
+extern FixedArray<sink_proc_t, 10> log_sinks;
+
+static void itest_log_sink(const char *src, u32 line, LogType type, const char *msg)
+{
+    if (test_current && type <= LOG_TYPE_ERROR) {
+        report_fail(src, (int)line, sz_from_enum(type), "%s", msg);
+    }
+
+    if (type <= LOG_TYPE_ERROR) {
+        String filename = filename_of_sz(src);
+        const char *type_s = sz_from_enum(type);
+        fprintf(stderr, "%.*s:%d %s: %s\n", STRFMT(filename), line, type_s, msg);
+    }
+}
+
+static bool itest_assert_handler(const char *src, int line, const char *sz_cond)
+{
+    report_fail(src, line, sz_cond, nullptr);
+    return false;
+}
+
+static bool itest_panic_handler(const char *src, int line, const char *sz_cond, const char *msg, ...)
+{
+    if (msg) {
+        va_list va;
+        va_start(va, msg);
+        char buf[2048];
+        vsnprintf(buf, sizeof buf, msg, va);
+        va_end(va);
+        report_fail(src, line, sz_cond, "%s", buf);
+    } else {
+        report_fail(src, line, sz_cond, nullptr);
+    }
+
+    longjmp(test_jmp, 1);
+    return false;
+}
+
+static void itest_free_results(TestResult *res)
+{
+    while (res) {
+        auto *next = res->next;
+        free(res);
+        res = next;
+    }
+}
+
+int run_integration_tests_(TestSuite *tests, int count)
+{
+    auto prev_sinks = log_sinks;
+    log_sinks.count = 0;
+    array_add(&log_sinks, itest_log_sink);
+
+    auto prev_assert = jl_assert_handler;
+    auto prev_panic  = jl_panic_handler;
+    jl_assert_handler = itest_assert_handler;
+    jl_panic_handler  = itest_panic_handler;
+
+    auto prev_sigsegv = signal(SIGSEGV, test_sig_handler);
+    auto prev_sigabrt = signal(SIGABRT, test_sig_handler);
+
+    int failed = 0;
+
+    for (int i = 0; i < count; i++) {
+        TestSuite *test = &tests[i];
+        test->result = nullptr;
+        test->passed = true;
+        test_current = test;
+
+        printf("/%s\n", test->name);
+
+        test_in_progress = 1;
+        int sig = setjmp(test_jmp);
+        if (sig == 0) {
+            test->proc();
+        } else {
+            printf("  %-78s : [ERROR]\n", "(crashed)");
+            printf("\tsignal %d\n", sig);
+            test->passed = false;
+        }
+        test_in_progress = 0;
+
+        if (!test->passed) {
+            for (auto *res = test->result; res; res = res->next) {
+                if (res->cond && res->msg) {
+                    printf("\t%s:%d %s: %s\n", res->src, res->line, res->cond, res->msg);
+                } else if (res->cond) {
+                    printf("\t%s:%d %s\n", res->src, res->line, res->cond);
+                } else if (res->msg) {
+                    printf("\t%s:%d %s\n", res->src, res->line, res->msg);
+                } else {
+                    printf("\t%s:%d test failed\n", res->src, res->line);
+                }
+            }
+            failed++;
+        }
+
+        itest_free_results(test->result);
+    }
+
+    test_current = nullptr;
+
+    log_sinks = prev_sinks;
+    jl_assert_handler = prev_assert;
+    jl_panic_handler  = prev_panic;
+    signal(SIGSEGV, prev_sigsegv);
+    signal(SIGABRT, prev_sigabrt);
+
+    return failed;
+}
+
+#endif // INTEGRATION_TEST_H_IMPL
