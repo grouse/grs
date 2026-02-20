@@ -23,6 +23,7 @@ typedef void* (*asset_load_t)(AssetHandle handle, void *existing, String identif
 typedef bool  (*asset_save_t)(AssetHandle handle, StringBuilder *stream, void *data);
 
 #define ASSET_LOAD_PROC(name) void* name(AssetHandle handle, void *existing, String identifier, u8 *data, i32 size)
+#define ASSET_SAVE_PROC(name) bool name(AssetHandle handle, StringBuilder *stream, void *data)
 
 struct AssetTypesDesc {
     struct {
