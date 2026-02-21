@@ -465,11 +465,20 @@ void release_mouse(AppWindow *wnd)
 	g_mouse.captured = false;
 }
 
+static int x11_error_handler(Display *dsp, XErrorEvent *event)
+{
+    char buf[256];
+    XGetErrorText(dsp, event->error_code, buf, sizeof buf);
+    LOG_ERROR("[X11] %s (opcode: %d.%d, serial: %lu)", buf, event->request_code, event->minor_code, event->serial);
+    return 0;
+}
+
 static void init_x11()
 {
     if (!x11.dsp) {
         x11.dsp = XOpenDisplay(0);
         PANIC_IF(!x11.dsp, "XOpenDisplay fail");
+        XSetErrorHandler(x11_error_handler);
     }
 
 	if (!x11.WM_PROTOCOLS) {
