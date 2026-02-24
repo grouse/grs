@@ -10,6 +10,7 @@
 
 #include <volk/volk.h>
 #define VULKAN_H_ 1
+#define VMA_EXTERNAL_MEMORY_WIN32 0
 #include <vk_mem_alloc.h>
 #include <shaderc/shaderc.h>
 
