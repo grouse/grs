@@ -436,23 +436,19 @@ void remove_files(String in_dir, u32 flags)
         sz_dir[length++] = '*';
         sz_dir[length++] = '\0';
 
-        WIN32_FIND_DATA fd;
-        HANDLE h = FindFirstFile(sz_dir, &fd);
+        WIN32_FIND_DATAA fd;
+        HANDLE h = FindFirstFileA(sz_dir, &fd);
         if (h != INVALID_HANDLE_VALUE) {
             defer { FindClose(h); };
 
             do {
                 if (fd.cFileName[0] == '.') continue;
 
-                String path = join_path(root, String{ fd.cFileName, (i32)strlen(fd.cFileName) });
+                String path = join_path(root, String{ fd.cFileName, (i32)strlen(fd.cFileName) }, scratch);
                 if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
                     if (flags & FILE_LIST_RECURSIVE) array_add(&folders, path);
                 } else {
-                    char *sz_file = sz_string(path);
-                    defer{
-                        free(sz_file);
-                        destroy_string(path);
-                    };
+                    char *sz_file = sz_string(path, scratch);
 
                     if (DeleteFileA(sz_file) == 0) {
                         LOG_ERROR("failed removing file: '%s', win32 error: '%s'", sz_file, win32_system_error_message(GetLastError()));
@@ -461,7 +457,7 @@ void remove_files(String in_dir, u32 flags)
                     }
 
                 }
-            } while(FindNextFile(h, &fd));
+            } while(FindNextFileA(h, &fd));
         }
     }
 }
