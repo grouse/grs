@@ -336,16 +336,24 @@ int run_tests(TestSuite *tests, int count)
 
 extern FixedArray<sink_proc_t, 10> log_sinks;
 
+static bool itest_defer_log = false;
+
 static void itest_log_sink(const char *src, u32 line, LogType type, const char *msg)
 {
     if (test_current && type <= LOG_TYPE_ERROR) {
         report_fail(src, (int)line, sz_from_enum(type), "%s", msg);
     }
 
-    if (type <= LOG_TYPE_ERROR) {
+    if (type <= LOG_TYPE_ERROR && !itest_defer_log) {
         String filename = filename_of_sz(src);
         const char *type_s = sz_from_enum(type);
-        fprintf(stderr, "%.*s:%d %s: %s\n", STRFMT(filename), line, type_s, msg);
+        char color = 49;
+        switch (type) {
+        case LOG_TYPE_ERROR: color = 31; break;
+        case LOG_TYPE_INFO:  color = 36; break;
+        case LOG_TYPE_PANIC: color = 91; break;
+        }
+        fprintf(stderr, "%.*s:%d \033[%dm%s\033[m: %s\n", STRFMT(filename), line, color, type_s, msg);
     }
 }
 
