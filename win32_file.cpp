@@ -487,7 +487,6 @@ FileHandle open_file(String path, u32 mode)
     if (mode & FILE_OPEN_READ) access_mode |= GENERIC_READ;
     if (mode & FILE_OPEN_WRITE) access_mode |= GENERIC_WRITE;
 
-    PANIC_IF(creation_mode == 0, "invalid creation mode");
     return win32_open_file(sz_path, creation_mode, access_mode);
 }
 
