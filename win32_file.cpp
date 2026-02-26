@@ -189,6 +189,7 @@ void list_files(DynamicArray<String> *dst, String dir, Array<String> extensions,
                 }
             } else if (ffd.dwFileAttributes & (FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_ARCHIVE)) {
                 String filename{ ffd.cFileName, (i32)strlen(ffd.cFileName) };
+                if (!extensions) goto pass_ext_filter;
                 for (auto ext : extensions) if (ends_with(filename, ext)) goto pass_ext_filter;
                 continue;
 
