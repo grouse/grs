@@ -49,7 +49,11 @@ void register_asset_folders(Array<String> folders) EXPORT
     for (auto it : folders) {
         String path = absolute_path(it, scratch);
 
-        if (!path) continue;
+        if (!path) {
+            LOG_ERROR("[assets] invalid asset folder: %.*s", STRFMT(it));
+            continue;
+        }
+
         if (array_contains(assets.folders, path)) continue;
 
         LOG_INFO("adding asset folder: %.*s", STRFMT(path));
