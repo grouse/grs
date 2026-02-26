@@ -4,9 +4,11 @@
 #ifdef _WIN32
 #include "win32_lite.h"
 using FileHandle = HANDLE;
+#define FILE_HANDLE_INVALID ((HANDLE)(LONG_PTR)-1)
 #else
 struct FileHandle_;
 using FileHandle = FileHandle_*;
+#define FILE_HANDLE_INVALID (nullptr)
 #endif
 
 #include "array.h"
