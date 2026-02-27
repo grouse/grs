@@ -1911,24 +1911,47 @@ GfxMesh gfx_ramp(f32 length, f32 height, f32 width) EXPORT
     if (*mesh) return *mesh;
 
     f32 hl = length*0.5f, hh = height*0.5f, hw = width*0.5f;
+
+    Vector3 top_n = normalise(cross({ length, height, 0 }, { 0, 0, width }));
+
+
     MeshVertex vertices[] = {
         // position            uv        normal       tangent
-        { { -hw, -hh,  hl }, { 0, 0 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
-        { {  hw, -hh,  hl }, { 1, 0 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
-        { {  hw,  hh, -hl }, { 1, 1 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
-        { { -hw,  hh, -hl }, { 0, 1 }, { 0, 1, 0 }, { 1, 0, 0, 1 } },
+        // top face
+        { { -hw, -hh,  hl }, { 0, 0 }, top_n, { 1, 0, 0, 1 } },
+        { {  hw, -hh,  hl }, { 1, 0 }, top_n, { 1, 0, 0, 1 } },
+        { {  hw,  hh, -hl }, { 1, 1 }, top_n, { 1, 0, 0, 1 } },
+        { { -hw,  hh, -hl }, { 0, 1 }, top_n, { 1, 0, 0, 1 } },
 
-        { { -hw, -hh, -hl }, { 1, 1 }, { 0, 1, 1 }, { 1, 0, 0, 1 } },
-        { {  hw, -hh, -hl }, { 0, 1 }, { 0, 1, 1 }, { 1, 0, 0, 1 } },
+        // right face
+        { { hw, hh, -hl }, { 1, 1 }, { 1, 0, 0 }, { 1, 0, 0, 1 } },
+        { { hw, -hh, hl }, { 0, 0 }, { 1, 0, 0 }, { 1, 0, 0, 1 } },
+        { { hw, -hh, -hl }, { 0, 1 }, { 1, 0, 0 }, { 1, 0, 0, 1 } },
+
+        // left face
+        { { -hw, hh, -hl }, { 1, 1 }, { -1, 0, 0 }, { 1, 0, 0, 1 } },
+        { { -hw, -hh, -hl }, { 1, 0 }, { -1, 0, 0 }, { 1, 0, 0, 1 } },
+        { { -hw, -hh, hl }, { 0, 0 }, { -1, 0, 0 }, { 1, 0, 0, 1 } },
+
+        // back face
+        { { hw,  hh,  -hl }, { 1, 1 }, { 0, 0, -1 }, { 1, 0, 0, 1 } },
+        { { hw,  -hh, -hl }, { 1, 0 }, { 0, 0, -1 }, { 1, 0, 0, 1 } },
+        { { -hw, -hh, -hl }, { 0, 0 }, { 0, 0, -1 }, { 1, 0, 0, 1 } },
+        { { -hw, hh,  -hl }, { 0, 1 }, { 0, 0, -1 }, { 1, 0, 0, 1 } },
+
+        // bottom face
+        { { hw,  -hh, -hl }, { 0, 0 }, { 0, -1, 0 }, { 1, 0, 0, 1 } },
+        { { hw,  -hh, hl  }, { 0, 1 }, { 0, -1, 0 }, { 1, 0, 0, 1 } },
+        { { -hw, -hh, hl  }, { 1, 1 }, { 0, -1, 0 }, { 1, 0, 0, 1 } },
+        { { -hw, -hh, -hl }, { 1, 0 }, { 0, -1, 0 }, { 1, 0, 0, 1 } },
     };
 
     u32 indices[] = {
-        0, 1, 2, 2, 3, 0, // top
-        0, 4, 1, 1, 4, 5, // bottom
-        2, 5, 3, 3, 5, 4, // back
-        2, 1, 5,          // rhs
-        3, 4, 0,          // lhs
-
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6,
+        7, 8, 9,
+        10, 11, 12, 12, 13, 10,
+        14, 15, 16, 16, 17, 14,
     };
 
     *mesh = gfx_create_mesh({ vertices, ARRAY_COUNT(vertices) }, { indices, ARRAY_COUNT(indices) }, ARRAY_COUNT(indices));
