@@ -460,6 +460,11 @@ HASH32_DECL(GfxPrimitiveDesc, state, desc)
         hash32_update(state, desc.cylinder.height);
         hash32_update(state, desc.cylinder.detail);
         break;
+    case GFX_RAMP:
+        hash32_update(state, desc.ramp.height);
+        hash32_update(state, desc.ramp.length);
+        hash32_update(state, desc.ramp.width);
+        break;
     }
 }
 
