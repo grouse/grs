@@ -1459,6 +1459,38 @@ bool ray_intersect_plane(
     return true;
 }
 
+bool ray_intersect_aabb(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 aabb_min, Vector3 aabb_max,
+    f32 *tr) EXPORT
+{
+    f32 t_min = -f32_MAX;
+    f32 t_max =  f32_MAX;
+
+    for (i32 axis = 0; axis < 3; axis++) {
+        f32 o = ray_o[axis];
+        f32 d = ray_d[axis];
+        f32 lo = aabb_min[axis];
+        f32 hi = aabb_max[axis];
+
+        if (fabsf(d) < f32_EPSILON) {
+            if (o < lo || o > hi) return false;
+        } else {
+            f32 inv_d = 1.0f / d;
+            f32 t0 = (lo - o) * inv_d;
+            f32 t1 = (hi - o) * inv_d;
+            if (t0 > t1) { f32 tmp = t0; t0 = t1; t1 = tmp; }
+
+            if (t0 > t_min) t_min = t0;
+            if (t1 < t_max) t_max = t1;
+            if (t_min > t_max) return false;
+        }
+    }
+
+    *tr = t_min;
+    return true;
+}
+
 bool nearest_ray_vs_line(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 line_o, Vector3 line_d,
