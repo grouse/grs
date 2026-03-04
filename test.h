@@ -56,6 +56,24 @@ int run_integration_tests_(TestSuite *tests, int count);
     run_integration_tests_(&t_, 1); \
 } while (0)
 
+struct ITestStats {
+    i32 total;
+    i32 passed;
+    i32 errors;
+};
+
+// NOTE: prints colored error details for results in range [from, to), returns error count
+i32 itest_print_results(TestResult *from, TestResult *to);
+
+// NOTE: checks before/after result snapshots, prints colored [ERROR]/[OK] line, updates stats
+void itest_report_subtest(const char *name, TestResult *before, TestResult *after, ITestStats *stats);
+
+// NOTE: prints "Results: N/M passed, E errors"
+void itest_print_summary(ITestStats *stats);
+
+// NOTE: frees result chain and nulls test_current->result
+void itest_clear_results();
+
 #endif // TEST_H
 
 #if defined(DO_TESTS) && !defined(TEST_H_DECL)
@@ -384,6 +402,55 @@ static void itest_free_results(TestResult *res)
         auto *next = res->next;
         free(res);
         res = next;
+    }
+}
+
+i32 itest_print_results(TestResult *from, TestResult *to)
+{
+    i32 count = 0;
+    for (TestResult *res = from; res && res != to; res = res->next) {
+        String filename = res->src ? filename_of_sz(res->src) : String{};
+        char color = 31;
+        if (res->cond) {
+            if (strcmp(res->cond, "panic") == 0) color = 91;
+            else if (strcmp(res->cond, "info") == 0) color = 36;
+        }
+
+        if (res->cond && res->msg) {
+            printf("\t%.*s:%d \033[%dm%s\033[m: %s\n", STRFMT(filename), res->line, color, res->cond, res->msg);
+        } else if (res->cond) {
+            printf("\t%.*s:%d \033[%dm%s\033[m\n", STRFMT(filename), res->line, color, res->cond);
+        } else if (res->msg) {
+            printf("\t%.*s:%d \033[%dm%s\033[m\n", STRFMT(filename), res->line, color, res->msg);
+        }
+        count++;
+    }
+    return count;
+}
+
+void itest_report_subtest(const char *name, TestResult *before, TestResult *after, ITestStats *stats)
+{
+    stats->total++;
+    bool had_errors = after != before;
+    if (had_errors) {
+        printf("  %-78s : \033[31m[ERROR]\033[m\n", name);
+        stats->errors += itest_print_results(after, before);
+    } else {
+        printf("  %-78s : \033[32m[OK]\033[m\n", name);
+        stats->passed++;
+    }
+}
+
+void itest_print_summary(ITestStats *stats)
+{
+    printf("  Results: %d/%d passed, %d errors\n", stats->passed, stats->total, stats->errors);
+}
+
+void itest_clear_results()
+{
+    if (test_current) {
+        itest_free_results(test_current->result);
+        test_current->result = nullptr;
     }
 }
 
