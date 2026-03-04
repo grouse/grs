@@ -107,6 +107,7 @@ extern bool ray_intersect_triangle(Vector3 ray_o, Vector3 ray_d, Vector3 p0, Vec
 extern bool ray_intersect_quad(Vector3 ray_o, Vector3 ray_d, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, f32 *tr);
 extern bool ray_intersect_plane(Vector3 ray_o, Vector3 ray_d, Vector3 plane_n, f32 plane_d, f32 *tr);
 extern bool ray_intersect_aabb(Vector3 ray_o, Vector3 ray_d, Vector3 aabb_min, Vector3 aabb_max, f32 *tr);
+extern bool ray_intersect_obb(Vector3 ray_o, Vector3 ray_d, Vector3 obb_center, Vector3 obb_half_extents, Matrix3 obb_axes, f32 *tr);
 extern bool nearest_ray_vs_line(Vector3 ray_o, Vector3 ray_d, Vector3 line_o, Vector3 line_d, f32 *t, f32 *u);
 extern bool point_in_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size, f32 epsilon);
 extern bool point_in_circle(Vector2 p, Vector2 c, f32 radius_sq);

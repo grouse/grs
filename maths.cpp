@@ -1491,6 +1491,40 @@ bool ray_intersect_aabb(
     return true;
 }
 
+bool ray_intersect_obb(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 obb_center, Vector3 obb_half_extents,
+    Matrix3 obb_axes,
+    f32 *tr) EXPORT
+{
+    Vector3 delta = obb_center - ray_o;
+
+    f32 t_min = -f32_MAX;
+    f32 t_max =  f32_MAX;
+
+    for (i32 i = 0; i < 3; i++) {
+        Vector3 axis = obb_axes[i];
+        f32 e = dot(axis, delta);
+        f32 f = dot(axis, ray_d);
+
+        if (fabsf(f) < f32_EPSILON) {
+            if (fabsf(e) > obb_half_extents[i]) return false;
+        } else {
+            f32 inv_f = 1.0f / f;
+            f32 t0 = (e - obb_half_extents[i]) * inv_f;
+            f32 t1 = (e + obb_half_extents[i]) * inv_f;
+            if (t0 > t1) { f32 tmp = t0; t0 = t1; t1 = tmp; }
+
+            if (t0 > t_min) t_min = t0;
+            if (t1 < t_max) t_max = t1;
+            if (t_min > t_max) return false;
+        }
+    }
+
+    *tr = t_min;
+    return true;
+}
+
 bool nearest_ray_vs_line(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 line_o, Vector3 line_d,
