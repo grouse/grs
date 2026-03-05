@@ -261,6 +261,7 @@ enum GfxPrimitive : u8 {
     GFX_CUBE,
     GFX_CYLINDER,
     GFX_RAMP,
+    GFX_TRI_PRISM,
 };
 
 struct GfxSphere {
@@ -294,13 +295,22 @@ struct GfxRamp {
     bool operator==(const GfxRamp&) const = default;
 };
 
+struct GfxTriPrism {
+    f32 width;
+    f32 height;
+    f32 thickness;
+
+    bool operator==(const GfxTriPrism&) const = default;
+};
+
 struct GfxPrimitiveDesc {
     GfxPrimitive type;
     union {
-        GfxSphere sphere;
-        GfxCube cube;
+        GfxSphere   sphere;
+        GfxCube     cube;
         GfxCylinder cylinder;
-        GfxRamp ramp;
+        GfxRamp     ramp;
+        GfxTriPrism tri_prism;
     };
 };
 
@@ -464,6 +474,11 @@ HASH32_DECL(GfxPrimitiveDesc, state, desc)
         hash32_update(state, desc.ramp.height);
         hash32_update(state, desc.ramp.length);
         hash32_update(state, desc.ramp.width);
+        break;
+    case GFX_TRI_PRISM:
+        hash32_update(state, desc.tri_prism.width);
+        hash32_update(state, desc.tri_prism.height);
+        hash32_update(state, desc.tri_prism.thickness);
         break;
     }
 }

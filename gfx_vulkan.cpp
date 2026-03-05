@@ -1898,6 +1898,96 @@ GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
     return *mesh;
 }
 
+GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness) EXPORT
+{
+    GfxPrimitiveDesc desc{
+        .type = GFX_TRI_PRISM,
+        .tri_prism.width     = width,
+        .tri_prism.height    = height,
+        .tri_prism.thickness = thickness,
+    };
+
+    GfxMesh *mesh = map_find_emplace(&vk.primitives, desc);
+    if (*mesh) return *mesh;
+
+    f32 hw = width*0.5f, hh = height*0.5f, ht = thickness*0.5f;
+    Vector3 right_n = normalise(cross({ 0.0f, 1.0f, 0.0f }, { hw, ht, -hh }));
+    Vector3 left_n = normalise(cross({ 0.0f, 1.0f, 0.0f }, { -hw, ht, -hh }));
+
+    i32 num_vertices = thickness > 0.0f ? 3*2 + 12 : 6;
+    i32 num_indices  = thickness > 0.0f ? 3*2 + 18 : 6;
+
+    SArena scratch = tl_scratch_arena();
+    auto vertices = array_create<MeshVertex>(num_vertices, scratch);
+
+    i32 vtx = 0;
+    vertices[vtx++] = { { 0.0f, ht, -hh }, { 0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+    vertices[vtx++] = { { -hw,  ht, hh },  { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+    vertices[vtx++] = { { hw,   ht, hh },  { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+
+    if (thickness > 0.0f) {
+        vertices[vtx++] = { { -hw, ht,  hh }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { -hw, -ht, hh }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { hw,  -ht, hh }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { hw,  ht,  hh }, { 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+
+        vertices[vtx++] = { { hw,   ht,  hh },  { 0.0f, 0.0f }, right_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { hw,   -ht, hh },  { 0.0f, 1.0f }, right_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { 0.0f, -ht, -hh }, { 1.0f, 1.0f }, right_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { 0.0f, ht,  -hh }, { 1.0f, 0.0f }, right_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+
+        vertices[vtx++] = { { 0.0f, ht,  -hh }, { 0.0f, 0.0f }, left_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { 0.0f, -ht, -hh }, { 0.0f, 1.0f }, left_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { -hw,  -ht, hh },  { 1.0f, 1.0f }, left_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+        vertices[vtx++] = { { -hw,  ht,  hh },  { 1.0f, 0.0f }, left_n, { 1.0f, 0.0f, 0.0f, 1.0f } };
+    }
+
+    vertices[vtx++] = { { 0.0f, -ht, -hh }, { 0.5f, 0.0f }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+    vertices[vtx++] = { { hw,   -ht, hh },  { 0.0f, 1.0f }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+    vertices[vtx++] = { { -hw,  -ht, hh },  { 1.0f, 1.0f }, { 0.0f, -1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } };
+
+    i32 idx = 0;
+    auto indices = array_create<u32>(num_indices, scratch);
+    indices[idx++] = 0;
+    indices[idx++] = 1;
+    indices[idx++] = 2;
+
+    if (thickness > 0.0f) {
+        indices[idx++] = 3;
+        indices[idx++] = 4;
+        indices[idx++] = 5;
+        indices[idx++] = 5;
+        indices[idx++] = 6;
+        indices[idx++] = 3;
+
+        indices[idx++] = 7;
+        indices[idx++] = 8;
+        indices[idx++] = 9;
+        indices[idx++] = 9;
+        indices[idx++] = 10;
+        indices[idx++] = 7;
+
+        indices[idx++] = 11;
+        indices[idx++] = 12;
+        indices[idx++] = 13;
+        indices[idx++] = 13;
+        indices[idx++] = 14;
+        indices[idx++] = 11;
+
+        indices[idx++] = 15;
+        indices[idx++] = 16;
+        indices[idx++] = 17;
+    } else {
+        indices[idx++] = 3;
+        indices[idx++] = 4;
+        indices[idx++] = 5;
+    }
+
+
+    *mesh = gfx_create_mesh(vertices, indices, indices.count);
+    return *mesh;
+}
+
 GfxMesh gfx_ramp(f32 length, f32 height, f32 width) EXPORT
 {
     GfxPrimitiveDesc desc{
