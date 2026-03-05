@@ -5,6 +5,7 @@ extern String read_memory(MemoryBuffer *buf, Allocator mem);
 extern String string(const char *str, i32 length, Allocator mem);
 extern String string(const char *sz_str, Allocator mem);
 extern String string(const char *begin, const char *end);
+extern char *duplicate_sz(const char *other, Allocator mem);
 extern String slice(String str, i32 start, i32 end);
 extern String slice(String str, i32 start);
 extern String slice(const char *str, i32 start, i32 end);

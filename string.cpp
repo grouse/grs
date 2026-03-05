@@ -55,6 +55,16 @@ String duplicate_string(String other, Allocator mem)
     return str;
 }
 
+char* duplicate_sz(const char *other, Allocator mem) EXPORT
+{
+    if (!other) return nullptr;
+    i32 len = strlen(other);
+    char *str = ALLOC_ARR(mem, char, len+1);
+    memcpy(str, other, len);
+    str[len] = '\0';
+    return str;
+}
+
 void string_copy(String *dst, String src, Allocator mem)
 {
     dst->data = REALLOC_ARR(mem, char, dst->data, dst->length, src.length);
