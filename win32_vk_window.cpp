@@ -8,13 +8,20 @@ AppWindow* create_window(WindowCreateDesc desc)
 {
     PANIC_IF(!(desc.flags & WINDOW_VULKAN), "invalid render backend");
 
+    auto *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
+    wnd->resolution = { (f32)desc.width, (f32)desc.height };
+
+    if (desc.flags & WINDOW_HEADLESS) {
+        wnd->headless = true;
+        return wnd;
+    }
+
     SArena scratch = tl_scratch_arena();
     HINSTANCE hInstance = GetModuleHandleA(NULL);
 
     DWORD style = WS_OVERLAPPEDWINDOW;
     DWORD ex_style = 0;//WS_EX_TOPMOST;
 
-    auto *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
     defer { map_set(&windows, (u64)wnd->hwnd, wnd); };
 
     WNDCLASSA wc{

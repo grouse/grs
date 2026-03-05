@@ -23,6 +23,7 @@ struct AppWindow {
 
     Vector2 resolution;
 
+    bool headless;
     bool query_xinput;
     DynamicArray<WindowEvent> event_queue;
 
@@ -193,8 +194,15 @@ bool translate_xinput_button(
     return false;
 }
 
+bool window_is_headless(AppWindow *wnd)
+{
+    return wnd->headless;
+}
+
 bool next_event(AppWindow *wnd, WindowEvent *dst)
 {
+    if (wnd->headless) return false;
+
     DynamicArray<WindowEvent> *queue = &wnd->event_queue;
 
     if (wnd->query_xinput) {
@@ -840,6 +848,8 @@ LRESULT win32_window_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 Vector2 get_client_resolution(AppWindow *wnd)
 {
+    if (wnd->headless) return wnd->resolution;
+
     Vector2 size{};
 
     RECT client_rect;
@@ -853,6 +863,8 @@ Vector2 get_client_resolution(AppWindow *wnd)
 
 void present_window(AppWindow *wnd)
 {
+    if (wnd->headless) return;
+
     SwapBuffers(wnd->hdc);
     if (current_cursor != MC_NORMAL) SetCursor(cursors[current_cursor]);
     current_cursor = MC_NORMAL;
