@@ -36,6 +36,7 @@ struct AppWindow {
 
     DynamicArray<WindowEvent> events;
 
+    bool headless;
 };
 
 MouseState g_mouse{};
@@ -555,6 +556,11 @@ static void init_clipboard()
 #include "linux_xvk_window.cpp"
 #endif
 
+bool window_is_headless(AppWindow *wnd)
+{
+    return wnd->headless;
+}
+
 Vector2 get_client_resolution(AppWindow *wnd)
 {
     return wnd->client_resolution;
@@ -562,6 +568,8 @@ Vector2 get_client_resolution(AppWindow *wnd)
 
 bool next_event(AppWindow *wnd, WindowEvent *dst)
 {
+    if (wnd->headless) return false;
+
     XEvent event;
     while (!wnd->events.count && XPending(x11.dsp)) {
         XNextEvent(x11.dsp, &event);

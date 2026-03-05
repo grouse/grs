@@ -6,6 +6,16 @@ VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance)
 {
     VkSurfaceKHR surface;
 
+    if (wnd->headless) {
+        VkHeadlessSurfaceCreateInfoEXT create_info{
+            VK_STRUCTURE_TYPE_HEADLESS_SURFACE_CREATE_INFO_EXT,
+        };
+        if (auto result = vkCreateHeadlessSurfaceEXT(instance, &create_info, NULL, &surface); result != VK_SUCCESS) {
+            PANIC("unable to create headless surface: %d", result);
+        }
+        return surface;
+    }
+
     VkXlibSurfaceCreateInfoKHR create_info{
         VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
         .dpy = x11.dsp,
@@ -21,11 +31,19 @@ VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance)
 
 AppWindow* create_window(WindowCreateDesc desc)
 {
-    init_x11();
     PANIC_IF(!(desc.flags & WINDOW_VULKAN), "unsupported render backend");
 
-    SArena scratch = tl_scratch_arena();
     AppWindow *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
+    wnd->client_resolution = { (f32)desc.width, (f32)desc.height };
+
+    if (desc.flags & WINDOW_HEADLESS) {
+        wnd->headless = true;
+        return wnd;
+    }
+
+    init_x11();
+
+    SArena scratch = tl_scratch_arena();
 
     Window parent = XDefaultRootWindow(x11.dsp);
 
@@ -73,6 +91,8 @@ AppWindow* create_window(WindowCreateDesc desc)
 
 void present_window(AppWindow *wnd)
 {
+    if (wnd->headless) return;
+
     extern MouseCursor current_cursor;
 
     XDefineCursor(x11.dsp, wnd->handle, cursors[current_cursor]);
