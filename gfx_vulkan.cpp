@@ -187,7 +187,7 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
         .imageColorSpace    = formats[chosen_format].colorSpace,
         .imageExtent        = vk.swapchain.extent,
         .imageArrayLayers   = 1,
-        .imageUsage         = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+        .imageUsage         = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
         .imageSharingMode   = VK_SHARING_MODE_EXCLUSIVE,
         .preTransform       = surface_caps.currentTransform,
         .compositeAlpha     = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,

@@ -255,8 +255,9 @@ enum {
 };
 
 enum WindowFlags : u32 {
-    WINDOW_OPENGL = 1 << 0,
-    WINDOW_VULKAN = 1 << 1,
+    WINDOW_OPENGL   = 1 << 0,
+    WINDOW_VULKAN   = 1 << 1,
+    WINDOW_HEADLESS = 1 << 2,
 };
 
 struct AppWindow;
@@ -482,6 +483,7 @@ extern void init_input_map_(InputMapId *dst, String name, std::initializer_list<
 AppWindow* create_window(WindowCreateDesc desc);
 void present_window(AppWindow *wnd);
 
+bool window_is_headless(AppWindow *wnd);
 Vector2 get_client_resolution(AppWindow *wnd);
 
 void wait_for_next_event(AppWindow *wnd);
