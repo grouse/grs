@@ -72,6 +72,7 @@ struct GfxVkTexture {
 };
 
 struct GfxVkMaterial {
+    GfxPipeline pipeline;
     VkDescriptorSet set;
     VkCullModeFlags cull_mode;
 };
