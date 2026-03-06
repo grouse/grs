@@ -122,6 +122,7 @@ struct GfxMaterialDesc {
     GfxSamplerDesc normal_sampler;
 
     GfxMaterialParameters parameters;
+    bool double_sided;
 };
 
 struct MeshVertex {

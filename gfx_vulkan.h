@@ -73,6 +73,7 @@ struct GfxVkTexture {
 
 struct GfxVkMaterial {
     VkDescriptorSet set;
+    VkCullModeFlags cull_mode;
 };
 
 
@@ -187,6 +188,10 @@ struct GfxVkDescriptorSetDesc {
     bool operator==(const GfxVkDescriptorSetDesc &other) const = default;
 };
 
+enum GfxVkDynamicStateFlags : u32 {
+    GFX_VK_CULL_MODE = (1 << 0)
+};
+
 struct GfxVkPipelineDesc {
     String debug_label;
 
@@ -203,7 +208,7 @@ struct GfxVkPipelineDesc {
     FixedArray<GfxVkVertexBindingDesc, MAX_VERTEX_INPUT_BINDINGS> inputs;
     FixedArray<GfxVkPushConstantDesc, MAX_PUSH_CONSTANTS> push_constants;
     FixedArray<GfxVkDescriptorSetLayoutDesc, MAX_DESCRIPTOR_SETS> descriptor_sets;
-    FixedArray<VkDynamicState, MAX_DYNAMIC_STATES> dynamic_states;
+    GfxVkDynamicStateFlags dynamic_states;
     VkPipelineColorBlendAttachmentState blend;
     VkPolygonMode polygon_mode = VK_POLYGON_MODE_FILL;
     VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
