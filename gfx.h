@@ -110,17 +110,18 @@ struct GfxSamplerDesc {
     bool operator==(const GfxSamplerDesc &other) const = default;
 };
 
+struct GfxMaterialTextureDesc {
+    GfxTexture texture;
+    GfxSamplerDesc sampler;
+
+    explicit operator bool() { return texture;}
+};
+
 struct GfxMaterialDesc {
     GfxPipeline pipeline;
-
-    GfxTexture albedo;
-    GfxTexture metallic_roughness;
-    GfxTexture normal;
-
-    GfxSamplerDesc albedo_sampler;
-    GfxSamplerDesc metallic_roughness_sampler;
-    GfxSamplerDesc normal_sampler;
-
+    GfxMaterialTextureDesc albedo;
+    GfxMaterialTextureDesc metallic_roughness;
+    GfxMaterialTextureDesc normal;
     GfxMaterialParameters parameters;
     bool double_sided;
 };
