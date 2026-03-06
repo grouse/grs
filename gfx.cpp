@@ -100,6 +100,14 @@ u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/) EXPORT
     h32s state = hash32_start(seed);
     hash32_update(&state, &it.albedo_factor, sizeof it.albedo_factor);
     hash32_update(&state, &it.metallic_roughness_factor, sizeof it.metallic_roughness_factor);
+
+    hash32_update(&state, &it.albedo_uv_offset_scale, sizeof it.albedo_uv_offset_scale);
+    hash32_update(&state, &it.metallic_roughness_uv_offset_scale, sizeof it.metallic_roughness_uv_offset_scale);
+    hash32_update(&state, &it.normal_uv_offset_scale, sizeof it.normal_uv_offset_scale);
+    hash32_update(&state, &it.albedo_rotation, sizeof it.albedo_rotation);
+    hash32_update(&state, &it.metallic_roughness_rotation, sizeof it.metallic_roughness_rotation);
+    hash32_update(&state, &it.normal_rotation, sizeof it.normal_rotation);
+
     hash32_update(&state, it.alpha_cutoff);
     hash32_update(&state, it.normal_scale);
     return hash32_digest(&state);

@@ -74,10 +74,17 @@ struct GfxTextureAsset {
     GfxTextureFormat format;
 };
 
-
 struct GfxMaterialParameters {
     Vector4 albedo_factor             = {1, 1, 1, 1};
     Vector4 metallic_roughness_factor = {1, 1, 0, 0 };
+
+    Vector4 albedo_uv_offset_scale             = { 0, 0, 1, 1 };
+    Vector4 metallic_roughness_uv_offset_scale = { 0, 0, 1, 1 };
+    Vector4 normal_uv_offset_scale             = { 0, 0, 1, 1 };
+    float albedo_rotation;
+    float metallic_roughness_rotation;
+    float normal_rotation;
+
     f32     alpha_cutoff              = 0.0f;
     f32     normal_scale              = 1.0f;
 
@@ -108,6 +115,12 @@ struct GfxSamplerDesc {
     GfxSampleBorderColor border_color;
 
     bool operator==(const GfxSamplerDesc &other) const = default;
+};
+
+struct GfxUVTransform {
+    Vector2 offset = { 0, 0 };
+    Vector2 scale = { 1, 1 };
+    f32 rotation = 0;
 };
 
 struct GfxMaterialTextureDesc {

@@ -133,6 +133,7 @@ struct GfxVkDescriptorDesc {
         struct {
             GfxVkTexture texture;
             VkSampler sampler;
+            GfxUVTransform transform;
         } texture;
         struct {
             GfxVkTexture *textures;
