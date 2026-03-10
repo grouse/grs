@@ -145,7 +145,7 @@ static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 
 
 #define SCOPE_EXPR(expr1, expr2) (expr1); for (i32 CAT(i, __LINE__) = 0; CAT(i, __LINE__) == 0; CAT(i, __LINE__) = ((expr2), 1))
-#define SCOPE_CEXPR(expr1, expr2) for (i32 CAT(i, __LINE__) = 0; CAT(i, __LINE__) == 0 && (expr1); CAT(i, __LINE__) = ((expr2), 1))
+#define SCOPE_CEXPR(expr1, expr2) for (i32 VAR(i) = 0; VAR(i) == 0 && (expr1); VAR(i) = ((expr2), 1))
 
 
 #define LOGR(...)      logf(__VA_ARGS__)
