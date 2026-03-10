@@ -716,4 +716,11 @@ i32 array_add(FixedArray<T, N> *arr, T *es, i32 count)
     return arr->count;
 }
 
+template<typename T, i32 N>
+void array_resize(FixedArray<T, N> *arr, i32 count)
+{
+    PANIC_IF(count > N, "FixedArray overflow");
+    arr->count = count;
+}
+
 #endif // ARRAY_H
