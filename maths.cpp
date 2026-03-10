@@ -9,8 +9,7 @@
 // -- Vector2
 Vector2 abs(Vector2 v) EXPORT
 {
-    // TODO(jesper): cmath dependency
-    return Vector2{ fabsf(v.x), fabsf(v.y) };
+    return Vector2{ abs(v.x), abs(v.y) };
 }
 
 Vector2 vec2_max(Vector2 lhs, Vector2 rhs) EXPORT
@@ -34,12 +33,12 @@ Vector2 lerp(Vector2 a, Vector2 b, f32 t) EXPORT
     return r;
 }
 
-f32 length(Vector2 v) EXPORT { return sqrtf(v.x*v.x + v.y*v.y); }
+f32 length(Vector2 v) EXPORT { return sqrt(v.x*v.x + v.y*v.y); }
 f32 length_sq(Vector2 v) EXPORT { return dot(v, v); }
 
 Vector2 normalise(Vector2 v) EXPORT
 {
-    f32 length = sqrtf(v.x*v.x + v.y*v.y);
+    f32 length = sqrt(v.x*v.x + v.y*v.y);
     Vector2 r;
     r.x = v.x / length;
     r.y = v.y / length;
@@ -152,7 +151,7 @@ f32 dot(Vector2 lhs, Vector2 rhs) EXPORT { return lhs.x * rhs.x + lhs.y * rhs.y;
 Vector3 abs(Vector3 v) EXPORT
 {
     // TODO(jesper): cmath dependency
-    return Vector3{ fabsf(v.x), fabsf(v.y), fabsf(v.z ) };
+    return Vector3{ abs(v.x), abs(v.y), abs(v.z ) };
 }
 
 Vector3 vec3_max(Vector3 lhs, Vector3 rhs) EXPORT
@@ -165,7 +164,7 @@ Vector3 vec3_min(Vector3 lhs, Vector3 rhs) EXPORT
     return { MIN(lhs.x, rhs.x), MIN(lhs.y, rhs.y), MIN(lhs.z, rhs.z) };
 }
 
-f32 length(Vector3 v) EXPORT { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z); }
+f32 length(Vector3 v) EXPORT { return sqrt(v.x*v.x + v.y*v.y + v.z*v.z); }
 f32 length_sq(Vector3 v) EXPORT { return dot(v, v); }
 
 Vector3 lerp(Vector3 a, Vector3 b, f32 t) EXPORT
@@ -179,7 +178,7 @@ Vector3 lerp(Vector3 a, Vector3 b, f32 t) EXPORT
 
 Vector3 normalise(Vector3 v) EXPORT
 {
-    f32 length = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
+    f32 length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
     Vector3 r;
     r.x = v.x / length;
     r.y = v.y / length;
@@ -215,7 +214,7 @@ Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat) EXPORT
 {
     f32 cos_theta = MIN(dot(-v, n), 1.0f);
     Vector3 d_perp = etai_over_etat * (v + cos_theta*n);
-    Vector3 d_parallel = -sqrtf(fabsf(1.0f-dot(d_perp, d_perp))) * n;
+    Vector3 d_parallel = -sqrt(abs(1.0f-dot(d_perp, d_perp))) * n;
     return d_perp + d_parallel;
 }
 
@@ -426,7 +425,7 @@ Vector3 calc_center(Vector3 *points, i32 point_count) EXPORT
 
 
 // Vector4
-f32 length(Vector4 v) EXPORT { return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w); }
+f32 length(Vector4 v) EXPORT { return sqrt(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w); }
 f32 length_sq(Vector4 v) EXPORT { return dot(v, v); }
 
 Vector4 lerp(Vector4 a, Vector4 b, f32 t) EXPORT
@@ -441,7 +440,7 @@ Vector4 lerp(Vector4 a, Vector4 b, f32 t) EXPORT
 
 Vector4 normalise(Vector4 v) EXPORT
 {
-    f32 length = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w);
+    f32 length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w);
     Vector4 r;
     r.x = v.x / length;
     r.y = v.y / length;
@@ -585,7 +584,7 @@ Vector4 calc_center(Vector4 *points, i32 point_count) EXPORT
 
 
 // Quaternion
-f32 length(Quaternion q) EXPORT { return sqrtf(dot(q.xyzw, q.xyzw)); }
+f32 length(Quaternion q) EXPORT { return sqrt(dot(q.xyzw, q.xyzw)); }
 f32 length_sq(Quaternion q) EXPORT { return dot(q.xyzw, q.xyzw); }
 
 Quaternion lerp(Quaternion p, Quaternion q, f32 t) EXPORT
@@ -603,8 +602,8 @@ Quaternion quat_identity() EXPORT { return { 0, 0, 0, 1 }; }
 Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
 {
     f32 half_theta = theta/2;
-    f32 s = sinf(half_theta);
-    return { v.x*s, v.y*s, v.z*s, cosf(half_theta) };
+    f32 s = sin(half_theta);
+    return { v.x*s, v.y*s, v.z*s, cos(half_theta) };
 }
 
 Quaternion quat_axis_angle(Vector3 v, f32 theta) EXPORT { return quat_angle_axis(theta, v); }
@@ -619,28 +618,28 @@ Quaternion quat_from_mat4(Matrix4 M) EXPORT
 {
     Quaternion q;
     if (f32 sum = M.m00 + M.m11 + M.m22; sum > 0) {
-        f32 s = sqrtf(sum + 1.0f) * 2.0f; 
+        f32 s = sqrt(sum + 1.0f) * 2.0f; 
         f32 denom = 1/s; 
         q.x = (M.m21 - M.m12) * denom;
         q.y = (M.m02 - M.m20) * denom;
         q.z = (M.m10 - M.m01) * denom;
         q.w = 0.25f * s;
     } else if (M.m00 > M.m11 && M.m00 > M.m22) {
-        f32 s = sqrtf(1.0f + M.m00 - M.m11 - M.m22) * 2.0f; 
+        f32 s = sqrt(1.0f + M.m00 - M.m11 - M.m22) * 2.0f; 
         f32 denom = 1/s;
         q.x = 0.25f * s;
         q.y = (M.m01 + M.m10) * denom;
         q.z = (M.m02 + M.m20) * denom;
         q.w = (M.m21 - M.m12) * denom;
     } else if (M.m11 > M.m22) {
-        f32 s = sqrtf(1.0f + M.m11 - M.m00 - M.m22) * 2.0f; 
+        f32 s = sqrt(1.0f + M.m11 - M.m00 - M.m22) * 2.0f; 
         f32 denom = 1/s;
         q.x = (M.m01 + M.m10) * denom;
         q.y = 0.25f * s;
         q.z = (M.m12 + M.m21) * denom;
         q.w = (M.m02 - M.m20) * denom;
     } else {
-        f32 s = sqrtf(1.0f + M.m22 - M.m00 - M.m11) * 2.0f; 
+        f32 s = sqrt(1.0f + M.m22 - M.m00 - M.m11) * 2.0f; 
         f32 denom = 1/s;
         q.x = (M.m02 + M.m20) * denom;
         q.y = (M.m12 + M.m21) * denom;
@@ -652,7 +651,7 @@ Quaternion quat_from_mat4(Matrix4 M) EXPORT
 
 Quaternion normalise(Quaternion q) EXPORT
 {
-    f32 length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+    f32 length = sqrt(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
     Quaternion r;
     r.x = q.x / length;
     r.y = q.y / length;
@@ -762,8 +761,8 @@ Matrix3 mat3_orthographic2(f32 min_x, f32 max_x, f32 min_y, f32 max_y) EXPORT
 
 Matrix3 mat3_rotate3_x(f32 theta) EXPORT
 {
-    f32 cos_t = cosf(theta);
-    f32 sin_t = sinf(theta);
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
 
     return { .columns = {
         { 1, 0,      0     },
@@ -774,8 +773,8 @@ Matrix3 mat3_rotate3_x(f32 theta) EXPORT
 
 Matrix3 mat3_rotate3_y(f32 theta) EXPORT
 {
-    f32 cos_t = cosf(theta);
-    f32 sin_t = sinf(theta);
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
 
     return { .columns = {
         { cos_t, 0, -sin_t },
@@ -786,8 +785,8 @@ Matrix3 mat3_rotate3_y(f32 theta) EXPORT
 
 Matrix3 mat3_rotate3_z(f32 theta) EXPORT
 {
-    f32 cos_t = cosf(theta);
-    f32 sin_t = sinf(theta);
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
 
     return { .columns = {
         {  cos_t, sin_t, 0 },
@@ -798,8 +797,8 @@ Matrix3 mat3_rotate3_z(f32 theta) EXPORT
 
 Matrix3 mat3_rotate3(Vector3 axis, f32 theta) EXPORT
 {
-    f32 cos_t = cosf(theta);
-    f32 sin_t = sinf(theta);
+    f32 cos_t = cos(theta);
+    f32 sin_t = sin(theta);
     f32 d = 1 - cos_t;
 
     f32 x = axis.x*d;
@@ -881,7 +880,7 @@ Matrix3 mat3_scale3_axis(Vector3 axis, f32 scalar) EXPORT
 
 Matrix3 mat3_skew3(f32 t, Vector3 a, Vector3 b) EXPORT
 {
-    t = tanf(t);
+    t = tan(t);
     f32 x = a.x*t;
     f32 y = a.y*t;
     f32 z = a.z*t;
@@ -1123,7 +1122,7 @@ Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_
 Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
 {
     // zero-to-one depth range
-    f32 tan_half_fov = tanf(fov/2);
+    f32 tan_half_fov = tan(fov/2);
     f32 g = 1/tan_half_fov;
     f32 k = far_z/(far_z-near_z);
 
@@ -1138,7 +1137,7 @@ Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
 Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/) EXPORT
 {
     // zero-to-infinite depth range
-    f32 tan_half_fov = tanf(fov/2);
+    f32 tan_half_fov = tan(fov/2);
     f32 g = 1/tan_half_fov;
     f32 e = 1.0f-epsilon;
 
@@ -1153,7 +1152,7 @@ Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-
 Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
 {
     // one-to-zero depth range
-    f32 tan_half_fov = tanf(fov/2);
+    f32 tan_half_fov = tan(fov/2);
     f32 g = 1/tan_half_fov;
     f32 k = near_z/(near_z-far_z);
 
@@ -1168,7 +1167,7 @@ Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
 Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/) EXPORT
 {
     // one-to-infinite depth range
-    f32 tan_half_fov = tanf(fov/2);
+    f32 tan_half_fov = tan(fov/2);
     f32 g = 1/tan_half_fov;
 
     return { .columns = {
@@ -1413,7 +1412,7 @@ bool ray_intersect_triangle(
     Vector3 h = cross(ray_d, e2);
 
     f32 a = dot(e1, h);
-    if (fabsf(a) < f32_EPSILON) return false;
+    if (abs(a) < f32_EPSILON) return false;
 
     Vector3 s = ray_o - p0;
 
@@ -1426,7 +1425,7 @@ bool ray_intersect_triangle(
     if (v < 0.0f || u + v > 1.0f) return false;
 
     f32 t = f * dot(e2, q);
-    if (fabsf(t) > f32_EPSILON) {
+    if (abs(t) > f32_EPSILON) {
         *tr = t;
         return true;
     }
@@ -1450,7 +1449,7 @@ bool ray_intersect_plane(
     f32 *tr) EXPORT
 {
     f32 d = dot(ray_d, plane_n);
-    if (fabsf(d) < f32_EPSILON) {
+    if (abs(d) < f32_EPSILON) {
         *tr = 0.0f;
         return false;
     }
@@ -1473,7 +1472,7 @@ bool ray_intersect_aabb(
         f32 lo = aabb_min[axis];
         f32 hi = aabb_max[axis];
 
-        if (fabsf(d) < f32_EPSILON) {
+        if (abs(d) < f32_EPSILON) {
             if (o < lo || o > hi) return false;
         } else {
             f32 inv_d = 1.0f / d;
@@ -1507,8 +1506,8 @@ bool ray_intersect_obb(
         f32 e = dot(axis, delta);
         f32 f = dot(axis, ray_d);
 
-        if (fabsf(f) < f32_EPSILON) {
-            if (fabsf(e) > obb_half_extents[i]) return false;
+        if (abs(f) < f32_EPSILON) {
+            if (abs(e) > obb_half_extents[i]) return false;
         } else {
             f32 inv_f = 1.0f / f;
             f32 t0 = (e - obb_half_extents[i]) * inv_f;
@@ -1773,14 +1772,14 @@ bool line_intersect_aabb(
 f32 dist_point_vs_line(Vector3 q, Vector3 p, Vector3 v) EXPORT
 {
     Vector3 a = cross(q-p, v);
-    return sqrtf(dot(a, a) / dot(v, v));
+    return sqrt(dot(a, a) / dot(v, v));
 }
 
 f32 dist_point_vs_line_unit(Vector3 q, Vector3 p, Vector3 v) EXPORT
 {
     ASSERT_UNIT_LENGTH(v);
     Vector3 a = cross(q-p, v);
-    return sqrtf(dot(a, a));
+    return sqrt(dot(a, a));
 }
 
 f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2) EXPORT
@@ -1791,7 +1790,7 @@ f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2) EXPORT
     f32 v1v2 = dot(v1, v2);
 
     f32 det = v1v2*v1v2 - v12*v22;
-    if (fabsf(det) > f32_MIN) {
+    if (abs(det) > f32_MIN) {
         det = 1.0f / det;
         f32 dpv1 = dot(dp, v1);
         f32 dpv2 = dot(dp, v2);
@@ -1802,7 +1801,7 @@ f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2) EXPORT
     }
 
     Vector3 a = cross(dp, v1);
-    return sqrtf(dot(a, a) / v12);
+    return sqrt(dot(a, a) / v12);
 }
 
 void calc_aabb_lines(Line2 lines[4], Vector2 pos, Vector2 extents) EXPORT
@@ -2042,7 +2041,7 @@ f32 round_to(f32 value, f32 multiple) EXPORT
 {
     f32 hm = 0.5f*multiple;
     f32 sign = value < 0.0f ? -1.0f : 1.0f;
-    f32 abs_value = fabsf(value);
+    f32 abs_value = abs(value);
     return sign*((abs_value+hm) - fmodf(abs_value+hm, multiple));
 }
 
@@ -2050,12 +2049,6 @@ Vector2 round_to(Vector2 v, f32 multiple) EXPORT
 {
     return { round_to(v.x, multiple), round_to(v.y, multiple) };
 }
-
-f32 lerp(f32 a, f32 b, f32 t) EXPORT
-{
-    return (1.0f-t) * a + t*b;
-}
-
 
 u32 rand_u32(XORShift128 *series) EXPORT
 {
@@ -2129,14 +2122,14 @@ f32 ray_hit_sphere(Vector3 ray_o, Vector3 ray_d, Vector3 sphere_p, f32 sphere_r)
     f32 disc = half_b*half_b - a*c;
 
     if (disc < 0.0f) return -1.0f;
-    return (-half_b - sqrtf(disc)) / a;
+    return (-half_b - sqrt(disc)) / a;
 }
 
 f32 sRGB_from_linear(f32 l)
 {
     if (l > 1.0f) return 1.0f;
     else if (l < 0.0f) return 0.0f;
-    return l > 0.0031308f ? 1.055f*powf(l, 1.0f/2.4f) - 0.055f : l*12.92f;
+    return l > 0.0031308f ? 1.055f*pow(l, 1.0f/2.4f) - 0.055f : l*12.92f;
 }
 
 Vector3 sRGB_from_linear(Vector3 l)
@@ -2155,7 +2148,7 @@ f32 reflectance(f32 cosine, f32 ref_idx)
     // Schlick's approximation
     f32 r0 = (1.0f-ref_idx) / (1.0f+ref_idx);
     r0 = r0*r0;
-    return r0 + (1.0f-r0)*powf((1.0f-cosine), 5);
+    return r0 + (1.0f-r0)*pow((1.0f-cosine), 5);
 }
 
 f32 radf(f32 theta) EXPORT
@@ -2170,7 +2163,7 @@ f32 degf(f32 rad) EXPORT
 
 bool almost_equal(f32 a, f32 b, f32 epsilon /*=1e-6f*/) EXPORT
 {
-    return fabsf(a-b) < epsilon;
+    return abs(a-b) < epsilon;
 }
 
 bool almost_equal(Vector3 a, Vector3 b, f32 epsilon /*=1e-6f*/) EXPORT
@@ -2212,7 +2205,7 @@ bool almost_equal(Matrix4 A, Matrix4 B, f32 epsilon) EXPORT
 f32 angle_between(Vector3 v0, Vector3 v1) EXPORT
 {
     f32 denom = length(v0) * length(v1);
-    f32 theta = acosf(dot(v0, v1) / denom);
+    f32 theta = acos(dot(v0, v1) / denom);
     return theta;
 }
 
@@ -2327,7 +2320,7 @@ f32 linear_from_sRGB(f32 s) EXPORT
     if (s <= 0.04045f) {
         return s / 12.92f;
     } else {
-        return powf((s + 0.055f) / (1.055f), 2.4f);
+        return pow((s + 0.055f) / (1.055f), 2.4f);
     }
 }
 

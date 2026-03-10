@@ -134,7 +134,6 @@ extern bool aabb_intersect_swept_aabb(Vector2 pos_a, Vector2 half_size_a, Vector
 extern f32 calc_center(f32 min, f32 max, f32 size);
 extern f32 round_to(f32 value, f32 multiple);
 extern Vector2 round_to(Vector2 v, f32 multiple);
-extern f32 lerp(f32 a, f32 b, f32 t);
 extern u32 rand_u32(XORShift128 *series);
 extern f32 rand_f32(XORShift128 *series);
 extern f32 rand_f32(XORShift128 *series, f32 min, f32 max);

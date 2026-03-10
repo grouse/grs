@@ -2,23 +2,7 @@
 #define MATHS_H
 
 #include "core.h"
-
-extern "C" CRTIMP double floor (double x) NOTHROW;
-extern "C" CRTIMP float floorf(float x) NOTHROW;
-extern "C" CRTIMP float powf( float base, float exponent ) NOTHROW;
-extern "C" CRTIMP double ceil (double x) NOTHROW;
-extern "C" CRTIMP float ceilf (float x) NOTHROW;
-extern "C" double fabs( double arg ) NOTHROW;
-extern "C" float fabsf( float arg ) NOTHROW;
-extern "C" CRTIMP float cosf( float arg ) NOTHROW;
-extern "C" CRTIMP float acosf( float arg ) NOTHROW;
-extern "C" CRTIMP float tanf( float arg ) NOTHROW;
-extern "C" CRTIMP float sinf( float arg ) NOTHROW;
-extern "C" double sin( double arg ) NOTHROW;
-extern "C" CRTIMP float sqrtf( float arg ) NOTHROW;
-extern "C" double sqrt( double arg ) NOTHROW;
-extern "C" CRTIMP float copysignf(float x, float y) NOTHROW;
-extern "C" CRTIMP float fmodf( float x, float y ) NOTHROW;
+#include <math.h>
 
 #ifndef M_BOUNDS_CHECK
 #define M_BOUNDS_CHECK(i, min, max) do { ASSERT(i <= max); ASSERT(i >= min); } while(0)

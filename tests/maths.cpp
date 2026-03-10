@@ -450,22 +450,22 @@ TEST_PROC(maths__vector3__a_minus_b_satisfies_reverse_triangle_inequality)
     { // Basic triangle with positive sides
         Vector3 a{ 3, 0, 0 };
         Vector3 b{ 1, 0, 0 };
-        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
     }
     { // Almost same length vectors
         Vector3 a{ 5, 0, 0 };
         Vector3 b{ 4, 0, 0 };
-        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
     }
     { // Zero vector case
         Vector3 a{ 5, 0, 0 };
         Vector3 b{ 0, 0, 0 };
-        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
     }
     { // Non-colinear vectors
         Vector3 a{ 3, 4, 0 };
         Vector3 b{ 1, 2, 2 };
-        ASSERT(fabsf(length(a) - length(b)) <= length(a - b));
+        ASSERT(abs(length(a) - length(b)) <= length(a - b));
     }
 }
 
