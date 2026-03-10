@@ -2,7 +2,21 @@
 #define MATHS_H
 
 #include "core.h"
-#include <math.h>
+#include <cmath>
+
+using std::cos;
+using std::acos;
+using std::sin;
+using std::asin;
+using std::tan;
+using std::atan;
+using std::atan2;
+using std::abs;
+using std::exp;
+using std::pow;
+using std::lerp;
+using std::floor;
+using std::ceil;
 
 #ifndef M_BOUNDS_CHECK
 #define M_BOUNDS_CHECK(i, min, max) do { ASSERT(i <= max); ASSERT(i >= min); } while(0)
