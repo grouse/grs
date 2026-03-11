@@ -88,7 +88,7 @@ extern Matrix4 mat4_translate3(Vector3 v);
 extern Matrix4 mat4_scale3(Vector3 v);
 extern Matrix4 mat4_transform3(Quaternion rotation, Vector3 position);
 extern Matrix4 mat4_transform3(Quaternion rotation, Vector3 position, Vector3 scale);
-extern void mat4_trs_decompose(Matrix4 trs, Vector3 *pos, Quaternion *rot, Vector3 *scale);
+extern void mat4_trs_decompose(Matrix4 trs, Vector3 *out_pos, Quaternion *out_rot, Vector3 *out_scale);
 extern Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z);
 extern Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z);
 extern Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon =1e-5);

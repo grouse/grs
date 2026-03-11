@@ -1086,20 +1086,24 @@ Matrix4 mat4_transform3(
 
 void mat4_trs_decompose(
     Matrix4 trs,
-    Vector3 *pos,
-    Quaternion *rot,
-    Vector3 *scale) EXPORT
+    Vector3 *out_pos,
+    Quaternion *out_rot,
+    Vector3 *out_scale) EXPORT
 {
-    *pos = trs[3].xyz;
+    Vector3 pos = trs[3].xyz;
     trs[3] = { 0, 0, 0, 1 };
 
-    *scale = { length(trs[0].xyz), length(trs[1].xyz), length(trs[2].xyz) };
-    trs[0] = { .xyz = trs[0].xyz / scale->x, 0 };
-    trs[1] = { .xyz = trs[1].xyz / scale->y, 0 };
-    trs[2] = { .xyz = trs[2].xyz / scale->z, 0 };
+    Vector3 scale = { length(trs[0].xyz), length(trs[1].xyz), length(trs[2].xyz) };
+    trs[0] = { .xyz = trs[0].xyz / scale.x, 0 };
+    trs[1] = { .xyz = trs[1].xyz / scale.y, 0 };
+    trs[2] = { .xyz = trs[2].xyz / scale.z, 0 };
 
 
-    *rot = quat_from_mat4(trs);
+    Quaternion rot = quat_from_mat4(trs);
+
+    if (out_pos) *out_pos = pos;
+    if (out_scale) *out_scale = scale;
+    if (out_rot) *out_rot = rot;
 }
 
 Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z) EXPORT
