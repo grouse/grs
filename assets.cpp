@@ -126,18 +126,26 @@ i32 get_asset_type(AssetHandle handle) EXPORT
     return assets.loaded[handle.index].type_id;
 }
 
-Asset* get_asset(AssetHandle handle) EXPORT
+Asset* get_loaded_asset(AssetHandle handle) EXPORT
 {
     SArena scratch = tl_scratch_arena();
     ASSERT(handle != ASSET_HANDLE_INVALID);
 
-    Asset asset = assets.loaded[handle.index];
-    if (asset.gen != handle.gen) return nullptr;
+    Asset *asset = &assets.loaded[handle.index];
+    if (asset->gen != handle.gen) return nullptr;
+    return asset;
+}
 
-    if (!asset.data) {
-        FileInfo fi = read_file(asset.path, scratch);
+Asset* get_asset(AssetHandle handle) EXPORT
+{
+    Asset *asset = get_loaded_asset(handle);
+
+    if (!asset->data) {
+        SArena scratch = tl_scratch_arena();
+
+        FileInfo fi = read_file(asset->path, scratch);
         if (!fi.data) {
-            LOG_ERROR("unable to load asset '%.*s'", STRFMT(asset.path));
+            LOG_ERROR("unable to load asset '%.*s'", STRFMT(asset->path));
             return nullptr;
         }
 
@@ -387,6 +395,8 @@ void save_dirty_assets() EXPORT
 
     StringBuilder stream{ .alloc = scratch };
     for (auto it : iterator(assets.loaded)) {
+        if (it->lock) continue;
+
         if (it->last_modified > it->last_saved) {
             reset_string_builder(&stream);
 
@@ -562,4 +572,30 @@ void hash32_update(h32s *state, const AssetHandle &it) EXPORT
 {
     hash32_update(state, it.index);
     hash32_update(state, it.gen);
+}
+
+void lock_asset(AssetHandle handle) EXPORT
+{
+    Asset *asset = get_loaded_asset(handle);
+    if (!asset) {
+        LOG_ERROR("asset] unable to lock asset, invalid handle: { %d %d }", handle.index, handle.gen);
+        return;
+    }
+
+    asset->lock++;
+}
+
+void unlock_asset(AssetHandle handle) EXPORT
+{
+    Asset *asset = get_loaded_asset(handle);
+    if (!asset) {
+        LOG_ERROR("asset] unable to unlock asset, invalid handle: { %d %d }", handle.index, handle.gen);
+        return;
+    }
+
+    asset->lock--;
+    if (asset->lock < 0) {
+        LOG_ERROR("asset] asset lock count below zero for asset: '%.*s'", STRFMT(asset->path));
+        asset->lock = 0;
+    }
 }

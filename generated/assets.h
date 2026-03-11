@@ -11,6 +11,7 @@ extern AssetHandle find_loaded_asset(String path);
 extern AssetHandle find_asset_handle(String path);
 extern Asset *find_asset_by_path(String path);
 extern i32 get_asset_type(AssetHandle handle);
+extern Asset *get_loaded_asset(AssetHandle handle);
 extern Asset *get_asset(AssetHandle handle);
 extern String get_asset_path(AssetHandle handle);
 extern String get_asset_identifier(AssetHandle handle);
@@ -39,6 +40,8 @@ extern Array<String> list_asset_files(Array<String> extensions, Allocator mem);
 extern void *load_string_asset(AssetHandle, void *existing, String, u8 *data, i32 size);
 extern u32 hash32(const AssetHandle & it, u32 seed = HASH32_SEED);
 extern void hash32_update(h32s *state, const AssetHandle & it);
+extern void lock_asset(AssetHandle handle);
+extern void unlock_asset(AssetHandle handle);
 
 #endif // ASSETS_GENERATED_H
 

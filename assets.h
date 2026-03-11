@@ -39,6 +39,7 @@ struct Asset {
 
     u64 last_saved;
     u64 last_modified;
+    i32 lock;
 
     String path;
     String identifier;
