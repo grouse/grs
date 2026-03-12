@@ -576,6 +576,8 @@ void hash32_update(h32s *state, const AssetHandle &it) EXPORT
 
 void lock_asset(AssetHandle handle) EXPORT
 {
+    if (!handle) return;
+
     Asset *asset = get_loaded_asset(handle);
     if (!asset) {
         LOG_ERROR("asset] unable to lock asset, invalid handle: { %d %d }", handle.index, handle.gen);
@@ -587,6 +589,8 @@ void lock_asset(AssetHandle handle) EXPORT
 
 void unlock_asset(AssetHandle handle) EXPORT
 {
+    if (!handle) return;
+
     Asset *asset = get_loaded_asset(handle);
     if (!asset) {
         LOG_ERROR("asset] unable to unlock asset, invalid handle: { %d %d }", handle.index, handle.gen);
