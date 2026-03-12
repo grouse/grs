@@ -41,6 +41,9 @@ enum WindowEventType : u32 {
 enum MouseCursor {
     MC_NORMAL = 0,
     MC_SIZE_NW_SE,
+    MC_SIZE_SE_NW,
+    MC_SIZE_SW_NE,
+    MC_SIZE_NE_SW,
     MC_HIDDEN,
     MC_MAX,
 };

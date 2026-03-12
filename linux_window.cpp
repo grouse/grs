@@ -518,6 +518,9 @@ static void init_cursors(Window wnd)
     if (!cursors[MC_NORMAL]) {
         cursors[MC_NORMAL] = XCreateFontCursor(x11.dsp, XC_left_ptr);
         cursors[MC_SIZE_NW_SE] = XCreateFontCursor(x11.dsp, XC_bottom_right_corner);
+        cursors[MC_SIZE_SE_NW] = XCreateFontCursor(x11.dsp, XC_top_left_corner);
+        cursors[MC_SIZE_SW_NE] = XCreateFontCursor(x11.dsp, XC_top_right_corner);
+        cursors[MC_SIZE_NE_SW] = XCreateFontCursor(x11.dsp, XC_bottom_left_corner);
 
         XColor xcolor;
         char csr_bits[] = { 0x00 };
