@@ -28,6 +28,7 @@ using std::ceil;
 
 #define vec3_MAX Vector3{ f32_MAX, f32_MAX, f32_MAX }
 #define vec4_MAX Vector4{ f32_MAX, f32_MAX, f32_MAX, f32_MAX }
+#define vec3_ONE Vector3{ 1, 1, 1 }
 
 #define rad_from_deg(theta) ((theta) * (f32)f32_PI / 180.0f)
 
@@ -201,6 +202,7 @@ struct Rect {
     Rect() = default;
     Rect(Vector2 tl, Vector2 br) : tl(tl), br(br) {}
 
+    constexpr Vector2 center() const { return tl + size() * 0.5f; }
     constexpr Vector2 pos() const { return tl; }
     constexpr Vector2 pos(Vector2 pos)
     {
