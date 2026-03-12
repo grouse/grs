@@ -172,6 +172,8 @@ i32 i32_from_string(String s)
 
 bool i32_from_string(String s, i32 *dst)
 {
+    if (!s) return false;
+
     i32 sign = 1;
     i32 result = 0;
 
@@ -191,6 +193,8 @@ bool i32_from_string(String s, i32 *dst)
 
 bool i64_from_string(String s, i64 *dst) EXPORT
 {
+    if (!s) return false;
+
     i64 sign = 1;
     i64 result = 0;
 
@@ -210,6 +214,8 @@ bool i64_from_string(String s, i64 *dst) EXPORT
 
 bool u32_from_string(String s, u32 *dst) EXPORT
 {
+    if (!s) return false;
+
     u32 result = 0;
 
     i32 i = 0;
@@ -252,6 +258,8 @@ u64 u64_from_string(String s) EXPORT
 
 bool u64_from_string(String s, u64 *dst) EXPORT
 {
+    if (!s) return false;
+
     u64 result = 0;
 
     i32 i = 0;
@@ -267,6 +275,8 @@ bool u64_from_string(String s, u64 *dst) EXPORT
 
 bool f32_from_string(String s, f32 *dst) EXPORT
 {
+    if (!s) return false;
+
     SArena scratch = tl_scratch_arena();
     char *sz_s = sz_string(s, scratch);
     int r = sscanf(sz_s, "%f", dst);
@@ -275,6 +285,8 @@ bool f32_from_string(String s, f32 *dst) EXPORT
 
 bool f64_from_string(String s, f64 *dst) EXPORT
 {
+    if (!s) return false;
+
     if (f32 value; f32_from_string(s, &value)) {
         *dst = (f64)value;
         return true;
