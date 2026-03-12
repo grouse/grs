@@ -384,6 +384,7 @@ void save_dirty_assets() EXPORT
 
     for (auto handle : assets.removed) {
         auto &it = assets.loaded[handle.index];
+        if (it.lock) continue;
 
         if (it.last_modified > it.last_saved) {
             LOG_INFO("removing file for deleted asset: %.*s", STRFMT(it.path));
