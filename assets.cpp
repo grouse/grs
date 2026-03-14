@@ -18,6 +18,8 @@ struct {
     DynamicMap<String, i32> types;
     DynamicMap<String, asset_load_t> load_procs;
     DynamicMap<String, asset_save_t> save_procs;
+
+    DynamicMap<i32, DynamicArray<String>> by_type;
 } assets{};
 
 void init_assets() EXPORT
@@ -512,29 +514,32 @@ Array<String> list_asset_files(Allocator mem) EXPORT
 
 Array<String> list_asset_files(i32 type, Allocator mem) EXPORT
 {
-    DynamicArray<String> files{ .alloc = mem };
+    auto *files = map_find_emplace(&assets.by_type, type);
+    if (!files->alloc) {
+        for (auto f : assets.folders) {
+            i32 c = files->count;
+            list_files(files, f, mem, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
 
-    for (auto f : assets.folders) {
-        i32 c = files.count;
-        list_files(&files, f, mem, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
+            // NOTE(jesper): dumb type filtering. The asset system probably ought to keep track of the filesystem better on its own, so these kinds of queries can be O(1), or close to it
+            for (i32 i = c; i < files->count; i++) {
+                String ext = extension_of(files->at(i));
+                i32 *t = map_find(&assets.types, ext);
+                if (t && *t == type) continue;
+                array_remove_unsorted(files, i--);
+            }
 
-        // NOTE(jesper): dumb type filtering. The asset system probably ought to keep track of the filesystem better on its own, so these kinds of queries can be O(1), or close to it
-        for (i32 i = c; i < files.count; i++) {
-            String ext = extension_of(files[i]);
-            i32 *t = map_find(&assets.types, ext);
-            if (t && *t == type) continue;
-            array_remove_unsorted(&files, i--);
-        }
-
-        // NOTE(jesper): handle the case of an asset folder being a subfolder to another. This should probably be handled in a much better way to avoid a lot of re-iteration of the filesystem, nevermind the allocation of the resolved file paths
-        for (i32 i = 0; i < c; i++) {
-            for (i32 j = c; j < files.count; j++) {
-                if (files[i] == files[j]) array_remove_unsorted(&files, j--);
+            // NOTE(jesper): handle the case of an asset folder being a subfolder to another. This should probably be handled in a much better way to avoid a lot of re-iteration of the filesystem, nevermind the allocation of the resolved file paths
+            for (i32 i = 0; i < c; i++) {
+                for (i32 j = c; j < files->count; j++) {
+                    if (files->at(i) == files->at(j)) {
+                        array_remove_unsorted(files, j--);
+                    }
+                }
             }
         }
     }
 
-    return files;
+    return *files;
 }
 
 Array<String> list_asset_files(Array<String> extensions, Allocator mem) EXPORT
