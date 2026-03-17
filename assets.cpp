@@ -143,9 +143,7 @@ Asset* get_asset(AssetHandle handle) EXPORT
     Asset *asset = get_loaded_asset(handle);
 
     if (!asset->data) {
-        SArena scratch = tl_scratch_arena();
-
-        FileInfo fi = read_file(asset->path, scratch);
+        FileInfo fi = read_file(asset->path, mem_dynamic);
         if (!fi.data) {
             LOG_ERROR("unable to load asset '%.*s'", STRFMT(asset->path));
             return nullptr;
