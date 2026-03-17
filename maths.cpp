@@ -1406,6 +1406,31 @@ bool ray_intersect_capsule(
     return dist_sq < cap_r*cap_r;
 }
 
+bool ray_intersect_sphere(
+    Vector3 ray_o, Vector3 ray_d,
+    Vector3 p, f32 radius,
+    f32 *tr) EXPORT
+{
+    Vector3 m = ray_o - p;
+    f32 b = dot(m, ray_d);
+    f32 c = dot(m, m) - radius*radius;
+
+    if (c > 0.0f && b > 0.0f) {
+        *tr = 0.0f;
+        return false;
+    }
+
+    f32 discr = b*b - c;
+    if (discr < 0.0f) {
+        *tr = 0.0f;
+        return false;
+    }
+
+    *tr = -b - sqrt(discr);
+    if (*tr < 0.0f) *tr = 0.0f;
+    return true;
+}
+
 bool ray_intersect_triangle(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 p0, Vector3 p1, Vector3 p2,
