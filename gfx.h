@@ -181,6 +181,9 @@ struct GfxContext {
     GfxPipeline gui_text;
 
     GfxPipeline prim_3d_wire;
+
+    GfxPipeline debug_phys_line;
+    GfxPipeline debug_phys_tri;
 };
 
 extern GfxContext gfx;
