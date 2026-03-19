@@ -3,6 +3,8 @@
 
 #include "core.h"
 
+#define DECLARE_HANDLE(type) typedef struct TYPE##__* TYPE
+
 #define CALLBACK __stdcall
 #define WINAPI __stdcall
 #define CONST const
@@ -373,14 +375,14 @@ typedef CONST void *LPCVOID;
 
 typedef PVOID HANDLE;
 typedef HANDLE* PHANDLE;
-typedef HANDLE HICON;
+DECLARE_HANDLE(HICON);
 typedef HANDLE HGLOBAL;
 typedef struct HINSTANCE__* HINSTANCE;
 typedef struct HWND__* HWND;
-typedef HANDLE HBRUSH;
-typedef HANDLE HMENU;
-typedef HANDLE HDC;
-typedef HANDLE HGLRC;
+DECLARE_HANDLE(HBRUSH);
+DECLARE_HANDLE(HMENU);
+DECLARE_HANDLE(HDC);
+DECLARE_HANDLE(HGLRC);
 typedef HINSTANCE HMODULE;
 typedef HICON HCURSOR;
 
@@ -415,7 +417,7 @@ extern "C" {
     typedef INT_PTR (*PROC)();
     typedef INT_PTR (*FARPROC)();
     typedef INT_PTR (*NEARPROC)();
-    typedef DWORD LPTHREAD_START_ROUTINE(LPVOID lpParameter);
+    typedef DWORD (*LPTHREAD_START_ROUTINE) (LPVOID lpThreadParameter);  
 
     typedef struct tagWNDCLASSA {
         UINT      style;
