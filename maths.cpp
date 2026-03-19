@@ -2383,3 +2383,25 @@ Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
     l.a = sRGB.a;
     return l;
 }
+
+Vector3 move_towards(Vector3 from, Vector3 to, Vector3 delta) EXPORT
+{
+    Vector3 dir = to - from;
+    f32 len = length_sq(dir);
+    if (len <= length_sq(delta) || len == 0.0f) {
+        return to;
+    } else {
+        return from + delta * (dir / sqrtf(len));
+    }
+}
+
+Vector3 move_towards(Vector3 from, Vector3 to, f32 delta) EXPORT
+{
+    Vector3 dir = to - from;
+    f32 len = length_sq(dir);
+    if (len <= delta*delta || len == 0.0f) {
+        return to;
+    } else {
+        return from + delta * (dir / sqrtf(len));
+    }
+}

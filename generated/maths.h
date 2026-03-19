@@ -156,6 +156,8 @@ extern Vector4 argb_unpack(u32 argb);
 extern f32 linear_from_sRGB(f32 s);
 extern Vector3 linear_from_sRGB(Vector3 sRGB);
 extern Vector4 linear_from_sRGB(Vector4 sRGB);
+extern Vector3 move_towards(Vector3 from, Vector3 to, Vector3 delta);
+extern Vector3 move_towards(Vector3 from, Vector3 to, f32 delta);
 
 #endif // MATHS_GENERATED_H
 
