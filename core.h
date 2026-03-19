@@ -2,6 +2,7 @@
 #define CORE_H
 
 #include <stdarg.h>
+#include <source_location>
 
 #ifndef NULL
 #define NULL nullptr
@@ -30,7 +31,6 @@
 
 #define DEBUG_BREAK() asm("int $3") // TODO(jesper): remove in non-debug builds
 #define BREAK() asm("int $3")
-
 
 typedef unsigned long size_t;
 
@@ -110,7 +110,7 @@ static_assert(sizeof(u8) == 1, "u8 sizeof mismatch");
 static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 
 #define jl_typeid(T) jl_type_id<T>(#T)
-#define defer auto defer_( __LINE__ ) = DeferDummy( ) + [&]( )
+#define defer auto defer_( __LINE__ ) = DeferDummy(std::source_location::current()) + [&](const std::source_location &_loc)
 #define transmute(T, value) (*(T*)&(value))
 
 #define CAT_(a, b) a ## b
@@ -193,24 +193,26 @@ extern jl_panic_handler_proc jl_panic_handler;
 
 template <typename F>
 struct Defer {
-    Defer(F f) : f(f) {}
-    ~Defer() { f(); }
+    Defer(const std::source_location &loc, F f) : loc(loc), f(f) {}
+    ~Defer() { f(loc); }
+
+    std::source_location loc;
     F f;
 };
 
 template <typename F>
-Defer<F> defer_create( F f ) {
-    return Defer<F>( f );
+Defer<F> defer_create(const std::source_location &loc, F f) {
+    return Defer<F>(loc, f);
 }
 
 #define defer__(line) defer_ ## line
 #define defer_(line) defer__( line )
 
-struct DeferDummy { };
+struct DeferDummy { std::source_location loc; };
 template<typename F>
-Defer<F> operator+ (DeferDummy, F&& f)
+Defer<F> operator+(DeferDummy d, F&& f)
 {
-    return defer_create<F>(RFWD(f));
+    return defer_create<F>(d.loc, RFWD(f));
 }
 
 
