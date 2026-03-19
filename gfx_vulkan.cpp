@@ -242,7 +242,8 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
         VK_CHECK(vkCreateSemaphore(vk.device, &semaphore_info, nullptr, &vk.swapchain.render_finished[it.index]));
     }
 
-    vk.swapchain.depth = vk_create_depth_texture(vk.swapchain.extent);
+    GfxTexture idx = vk_create_depth_texture(vk.swapchain.extent);
+    vk.swapchain.depth = vk.textures[idx];
 }
 
 void gfx_wait_for_frame() EXPORT
@@ -408,22 +409,20 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
         gfx_format_srgb(asset->format) :
         gfx_format_unorm(asset->format);
 
-    GfxVkTexture texture = vk_create_texture(
+    GfxTexture texture_idx = vk_create_texture(
         asset->data,
         vk_format(format),
         vk_component_mapping(swizzle),
         asset->width, asset->height);
+    GfxVkTexture texture = vk.textures[texture_idx];
 
     vk_set_texture_label(texture, get_asset_identifier(handle));
 
-    i32 idx = array_add(&vk.textures, texture);
-    GfxTexture texture_handle = GfxTexture(idx);
-
-    map_set(&vk.texture_assets, { handle, sRGB }, texture_handle);
-    return texture_handle;
+    map_set(&vk.texture_assets, { handle, sRGB }, texture_idx);
+    return texture_idx;
 }
 
-extern GfxVkTexture vk_create_texture(
+extern GfxTexture vk_create_texture(
     VkFormat format,
     VkComponentMapping swizzle,
     u32 width, u32 height,
@@ -483,32 +482,36 @@ extern GfxVkTexture vk_create_texture(
     };
 
     VK_CHECK(vkCreateImageView(vk.device, &view_info, nullptr, &texture.view));
-    return texture;
+    i32 idx = array_add(&vk.textures, texture);
+    i32 didx = array_add(&vk.texture_descs, { image_info, view_info });
+    PANIC_IF(idx != didx, "[gfx] mismatch in textures and texture descs");
+    return GfxTexture(idx);
 }
 
-extern GfxVkTexture vk_create_texture(
+extern GfxTexture vk_create_texture(
     VkFormat format,
     VkComponentMapping swizzle,
     u32 width, u32 height) INTERNAL
 {
-    GfxVkTexture texture = vk_create_texture(
+    GfxTexture texture_idx = vk_create_texture(
         format, swizzle,
         width, height,
         VK_IMAGE_USAGE_SAMPLED_BIT|VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+    GfxVkTexture texture = vk.textures[texture_idx];
 
     VK_IMM vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-    return texture;
+    return texture_idx;
 }
 
-extern GfxVkTexture vk_create_texture(
+extern GfxTexture vk_create_texture(
     void *pixels,
     VkFormat format,
     VkComponentMapping swizzle,
     u32 width, u32 height) INTERNAL
 {
-    GfxVkTexture texture = vk_create_texture(format, swizzle, width, height);
-    if (!texture) return {};
+    GfxTexture texture_idx = vk_create_texture(format, swizzle, width, height);
+    if (texture_idx == GfxTexture_INVALID) return GfxTexture_INVALID;
 
     u32 block_size = vk_block_size(format);
     auto staging = vk_create_buffer(
@@ -519,13 +522,15 @@ extern GfxVkTexture vk_create_texture(
 
     if (!staging) {
         LOG_ERROR("[gfx][vk] unable to create staging buffer for texture");
-        return {};
+        return GfxTexture_INVALID;
     }
 
 
     vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
     memcpy(staging.allocation_info.pMappedData, pixels, width*height*block_size);
     vmaUnmapMemory(vk.allocator, staging.allocation);
+
+    GfxVkTexture texture = vk.textures[texture_idx];
 
     VK_IMM {
         vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -534,10 +539,10 @@ extern GfxVkTexture vk_create_texture(
     }
 
     vk_destroy_buffer(staging);
-    return texture;
+    return texture_idx;
 }
 
-extern GfxVkTexture vk_create_depth_texture(VkExtent2D extent) INTERNAL
+extern GfxTexture vk_create_depth_texture(VkExtent2D extent) INTERNAL
 {
     return vk_create_texture(
         VK_FORMAT_D16_UNORM,
@@ -688,6 +693,12 @@ extern void vk_set_texture_label(GfxVkTexture texture, String label) INTERNAL
 {
     vk_set_image_label(texture.image, label);
     vk_set_image_view_label(texture.view, label);
+}
+
+extern void vk_set_texture_label(GfxTexture idx, String label) INTERNAL
+{
+    GfxVkTexture texture = vk.textures[idx];
+    return vk_set_texture_label(texture, label);
 }
 
 extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
@@ -1217,6 +1228,36 @@ extern const char* sz_from_enum(VkPresentModeKHR mode) INTERNAL
     }
 
     LOG_ERROR("[gfx] unknown present mode: %d", mode);
+    return "unknown";
+}
+
+extern const char* sz_from_enum(VkImageType type) INTERNAL
+{
+    switch (type) {
+    case VK_IMAGE_TYPE_1D: return "VK_IMAGE_TYPE_1D";
+    case VK_IMAGE_TYPE_2D: return "VK_IMAGE_TYPE_2D";
+    case VK_IMAGE_TYPE_3D: return "VK_IMAGE_TYPE_3D";
+    case VK_IMAGE_TYPE_MAX_ENUM: return "VK_IMAGE_TYPE_MAX_ENUM";
+    }
+
+    LOG_ERROR("[gfx] unknown image type: %d", type);
+    return "unknown";
+}
+
+extern const char* sz_from_enum(VkImageViewType type) INTERNAL
+{
+    switch (type) {
+    case VK_IMAGE_VIEW_TYPE_1D:         return "VK_IMAGE_VIEW_TYPE_1D";
+    case VK_IMAGE_VIEW_TYPE_2D:         return "VK_IMAGE_VIEW_TYPE_2D";
+    case VK_IMAGE_VIEW_TYPE_3D:         return "VK_IMAGE_VIEW_TYPE_3D";
+    case VK_IMAGE_VIEW_TYPE_CUBE:       return "VK_IMAGE_VIEW_TYPE_CUBE";
+    case VK_IMAGE_VIEW_TYPE_1D_ARRAY:   return "VK_IMAGE_VIEW_TYPE_1D_ARRAY";
+    case VK_IMAGE_VIEW_TYPE_2D_ARRAY:   return "VK_IMAGE_VIEW_TYPE_2D_ARRAY";
+    case VK_IMAGE_VIEW_TYPE_CUBE_ARRAY: return "VK_IMAGE_VIEW_TYPE_CUBE_ARRAY";
+    case VK_IMAGE_VIEW_TYPE_MAX_ENUM:   return "VK_IMAGE_VIEW_TYPE_MAX_ENUM";
+    }
+
+    LOG_ERROR("[gfx] unknown image view type: %d", type);
     return "unknown";
 }
 

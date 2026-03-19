@@ -71,6 +71,11 @@ struct GfxVkTexture {
     }
 };
 
+struct GfxVkTextureDesc {
+    VkImageCreateInfo image;
+    VkImageViewCreateInfo view;
+};
+
 struct GfxVkMaterial {
     GfxPipeline pipeline;
     VkDescriptorSet set;
@@ -367,6 +372,8 @@ extern struct GfxVkContext {
     DynamicArray<GfxVkPipelineDesc> pipeline_descs;
 
     DynamicArray<GfxVkTexture> textures;
+    DynamicArray<GfxVkTextureDesc> texture_descs;
+
     DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_assets;
     DynamicMap<GfxSamplerDesc, VkSampler> samplers;
 
