@@ -186,6 +186,18 @@ Vector3 normalise(Vector3 v) EXPORT
     return r;
 }
 
+Vector3 normalise_zero(Vector3 v) EXPORT
+{
+    f32 length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+    if (length == 0) return Vector3{ 0, 0, 0 };
+
+    Vector3 r;
+    r.x = v.x / length;
+    r.y = v.y / length;
+    r.z = v.z / length;
+    return r;
+}
+
 // projection of a onto b
 // the components of a that are parallel to b
 // project(a, b) = a∥b
