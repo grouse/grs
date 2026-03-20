@@ -3,7 +3,7 @@
 
 #include "core.h"
 
-#define DECLARE_HANDLE(type) typedef struct TYPE##__* TYPE
+#define DECLARE_HANDLE(T) typedef struct T##__* T 
 
 #define CALLBACK __stdcall
 #define WINAPI __stdcall
