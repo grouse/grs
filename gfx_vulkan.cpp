@@ -545,7 +545,7 @@ extern GfxTexture vk_create_texture(
 extern GfxTexture vk_create_depth_texture(VkExtent2D extent) INTERNAL
 {
     return vk_create_texture(
-        VK_FORMAT_D16_UNORM,
+        VK_FORMAT_D32_SFLOAT,
         vk_component_mapping(GFX_SWIZZLE_IDENTITY),
         extent.width, extent.height,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
