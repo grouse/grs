@@ -44,21 +44,16 @@ bool ini_section_begin(IniSerializer *ini, String name) EXPORT
         break;
     case INI_READ:
         if (ini->lexer.t == '[') {
-            i32 parent_depth = 0;
-            while (ini->lexer.t != ']' && ini->lexer.t != TOKEN_EOF) {
-                if (!require_next_token(&ini->lexer, TOKEN_IDENTIFIER, &ini->lexer.t)) return false;
-                if (parent_depth >= ini->sections.count || ini->sections[parent_depth] != ini->lexer.t.str) {
-                    ini->sections.count = parent_depth;
-                    array_add(&ini->sections, ini->lexer.t.str);
-                } else parent_depth++;
-                next_token(&ini->lexer);
-            }
-
+            Token section;
+            if (!require_next_token(&ini->lexer, TOKEN_IDENTIFIER, &section)) return false;
+            Token end = eat_until(&ini->lexer, ']');
+            section.str.length = i32(end.str.data - section.str.data);
+            array_add(&ini->sections, section.str);
             next_token(&ini->lexer);
         }
 
         if (ini->sections.count == 0) return false;
-        if (*array_tail(ini->sections) != name) return false;
+        if (*array_tail(ini->sections) == name) return true;
         break;
     }
 

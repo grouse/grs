@@ -10,9 +10,10 @@ enum IniMode {
     INI_WRITE,
 };
 
-struct IniSerializer {
-    FixedArray<String, 4> sections;
+#define INI_MAX_NESTED_SECTIONS 8
 
+struct IniSerializer {
+    FixedArray<String, INI_MAX_NESTED_SECTIONS> sections;
     IniMode mode;
 
     union {
@@ -27,7 +28,7 @@ struct IniSerializer {
 #define ini_section(ini, ...)\
     for (bool VAR(ini_section) = ini_section_begin(ini ARGS(__VA_ARGS__));\
          VAR(ini_section);\
-         VAR(ini_section) = ini_in_section(ini) || (ini_section_end(ini), false))
+         VAR(ini_section) = (ini_section_end(ini), false))
 
 #define ini_bitfield_value(ini, name, bit)\
     do {\
