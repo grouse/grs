@@ -2,6 +2,7 @@
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 #include <X11/extensions/XInput2.h>
+#include <dlfcn.h>
 
 #include "window.h"
 
@@ -13,6 +14,14 @@
 
 #define LOG_KEY_PRESS 0
 #define LOG_KEY_RELEASE 0
+
+#define X11_DECL(ret, sym, params)\
+    typedef ret(*sym_##t) params;\
+    sym_##t x11_##sym;
+
+#define X11_LOAD(handle, sym) x11_##sym = (sym_##t)dlsym(handle, #sym)
+
+X11_DECL(Cursor, XcursorLibraryLoadCursor, (Display *a, const char *b));
 
 struct {
     Display *dsp;
@@ -511,16 +520,46 @@ static void init_x11()
         // see http://who-t.blogspot.com/2009/07/xi2-recipes-part-4.html
         XISelectEvents(x11.dsp, DefaultRootWindow(x11.dsp), &ximask, 1);
     }
+
+    if (void *handle = dlopen("libXcursor.so.1", RTLD_LAZY)) {
+        X11_LOAD(handle, XcursorLibraryLoadCursor);
+    }
+}
+
+static const char* Xcursor_name(MouseCursor cursor)
+{
+    switch (cursor) {
+    case MC_NORMAL: return "default";
+
+    case MC_SIZE_SE_NW:
+    case MC_SIZE_NW_SE:
+        return "nwse-resize";
+
+    case MC_SIZE_SW_NE:
+    case MC_SIZE_NE_SW:
+        return "nesw-resize";
+    }
+
+    return nullptr;
 }
 
 static void init_cursors(Window wnd)
 {
     if (!cursors[MC_NORMAL]) {
-        cursors[MC_NORMAL] = XCreateFontCursor(x11.dsp, XC_left_ptr);
-        cursors[MC_SIZE_NW_SE] = XCreateFontCursor(x11.dsp, XC_bottom_right_corner);
-        cursors[MC_SIZE_SE_NW] = XCreateFontCursor(x11.dsp, XC_top_left_corner);
-        cursors[MC_SIZE_SW_NE] = XCreateFontCursor(x11.dsp, XC_top_right_corner);
-        cursors[MC_SIZE_NE_SW] = XCreateFontCursor(x11.dsp, XC_bottom_left_corner);
+
+        if (x11_XcursorLibraryLoadCursor) {
+            for (auto it : iterator(cursors)) {
+                cursors[it.index] = x11_XcursorLibraryLoadCursor(
+                    x11.dsp, 
+                    Xcursor_name(MouseCursor(it.index)));
+            }
+        }
+
+        if (!cursors[MC_NORMAL]) cursors[MC_NORMAL] = XCreateFontCursor(x11.dsp, XC_left_ptr);
+        if (!cursors[MC_SIZE_NW_SE]) cursors[MC_SIZE_NW_SE] = XCreateFontCursor(x11.dsp, XC_bottom_right_corner);
+        if (!cursors[MC_SIZE_SE_NW]) cursors[MC_SIZE_SE_NW] = XCreateFontCursor(x11.dsp, XC_top_left_corner);
+        if (!cursors[MC_SIZE_SW_NE]) cursors[MC_SIZE_SW_NE] = XCreateFontCursor(x11.dsp, XC_top_right_corner);
+        if (!cursors[MC_SIZE_NE_SW]) cursors[MC_SIZE_NE_SW] = XCreateFontCursor(x11.dsp, XC_bottom_left_corner);
 
         XColor xcolor;
         char csr_bits[] = { 0x00 };
