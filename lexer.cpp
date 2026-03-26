@@ -128,6 +128,8 @@ bool require_next_token(Lexer *lexer, TokenType type, Token *t /*= nullptr */) E
     if (t) *t = lexer->t;
     if (lexer->t.type == type) return true;
     if (lexer->t.type == TOKEN_INTEGER && type == TOKEN_NUMBER) return true;
+
+    PARSE_ERROR(lexer, "unexpected token; expected %s, got '%.*s'", sz_from_enum(type), STRFMT(lexer->t.str));
     return false;
 
 }
@@ -137,6 +139,8 @@ bool require_next_token(Lexer *lexer, char c, Token *t /*= nullptr */) EXPORT
     next_token(lexer);
     if (t) *t = lexer->t;
     if (lexer->t.type == (TokenType)c) return true;
+
+    PARSE_ERROR(lexer, "unexpected token; expected '%c', got '%.*s'", c, STRFMT(lexer->t.str));
     return false;
 }
 
@@ -145,6 +149,8 @@ bool require_next_identifier(Lexer *lexer, String identifier, Token *t /*= nullp
     next_token(lexer);
     if (t) *t = lexer->t;
     if (lexer->t.type == TOKEN_IDENTIFIER && lexer->t.str == identifier) return true;
+
+    PARSE_ERROR(lexer, "unexpected token; expected identifier '%.*s', got '%.*s'", STRFMT(identifier), STRFMT(lexer->t.str));
     return false;
 }
 
@@ -186,20 +192,11 @@ bool is_identifier(Token t, String str) EXPORT
 
 bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version) EXPORT
 {
-    if (!require_next_token(lexer, '#', &lexer->t)) {
-        return PARSE_ERROR(lexer, "invalid version decl; expected '#', got %.*s", STRFMT(lexer->t.str)), false;
-    }
-    if (!require_next_token(lexer, TOKEN_IDENTIFIER, &lexer->t)) {
-        return PARSE_ERROR(lexer, "invalid version decl; expected identifier got '%.*s'", STRFMT(lexer->t.str)), false;
-    }
-    if (lexer->t != "version") {
-        return PARSE_ERROR(lexer, "invalid identifier for version decl, expected 'version' got %.*s", STRFMT(lexer->t.str)), false;
-    }
+    if (!require_next_token(lexer, '#')) return false;
+    if (!require_next_identifier(lexer, "version")) return false;
     
     Token version_token;
-    if (!require_next_token(lexer, TOKEN_INTEGER, &version_token)) {
-        return PARSE_ERROR(lexer, "invaid token in version decl, expected INTEGER got '%.*s'", STRFMT(lexer->t.str)), false;
-    }
+    if (!require_next_token(lexer, TOKEN_INTEGER, &version_token)) return false;
     i32 version = i32_from_string(version_token.str);
 
     if (version < 0) return PARSE_ERROR(lexer, "version cannot be a negative number"), false;
@@ -214,10 +211,7 @@ bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version) EXPORT
 bool parse_float(Lexer *lexer, f32 *value, i32 n /*= 1*/) EXPORT
 {
     for (i32 i = 0; i < n; i++) {
-        if (!require_next_token(lexer, TOKEN_NUMBER)) {
-            PARSE_ERROR(lexer, "invalid token parsing float[%d], expected NUMBER, got '%.*s'", n, STRFMT(lexer->t.str));
-            return false;
-        }
+        if (!require_next_token(lexer, TOKEN_NUMBER)) return false;
         if (!f32_from_string(lexer->t.str, &value[i])) {
             PARSE_ERROR(lexer, "invalid float string: '%.*s'", STRFMT(lexer->t.str));
             return false;
@@ -229,10 +223,7 @@ bool parse_float(Lexer *lexer, f32 *value, i32 n /*= 1*/) EXPORT
 bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/) EXPORT
 {
     for (i32 i = 0; i < n; i++) {
-        if (!require_next_token(lexer, TOKEN_INTEGER)) {
-            PARSE_ERROR(lexer, "invalid token parsing float[%d], expected INTEGER, got '%.s'", n, STRFMT(lexer->t.str));
-            return false;
-        }
+        if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
         if (!i32_from_string(lexer->t.str, &value[i])) {
             PARSE_ERROR(lexer, "invalid float string: '%.*s'", STRFMT(lexer->t.str));
             return false;
@@ -244,10 +235,7 @@ bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/) EXPORT
 bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 1*/) EXPORT
 {
     for (i32 i = 0; i < n; i++) {
-        if (!require_next_token(lexer, TOKEN_IDENTIFIER)) {
-            PARSE_ERROR(lexer, "invalid token parsing float, expected IDENTIFIER, got '%.*s'", STRFMT(lexer->t.str));
-            return false;
-        }
+        if (!require_next_token(lexer, TOKEN_IDENTIFIER)) return false;
 
         if (lexer->t == "true") value[i] = true;
         else if (lexer->t == "false") value[i] = false;
