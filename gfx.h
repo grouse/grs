@@ -131,6 +131,7 @@ struct GfxMaterialTextureDesc {
 };
 
 struct GfxMaterialDesc {
+    String debug_name;
     GfxPipeline pipeline;
     GfxMaterialTextureDesc albedo;
     GfxMaterialTextureDesc metallic_roughness;
