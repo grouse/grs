@@ -37,7 +37,7 @@ String string(const char *str, i32 length, Allocator mem) EXPORT
 String string(const char *sz_str, Allocator mem)  EXPORT
 {
     if (sz_str == nullptr) return {};
-    return string(sz_str, (i32)strlen(sz_str), mem);
+    return string(sz_str, i32(strlen(sz_str)), mem);
 }
 
 String string(const char *begin, const char *end) EXPORT
@@ -48,6 +48,8 @@ String string(const char *begin, const char *end) EXPORT
 
 String duplicate_string(String other, Allocator mem)
 {
+    if (!other) return {};
+
     String str;
     str.data = ALLOC_ARR(mem, char, other.length);
     memcpy(str.data, other.data, other.length);

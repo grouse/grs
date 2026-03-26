@@ -45,7 +45,7 @@ struct String {
     char* end() { return &data[length]; }
 };
 
-inline String string(const char *sz_string) { return String{ (char*)sz_string, (i32)strlen(sz_string) }; }
+inline String string(const char *sz_string) { return String{ (char*)sz_string, sz_string ? i32(strlen(sz_string)) : 0 }; }
 
 struct StringBuilder {
     struct Block {
