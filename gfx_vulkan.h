@@ -77,9 +77,12 @@ struct GfxVkTextureDesc {
 };
 
 struct GfxVkMaterial {
+    String debug_name;
     GfxPipeline pipeline;
     VkDescriptorSet set;
     VkCullModeFlagBits cull_mode;
+
+    bool operator==(const GfxVkMaterial &other) const = default;
 };
 
 
@@ -381,6 +384,7 @@ extern struct GfxVkContext {
 
     DynamicArray<GfxVkMaterial> materials;
     DynamicArray<GfxMaterialDesc> material_descs;
+    DynamicMap<GfxVkMaterial, i32> material_map;
     DynamicMap<GfxMaterialParameters, GfxVkBuffer> material_parameters;
 
     DynamicArray<GfxVkShader> shaders;
@@ -408,14 +412,14 @@ HASH32_DECL(GfxTextureAssetDesc, state, it)
 
 HASH32_DECL(GfxVkBuffer, state, it)
 {
-    hash32_update(state, it.handle);
+    hash32_update(state, u64(it.handle));
     hash32_update(state, it.size);
 }
 
 HASH32_DECL(GfxVkTexture, state, it)
 {
-    hash32_update(state, it.image);
-    hash32_update(state, it.view);
+    hash32_update(state, u64(it.image));
+    hash32_update(state, u64(it.view));
 }
 
 HASH32_DECL(GfxVkDescriptorDesc, state, desc)
@@ -426,13 +430,13 @@ HASH32_DECL(GfxVkDescriptorDesc, state, desc)
     switch (desc.type) {
     case GFX_TEXTURE:
         hash32_update(state, desc.texture.texture);
-        hash32_update(state, desc.texture.sampler);
+        hash32_update(state, u64(desc.texture.sampler));
         break;
     case GFX_TEXTURE_ARRAY:
         hash32_update(state, desc.texture_array.count);
         for (i32 i = 0; i < desc.texture_array.count; i++) {
             hash32_update(state, desc.texture_array.textures[i]);
-            hash32_update(state, desc.texture_array.samplers[i]);
+            hash32_update(state, u64(desc.texture_array.samplers[i]));
         }
         break;
     case GFX_UNIFORM:
@@ -443,8 +447,8 @@ HASH32_DECL(GfxVkDescriptorDesc, state, desc)
 
 HASH32_DECL(GfxVkDescriptorSetDesc, state, desc)
 {
-    hash32_update(state, desc.pipeline_layout);
-    hash32_update(state, desc.set_layout);
+    hash32_update(state, u64(desc.pipeline_layout));
+    hash32_update(state, u64(desc.set_layout));
     for (auto it : desc.bindings) hash32_update(state, it);
 }
 
@@ -496,6 +500,13 @@ HASH32_DECL(GfxPrimitiveDesc, state, desc)
         hash32_update(state, desc.tri_prism.thickness);
         break;
     }
+}
+
+HASH32_DECL(GfxVkMaterial, state, mat)
+{
+    hash32_update(state, mat.pipeline);
+    hash32_update(state, u64(mat.set));
+    hash32_update(state, mat.cull_mode);
 }
 
 
