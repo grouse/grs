@@ -132,15 +132,14 @@ inline h128 hash128_digest(h128s *state)
     HASH128_DECL_PRIM(T)
 
 #define HASH32_DECL(T, state, var)\
-void hash32_update(h32s *state, const T &var);\
-inline u32 hash32(const T &var, u32 seed = HASH32_SEED)\
-{\
-    h32s state = hash32_start(seed);\
-    hash32_update(&state, var);\
-    return hash32_digest(&state);\
-}\
-inline void hash32_update(h32s *state, const T &var)\
-
+    void hash32_update(h32s *state, const T &var);\
+    inline u32 hash32(const T &var, u32 seed = HASH32_SEED)\
+    {\
+        h32s state = hash32_start(seed);\
+        hash32_update(&state, var);\
+        return hash32_digest(&state);\
+    }\
+    inline void hash32_update(h32s *state, const T &var)\
 
 HASH_DECL_PRIM(i8);
 HASH_DECL_PRIM(i16);
@@ -154,10 +153,6 @@ HASH_DECL_PRIM(u64);
 
 HASH_DECL_PRIM(f32);
 HASH_DECL_PRIM(f64);
-
-// NOTE(jesper): I don't like having this here. it hashes the pointer address, not the contents, but currently mandatory to not completely break on hash32((void*)ptr, seed) cases
-HASH_DECL_PRIM(void*);
-
 
 inline h32 hash32(const String str, h32 seed = HASH32_SEED)
 {
