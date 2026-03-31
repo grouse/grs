@@ -77,7 +77,6 @@ struct GfxVkTextureDesc {
 };
 
 struct GfxVkMaterial {
-    String debug_name;
     GfxPipeline pipeline;
     VkDescriptorSet set;
     VkCullModeFlagBits cull_mode;
