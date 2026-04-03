@@ -35,8 +35,7 @@ enum ListFileFlags : u32 {
 };
 
 enum FileEventType {
-    FE_UNKNOWN = 0,
-    FE_MODIFY,
+    FE_MODIFY = 1,
     FE_CREATE,
     FE_DELETE,
 };

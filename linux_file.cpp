@@ -426,7 +426,7 @@ void create_filewatch(String folder, DynamicArray<FileEvent> *events, Mutex *eve
                 else if (event->mask & IN_MOVED_FROM) fe.type = FE_DELETE;
                 else if (event->mask & IN_MOVED_TO) fe.type = FE_CREATE;
 
-                if (fe.type == FE_UNKNOWN) {
+                if (fe.type == 0) {
                     LOG_ERROR("unknown file event");
                     continue;
                 }
