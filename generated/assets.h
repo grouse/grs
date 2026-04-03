@@ -22,6 +22,7 @@ extern AssetHandle create_asset(AssetHandle handle, String path, i32 type_id, vo
 extern AssetHandle create_asset(String path, i32 type_id, void *data);
 extern AssetHandle restore_removed_asset(String path);
 extern void restore_removed_asset(AssetHandle handle);
+extern void asset_file_event(FileEvent event);
 extern void remove_asset(AssetHandle handle);
 extern bool asset_path_used(String path);
 extern bool load_asset(AssetHandle handle, u8 *contents, i32 size);

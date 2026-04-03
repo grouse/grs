@@ -251,6 +251,36 @@ void restore_removed_asset(AssetHandle handle) EXPORT
     }
 }
 
+void asset_file_event(FileEvent event) EXPORT
+{
+    String ext = extension_of(event.path);
+    i32 *type_id = map_find(&assets.types, ext);
+
+    switch (event.type) {
+    case FE_MODIFY:
+        break;
+    case FE_CREATE:
+        if (type_id) {
+            if (auto *by_type = map_find(&assets.by_type, *type_id)) {
+                array_add(by_type, duplicate_string(event.path, mem_dynamic));
+            }
+        }
+        break;
+    case FE_DELETE:
+        if (type_id) {
+            if (auto *by_type = map_find(&assets.by_type, *type_id)) {
+                for (i32 i = 0; i < by_type->count; i++) {
+                    if (by_type->at(i) == event.path) {
+                        array_remove_unsorted(by_type, i--);
+                    }
+                }
+
+            }
+        }
+        break;
+    }
+}
+
 void remove_asset(AssetHandle handle) EXPORT
 {
     if (handle.gen != assets.loaded[handle.index].gen) {

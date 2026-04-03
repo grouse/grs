@@ -4,6 +4,7 @@
 #include "string.h"
 #include "array.h"
 #include "hash.h"
+#include "file.h"
 
 struct Asset;
 
