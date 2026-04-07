@@ -49,11 +49,11 @@ void init_default_allocators()
     mem_dynamic = malloc_allocator();//vm_freelist_allocator(16*GiB);
 }
 
-MArena tl_scratch_arena(Allocator conflict)
+MArena* tl_scratch_arena(Allocator conflict)
 {
     MArena *arena = &mem_scratch[0];
     MArena *end = mem_scratch + ARRAY_COUNT(mem_scratch);
-    if (conflict.state) while (arena < end && arena->state == conflict.state) arena++;
+    if (conflict.state) while (arena < end && (arena->state == conflict.state || arena->in_use)) arena++;
     PANIC_IF(arena == end, "too many scratch arenas allocated");
 
     if (!arena->state) {
@@ -65,7 +65,8 @@ MArena tl_scratch_arena(Allocator conflict)
 
     auto state = (TlLinearAllocatorState*)arena->state;
     arena->restore_point = state->current;
-    return *arena;
+    arena->in_use++;
+    return arena;
 }
 
 void restore_arena(MArena *arena)
@@ -77,7 +78,8 @@ void restore_arena(MArena *arena)
 void release_arena(MArena *arena)
 {
     restore_arena(arena);
-    *arena = {};
+    arena->in_use--;
+    PANIC_IF(arena->in_use < 0, "arena in use count below 0");
 }
 
 void* align_ptr(void *ptr, u8 alignment, u8 header_size)

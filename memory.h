@@ -17,7 +17,7 @@ extern "C" void* memmove(void *destination, const void *source, size_t num) NOTH
 #define MiB (1024*1024)
 #define GiB (1024LL*1024LL*1024LL)
 
-#define M_SCRATCH_ARENAS 4
+#define M_SCRATCH_ARENAS 16
 #define M_DEFAULT_ALIGN 16
 
 enum M_Proc { M_ALLOC, M_FREE, M_EXTEND, M_REALLOC, M_RESET, };
@@ -79,27 +79,28 @@ Allocator vm_freelist_allocator(i64 max_size);
 
 struct MArena : Allocator {
     void *restore_point;
+    i32 in_use;
 };
 
-MArena tl_scratch_arena(Allocator conflict = {});
+MArena* tl_scratch_arena(Allocator conflict = {});
 void release_arena(MArena *arena);
 void restore_arena(MArena *arena);
 
 
 struct SArena {
-    MArena arena;
-    SArena(MArena &&arena) : arena(arena) {}
-    SArena &operator=(MArena &&arena) { this->arena = arena; return *this; }
+    MArena *arena;
+    SArena(MArena *arena) : arena(arena) {}
+    SArena &operator=(MArena *arena) { this->arena = arena; return *this; }
 
     SArena(const MArena &arena) = delete;
     SArena(const SArena &) = delete;
     SArena& operator=(const SArena &) = delete;
 
-    ~SArena() { release_arena(&arena); }
+    ~SArena() { release_arena(arena); }
 
-    MArena* operator->() { return &arena; }
-    MArena& operator*() { return arena; }
-    operator Allocator() { return arena; }
+    MArena* operator->() { return arena; }
+    MArena& operator*() { return *arena; }
+    operator Allocator() { return *arena; }
 };
 
 struct Mutex;
