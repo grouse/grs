@@ -47,3 +47,9 @@ Thread* create_thread(ThreadProc proc, void *user_data)
 
     return t;
 }
+
+i32 thread_id() 
+{
+    extern "C" DWORD GetCurrentThreadId();
+    return (i32)GetCurrentThreadId();
+}

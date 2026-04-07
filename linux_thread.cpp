@@ -4,6 +4,7 @@
 
 #include <pthread.h>
 #include <errno.h>
+#include <unistd.h>
 
 struct Thread {
 	pthread_t handle;
@@ -62,4 +63,9 @@ Thread* create_thread(ThreadProc proc, void *user_data)
 
 	PANIC_IF(result != 0, "failed creating thread");
 	return thread;
+}
+
+i32 thread_id() 
+{
+    return (i32)gettid();
 }
