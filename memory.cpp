@@ -34,6 +34,15 @@ struct LinearAllocatorState {
 Allocator mem_sys;
 Allocator mem_dynamic;
 thread_local MArena mem_scratch[M_SCRATCH_ARENAS];
+thread_local i32 mem_scratch_used[M_SCRATCH_ARENAS];
+
+i32 tl_arena_idx(MArena arena) 
+{
+    for (i32 i = 0; i < ARRAY_COUNT(mem_scratch); i++) {
+        if (arena.state == mem_scratch[i].state) return i;
+    }
+    return -1;
+}
 
 void* align_ptr(void *ptr, u8 alignment, u8 header_size);
 
@@ -49,12 +58,17 @@ void init_default_allocators()
     mem_dynamic = malloc_allocator();//vm_freelist_allocator(16*GiB);
 }
 
-MArena* tl_scratch_arena(Allocator conflict)
+MArena tl_scratch_arena(Allocator conflict)
 {
-    MArena *arena = &mem_scratch[0];
-    MArena *end = mem_scratch + ARRAY_COUNT(mem_scratch);
-    if (conflict.state) while (arena < end && (arena->state == conflict.state || arena->in_use)) arena++;
-    PANIC_IF(arena == end, "too many scratch arenas allocated");
+    i32 idx = -1;
+    for (i32 i = 0; i < ARRAY_COUNT(mem_scratch); i++) {
+        if (!conflict.state && mem_scratch_used[i]) continue;
+        if (conflict.state && mem_scratch[i].state == conflict.state) continue;
+        idx = i;
+        break;
+    }
+    PANIC_IF(idx == -1, "too many scratch arenas allocated");
+    MArena *arena = &mem_scratch[idx];
 
     if (!arena->state) {
         LOG_INFO("creating scratch arena: %d", (i32)(arena - &mem_scratch[0]));
@@ -63,10 +77,14 @@ MArena* tl_scratch_arena(Allocator conflict)
         arena->proc = alloc.proc;
     }
 
+    mem_scratch_used[idx]++;
+
     auto state = (TlLinearAllocatorState*)arena->state;
-    arena->restore_point = state->current;
-    arena->in_use++;
-    return arena;
+    MArena ret = *arena;
+    ret.restore_point = state->current;
+    return ret;
+}
+
 }
 
 void restore_arena(MArena *arena)
@@ -78,8 +96,9 @@ void restore_arena(MArena *arena)
 void release_arena(MArena *arena)
 {
     restore_arena(arena);
-    arena->in_use--;
-    PANIC_IF(arena->in_use < 0, "arena in use count below 0");
+    i32 idx = tl_arena_idx(*arena);
+    mem_scratch_used[idx]--;
+    PANIC_IF(mem_scratch_used[idx] < 0, "arena in use count below 0");
 }
 
 void* align_ptr(void *ptr, u8 alignment, u8 header_size)

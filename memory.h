@@ -79,7 +79,6 @@ Allocator vm_freelist_allocator(i64 max_size);
 
 struct MArena : Allocator {
     void *restore_point;
-    i32 in_use;
 };
 
 MArena* tl_scratch_arena(Allocator conflict = {});
@@ -88,19 +87,19 @@ void restore_arena(MArena *arena);
 
 
 struct SArena {
-    MArena *arena;
-    SArena(MArena *arena) : arena(arena) {}
-    SArena &operator=(MArena *arena) { this->arena = arena; return *this; }
+    MArena arena;
+    SArena(MArena &&arena) : arena(arena) {}
+    SArena &operator=(MArena &&arena) { this->arena = arena; return *this; }
 
     SArena(const MArena &arena) = delete;
     SArena(const SArena &) = delete;
     SArena& operator=(const SArena &) = delete;
 
-    ~SArena() { release_arena(arena); }
+    ~SArena() { release_arena(&arena); }
 
-    MArena* operator->() { return arena; }
-    MArena& operator*() { return *arena; }
-    operator Allocator() { return *arena; }
+    MArena* operator->() { return &arena; }
+    MArena& operator*() { return arena; }
+    operator Allocator() { return arena; }
 };
 
 struct Mutex;
