@@ -48,6 +48,7 @@ typedef float f32;
 typedef double f64;
 
 #define atomic_exchange(var, value) __sync_lock_test_and_set(var, value)
+#define atomic_compare_exchange(var, old_val, new_val) __sync_bool_compare_and_swap(var, old_val, new_val)
 
 #elif defined(_WIN32)
 
@@ -70,6 +71,7 @@ typedef signed char i8 ;
 typedef float f32;
 typedef double f64;
 
+#define atomic_compare_exchange(var, old_val, new_val) InterlockedCompareExchange(var, new_val, old_val) == old_val
 
 #else
 #error "unsupported platform"
