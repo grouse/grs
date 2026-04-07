@@ -81,9 +81,25 @@ struct MArena : Allocator {
     void *restore_point;
 };
 
-MArena* tl_scratch_arena(Allocator conflict = {});
+
+struct ArenaNode {
+    ArenaNode *next;
+    MArena *arena;
+    i64 thread_owner;
+};
+
+struct ArenaInfo {
+    i64 size;
+    i64 used;
+};
+
+extern ArenaNode mem_arenas;
+
+MArena tl_scratch_arena(Allocator conflict = {});
 void release_arena(MArena *arena);
 void restore_arena(MArena *arena);
+
+ArenaInfo get_arena_info(MArena *arena);
 
 
 struct SArena {

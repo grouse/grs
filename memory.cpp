@@ -33,6 +33,10 @@ struct LinearAllocatorState {
 
 Allocator mem_sys;
 Allocator mem_dynamic;
+
+ArenaNode mem_arenas;
+ArenaNode *tail = &mem_arenas;
+
 thread_local MArena mem_scratch[M_SCRATCH_ARENAS];
 thread_local i32 mem_scratch_used[M_SCRATCH_ARENAS];
 
@@ -75,6 +79,17 @@ MArena tl_scratch_arena(Allocator conflict)
         Allocator alloc = tl_linear_allocator(1*GiB);
         arena->state = alloc.state;
         arena->proc = alloc.proc;
+
+        ArenaNode *node = ALLOC_T(mem_dynamic, ArenaNode) {
+            .arena = arena,
+            .thread_owner = thread_id(),
+        };
+
+        ArenaNode *next = nullptr;
+        do {
+            next = tail->next;
+            node->next = next;
+        } while (!atomic_compare_exchange(&tail->next, next, node));
     }
 
     mem_scratch_used[idx]++;
@@ -85,6 +100,12 @@ MArena tl_scratch_arena(Allocator conflict)
     return ret;
 }
 
+ArenaInfo get_arena_info(MArena *arena)
+{
+    ArenaInfo info;
+    info.size = ((TlLinearAllocatorState*)arena->state)->end - ((TlLinearAllocatorState*)arena->state)->start;
+    info.used = ((TlLinearAllocatorState*)arena->state)->current - ((TlLinearAllocatorState*)arena->state)->start;
+    return info;
 }
 
 void restore_arena(MArena *arena)
