@@ -71,7 +71,7 @@ typedef signed char i8 ;
 typedef float f32;
 typedef double f64;
 
-#define atomic_compare_exchange(var, old_val, new_val) InterlockedCompareExchange(var, new_val, old_val) == old_val
+#define atomic_compare_exchange(var, old_val, new_val) _InterlockedCompareExchange(var, new_val, old_val) == old_val
 
 #else
 #error "unsupported platform"
