@@ -456,6 +456,12 @@ void quick_sort_asc(Array<T> arr, Array<Tail>... tail)
     quick_sort_asc(arr, 0, arr.count-1, tail...);
 }
 
+template<typename T>
+void array_sort(Array<T> arr)
+{
+    quick_sort_asc(arr);
+}
+
 // -- dynamic array procedures
 template<typename T>
 void array_grow(DynamicArray<T> *arr, i32 additional_elements)
