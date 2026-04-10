@@ -89,7 +89,7 @@ void handle_clipboard_events(XEvent event)
 void set_clipboard_data(String str)
 {
     char *clip = sz_string(str, mem_dynamic);
-    char *e = atomic_exchange((char**)&clipboard.data, clip);
+    char *old = atomic_exchange((char**)&clipboard.data, clip);
 
     XSetSelectionOwner(
         x11.dsp,
@@ -97,7 +97,7 @@ void set_clipboard_data(String str)
         clipboard.wnd,
         CurrentTime);
 
-    if (e) FREE(mem_dynamic, e);
+    if (old) FREE(mem_dynamic, old);
 }
 
 String read_clipboard_str(Allocator mem)

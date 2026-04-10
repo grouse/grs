@@ -47,8 +47,6 @@ typedef signed char i8 ;
 typedef float f32;
 typedef double f64;
 
-#define atomic_exchange(var, value) __sync_lock_test_and_set(var, value)
-#define atomic_compare_exchange(var, old_val, new_val) __sync_bool_compare_and_swap(var, old_val, new_val)
 
 #elif defined(_WIN32)
 
@@ -61,20 +59,36 @@ typedef double f64;
 typedef unsigned long long u64;
 typedef unsigned int u32;
 typedef unsigned short u16;
-typedef unsigned char u8 ;
+typedef unsigned char u8;
 
 typedef signed long long i64;
 typedef signed int i32;
 typedef signed short i16;
-typedef signed char i8 ;
+typedef signed char i8;
 
 typedef float f32;
 typedef double f64;
 
-#define atomic_compare_exchange(var, old_val, new_val) _InterlockedCompareExchange(var, new_val, old_val) == old_val
+typedef i64 iptr;
+typedef u64 uptr;
 
 #else
 #error "unsupported platform"
+#endif
+
+#if defined(__clang__)
+#define atomic_exchange(var, value) __sync_lock_test_and_set(var, value)
+
+#define atomic_compare_exchange(var, old_val, new_val) __sync_bool_compare_and_swap(var, old_val, new_val)
+
+#define atomic_fetch_add(var, value) __sync_fetch_and_add(var, value)
+#define atomic_fetch_sub(var, value) __sync_fetch_and_sub(var, value)
+#define atomic_fetch_or(var, value) __sync_fetch_and_or(var, value)
+#define atomic_fetch_and(var, value) __sync_fetch_and_and(var, value)
+#define atomic_fetch_xor(var, value) __sync_fetch_and_xor(var, value)
+#define atomic_fetch_nand(var, value) __sync_fetch_and_nand(var, value)
+#else
+#error "unsupported compiler"
 #endif
 
 constexpr f64 f64_PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
