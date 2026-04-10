@@ -97,6 +97,8 @@ AssetHandle find_loaded_asset(String path) EXPORT
 
 AssetHandle find_asset_handle(String path) EXPORT
 {
+    if (!path) return ASSET_HANDLE_INVALID;
+
     SArena scratch = tl_scratch_arena();
     String apath = resolve_asset_path(path, scratch);
 
