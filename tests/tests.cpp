@@ -7,6 +7,7 @@
 #include "generated/tests/maths.h"
 #include "generated/tests/array.h"
 #include "generated/tests/map.h"
+#include "generated/tests/memory.h"
 
 int main(Array<String> args)
 {
@@ -14,9 +15,12 @@ int main(Array<String> args)
     mem_sys = malloc_allocator();
     mem_dynamic = malloc_allocator();
 
-    int error = 0;
-    error |= RUN_TESTS(MATHS__tests);
-    error |= RUN_TESTS(MAP__tests);
-    error |= RUN_TESTS(ARRAY__tests);
-    return error;
+    TestStats stats{};
+    RUN_TESTS(MATHS__tests,  &stats);
+    RUN_TESTS(MAP__tests,    &stats);
+    RUN_TESTS(ARRAY__tests,  &stats);
+    RUN_TESTS(MEMORY__tests, &stats);
+
+    test_print_summary(&stats);
+    return stats.failed;
 }
