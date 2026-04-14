@@ -82,24 +82,25 @@ struct MArena : Allocator {
 };
 
 
-struct ArenaNode {
-    ArenaNode *next;
-    MArena *arena;
+struct AllocatorNode {
+    AllocatorNode *next;
+    Allocator *arena;
     i64 thread_owner;
 };
 
-struct ArenaInfo {
+struct AllocatorInfo {
     i64 size;
     i64 used;
 };
 
-extern ArenaNode mem_arenas;
+extern AllocatorNode mem_allocators;
+
+MArena tl_arena(i32 initial_size);
 
 MArena tl_scratch_arena(Allocator conflict = {});
 void release_arena(MArena *arena);
 void restore_arena(MArena *arena);
-
-ArenaInfo get_arena_info(MArena *arena);
+AllocatorInfo get_allocator_info(Allocator alloc);
 
 
 struct SArena {

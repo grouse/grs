@@ -34,13 +34,12 @@ struct LinearAllocatorState {
 Allocator mem_sys;
 Allocator mem_dynamic;
 
-ArenaNode mem_arenas;
-ArenaNode *tail = &mem_arenas;
+AllocatorNode mem_allocators;
+AllocatorNode *tail = &mem_allocators;
 
-thread_local MArena mem_scratch[M_SCRATCH_ARENAS];
-thread_local i32 mem_scratch_used[M_SCRATCH_ARENAS];
+thread_local Allocator mem_scratch[2];
 
-i32 tl_arena_idx(MArena arena) 
+i32 tl_scratch_idx(MArena arena) 
 {
     for (i32 i = 0; i < ARRAY_COUNT(mem_scratch); i++) {
         if (arena.state == mem_scratch[i].state) return i;
@@ -55,7 +54,7 @@ T* get_header(const void *aligned_ptr) { return (T*)((size_t)aligned_ptr-sizeof(
 
 void init_default_allocators()
 {
-    PANIC_IF(mem_sys.proc != nullptr, "default allocators already initialized");
+    PANIC_IF(mem_sys.proc != nullptr, "[mem] default allocators already initialized");
 
     mem_sys = malloc_allocator();
     // TODO(jesper): disabled vm_freelist_allocator due to memory leak issues observed in mimir
@@ -64,15 +63,7 @@ void init_default_allocators()
 
 MArena tl_scratch_arena(Allocator conflict)
 {
-    i32 idx = -1;
-    for (i32 i = 0; i < ARRAY_COUNT(mem_scratch); i++) {
-        if (!conflict.state && mem_scratch_used[i]) continue;
-        if (conflict.state && mem_scratch[i].state == conflict.state) continue;
-        idx = i;
-        break;
-    }
-    PANIC_IF(idx == -1, "too many scratch arenas allocated");
-    MArena *arena = &mem_scratch[idx];
+    Allocator *arena = conflict.state && conflict.state == mem_scratch[0].state ? &mem_scratch[1] : &mem_scratch[0];
 
     if (!arena->state) {
         LOG_INFO("creating scratch arena: %d", (i32)(arena - &mem_scratch[0]));
@@ -80,46 +71,51 @@ MArena tl_scratch_arena(Allocator conflict)
         arena->state = alloc.state;
         arena->proc = alloc.proc;
 
-        ArenaNode *node = ALLOC_T(mem_dynamic, ArenaNode) {
+        AllocatorNode *node = ALLOC_T(mem_dynamic, AllocatorNode) {
             .arena = arena,
             .thread_owner = thread_id(),
         };
 
-        ArenaNode *next = nullptr;
+        AllocatorNode *next = nullptr;
         do {
             next = tail->next;
             node->next = next;
         } while (!atomic_compare_exchange(&tail->next, next, node));
     }
 
-    mem_scratch_used[idx]++;
-
     auto state = (TlLinearAllocatorState*)arena->state;
-    MArena ret = *arena;
-    ret.restore_point = state->current;
-    return ret;
+    return { *arena, state->current };
 }
 
-ArenaInfo get_arena_info(MArena *arena)
+MArena tl_arena(i32 initial_size)
 {
-    ArenaInfo info;
-    info.size = ((TlLinearAllocatorState*)arena->state)->end - ((TlLinearAllocatorState*)arena->state)->start;
-    info.used = ((TlLinearAllocatorState*)arena->state)->current - ((TlLinearAllocatorState*)arena->state)->start;
+    LOG_INFO("[mem] creating arena: %d bytes", initial_size);
+    Allocator alloc = tl_linear_allocator(initial_size);
+    MArena arena{ alloc };
+    return arena;
+}
+
+AllocatorInfo get_allocator_info(Allocator alloc)
+{
+    AllocatorInfo info;
+    info.size = ((TlLinearAllocatorState*)alloc.state)->end - ((TlLinearAllocatorState*)alloc.state)->start;
+    info.used = ((TlLinearAllocatorState*)alloc.state)->current - ((TlLinearAllocatorState*)alloc.state)->start;
     return info;
 }
 
 void restore_arena(MArena *arena)
 {
-    //LOG_INFO("restoring arena[%d] to %p", (i32)(arena - &scratch_arenas[0]), arena->restore_point);
     arena->proc(arena->state, M_RESET, arena->restore_point, 0, 0, 0);
 }
 
 void release_arena(MArena *arena)
 {
     restore_arena(arena);
-    i32 idx = tl_arena_idx(*arena);
-    mem_scratch_used[idx]--;
-    PANIC_IF(mem_scratch_used[idx] < 0, "arena in use count below 0");
+    i32 idx = tl_scratch_idx(*arena);
+    if (idx == -1) {
+        // TODO(jesper): push this into a free-list of arenas, or some such
+        LOG_ERROR("[mem] leaking arena");
+    }
 }
 
 void* align_ptr(void *ptr, u8 alignment, u8 header_size)

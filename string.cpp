@@ -1175,7 +1175,7 @@ void append_stringf(StringBuilder *sb, const char *fmt, ...) EXPORT
 
     if (length > available-1) {
         SArena scratch = tl_scratch_arena(sb->alloc);
-        char *buffer = ALLOC_ARR(*scratch, char, length+1);
+        char *buffer = ALLOC_ARR(scratch, char, length+1);
 
         va_start(args, fmt);
         vsnprintf(buffer, length+1, fmt, args);
