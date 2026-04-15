@@ -21,15 +21,15 @@ TEST_PROC(memory__tl_linear__alloc_returns_nonnull)
     ASSERT(p != nullptr);
 }
 
-TEST_PROC(memory__tl_linear__alloc_zero_size_returns_null)
+TEST_PROC(memory__tl_linear__alloc_zero_size_returns_nonnull)
 {
     Allocator a = tl_linear_allocator(4096);
 
-    // size == 0 must return nullptr without advancing the arena
+    // Zero-size requests still need a usable pointer.
     void *p = ALLOC(a, 0);
-    ASSERT(p == nullptr);
+    ASSERT(p != nullptr);
 
-    // Arena should still be usable after a zero-size alloc
+    // Arena should still be usable after a zero-size alloc.
     void *q = ALLOC(a, 16);
     ASSERT(q != nullptr);
 }
@@ -91,7 +91,7 @@ TEST_PROC(memory__tl_linear__free_is_noop)
     ASSERT(q != p);
 }
 
-TEST_PROC(memory__tl_linear__realloc_zero_size_returns_null)
+TEST_PROC(memory__tl_linear__realloc_zero_size_returns_nonnull)
 {
     Allocator a = tl_linear_allocator(4096);
 
@@ -99,7 +99,7 @@ TEST_PROC(memory__tl_linear__realloc_zero_size_returns_null)
     ASSERT(p != nullptr);
 
     void *r = REALLOC(a, p, 64, 0);
-    ASSERT(r == nullptr);
+    ASSERT(r != nullptr);
 }
 
 TEST_PROC(memory__tl_linear__realloc_last_alloc_is_inplace)
@@ -138,13 +138,13 @@ TEST_PROC(memory__tl_linear__realloc_null_ptr_acts_as_alloc)
     ASSERT(p != nullptr);
 }
 
-TEST_PROC(memory__tl_linear__extend_zero_size_returns_null)
+TEST_PROC(memory__tl_linear__extend_zero_size_returns_nonnull)
 {
     Allocator a = tl_linear_allocator(4096);
     void *p = ALLOC(a, 64);
 
     void *r = ALLOC_PROC(a, M_EXTEND, p, 64, 0, M_DEFAULT_ALIGN);
-    ASSERT(r == nullptr);
+    ASSERT(r != nullptr);
 }
 
 TEST_PROC(memory__tl_linear__extend_last_alloc_is_inplace)
@@ -256,11 +256,12 @@ TEST_PROC(memory__malloc__alloc_returns_nonnull)
     FREE(a, p);
 }
 
-TEST_PROC(memory__malloc__alloc_zero_size_returns_null)
+TEST_PROC(memory__malloc__alloc_zero_size_returns_nonnull)
 {
     Allocator a = malloc_allocator();
     void *p = ALLOC(a, 0);
-    ASSERT(p == nullptr);
+    ASSERT(p != nullptr);
+    FREE(a, p);
 }
 
 TEST_PROC(memory__malloc__alloc_respects_alignment)

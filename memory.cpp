@@ -119,8 +119,9 @@ void release_arena(MArena *arena)
 
 void* align_ptr(void *ptr, u8 alignment, u8 header_size)
 {
-    u8 offset = header_size + alignment - (((size_t)ptr + header_size) & ((size_t)alignment-1));
-    return (void*)((size_t)ptr + offset);
+    size_t addr = (size_t)ptr + header_size;
+    size_t mask = (size_t)alignment - 1;
+    return (void*)((addr + mask) & ~mask);
 }
 
 void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment)
@@ -129,8 +130,6 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_si
 
     switch (cmd) {
     case M_ALLOC: {
-        if (size == 0) return nullptr;
-
         u8 *ptr = (u8*)align_ptr(state->current, alignment, 0);
         PANIC_IF(ptr+size > state->end, "allocator does not have enough memory for allocation: %lld", size);
 
@@ -147,20 +146,16 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_si
         return nullptr;
         }
     case M_REALLOC: {
-        if (size == 0) return nullptr;
-
         if (old_ptr && state->last == old_ptr) {
             state->current += size-old_size;
             return (void*)old_ptr;
         }
 
         void *ptr = tl_linear_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
-        if (old_size > 0) memcpy(ptr, old_ptr, old_size);
+        if (size > 0 && old_size > 0) memcpy(ptr, old_ptr, old_size);
         return ptr;
         }
     case M_EXTEND: {
-        if (size == 0) return nullptr;
-
         if (old_ptr && state->last == old_ptr) {
             state->current += size-old_size;
             return (void*)old_ptr;
@@ -185,8 +180,6 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
 
     switch (cmd) {
     case M_ALLOC: {
-        if (size == 0) return nullptr;
-
         u8 *ptr;
         GUARD_MUTEX(state->mutex) {
             ptr = (u8*)align_ptr(state->current, alignment, 0);
@@ -209,8 +202,6 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
         return nullptr;
         }
     case M_REALLOC: {
-        if (size == 0) return nullptr;
-
         u8 *ptr;
         GUARD_MUTEX(state->mutex) {
             if (old_ptr && state->last == old_ptr) {
@@ -223,7 +214,7 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
 
             ptr = (u8*)align_ptr(state->current, alignment, 0);
             PANIC_IF(ptr+size > state->end, "allocator does not have enough memory for allocation: %lld", size);
-            if (old_size > 0) memcpy(ptr, old_ptr, old_size);
+            if (size > 0 && old_size > 0) memcpy(ptr, old_ptr, old_size);
 
             state->current = ptr+size;
             state->last = ptr;
@@ -232,8 +223,6 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
         return ptr;
         }
     case M_EXTEND: {
-        if (size == 0) return nullptr;
-
         u8 *ptr;
         GUARD_MUTEX(state->mutex) {
             if (old_ptr && state->last == old_ptr) {
@@ -274,10 +263,8 @@ void* malloc_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
 
     switch (cmd) {
     case M_ALLOC: {
-        if (size == 0) return nullptr;
-
         u8 header_size = sizeof(Header);
-        void *ptr = malloc(size+alignment+header_size);
+        void *ptr = malloc(size+alignment+header_size-1);
         void *aligned_ptr = align_ptr(ptr, alignment, header_size);
 
         auto header = get_header<Header>(aligned_ptr); header->offset = (u8)((size_t)aligned_ptr - (size_t)ptr);
@@ -306,7 +293,7 @@ void* malloc_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
         }
 
         u8 header_size = sizeof(Header);
-        void *ptr = realloc(old_unaligned_ptr, size+alignment+header_size);
+        void *ptr = realloc(old_unaligned_ptr, size+alignment+header_size-1);
         void *aligned_ptr = align_ptr(ptr, alignment, header_size);
 
         auto header = get_header<Header>(aligned_ptr);
@@ -375,14 +362,12 @@ void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_
     auto state = (VMFreeListState*)v_state;
     switch (cmd) {
     case M_ALLOC: {
-            if (size == 0) return nullptr;
-
             lock_mutex(state->mutex);
             defer { unlock_mutex(state->mutex); };
 
             u8 header_size = sizeof(Header);
             i64 minimum_size = sizeof(Block);
-            i64 required_size = size+alignment+header_size;
+            i64 required_size = size+alignment+header_size-1;
 
             auto block = state->free_block;
             while (block && block->size < required_size) block = block->next;
@@ -489,20 +474,16 @@ void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_
 
     } break;
     case M_REALLOC: {
-        if (size == 0) return nullptr;
-
         // TODO(jesper): if size < old_size, shrink the allocation and push the free block to the list
         // TODO(jesper): we should check if the current allocation can be expanded
         void *nptr = vm_freelist_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);
         if (old_ptr == nullptr) return nptr;
 
-        memcpy(nptr, old_ptr, old_size);
+        if (size > 0 && old_size > 0) memcpy(nptr, old_ptr, old_size);
         vm_freelist_alloc(v_state, M_FREE, old_ptr, 0, 0, 0);
         return nptr;
     } break;
     case M_EXTEND: {
-        if (size == 0) return nullptr;
-
         // TODO(jesper): if size < old_size, shrink the allocation and push the free block to the list
         // TODO(jesper): we should check if the current allocation can be expanded
         void *nptr = vm_freelist_alloc(v_state, M_ALLOC, nullptr, 0, size, alignment);

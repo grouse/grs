@@ -2,15 +2,15 @@
 #define MEMORY_TEST_H
 
 extern void memory__tl_linear__alloc_returns_nonnull();
-extern void memory__tl_linear__alloc_zero_size_returns_null();
+extern void memory__tl_linear__alloc_zero_size_returns_nonnull();
 extern void memory__tl_linear__alloc_respects_alignment();
 extern void memory__tl_linear__sequential_allocs_dont_overlap();
 extern void memory__tl_linear__free_is_noop();
-extern void memory__tl_linear__realloc_zero_size_returns_null();
+extern void memory__tl_linear__realloc_zero_size_returns_nonnull();
 extern void memory__tl_linear__realloc_last_alloc_is_inplace();
 extern void memory__tl_linear__realloc_non_last_alloc_copies_data();
 extern void memory__tl_linear__realloc_null_ptr_acts_as_alloc();
-extern void memory__tl_linear__extend_zero_size_returns_null();
+extern void memory__tl_linear__extend_zero_size_returns_nonnull();
 extern void memory__tl_linear__extend_last_alloc_is_inplace();
 extern void memory__tl_linear__extend_non_last_alloc_does_not_copy_data();
 extern void memory__tl_linear__reset_to_start();
@@ -19,7 +19,7 @@ extern void memory__tl_linear__alloc_beyond_capacity_panics();
 extern void memory__tl_linear__get_allocator_info_reports_usage();
 extern void memory__linear__get_allocator_info_reports_usage();
 extern void memory__malloc__alloc_returns_nonnull();
-extern void memory__malloc__alloc_zero_size_returns_null();
+extern void memory__malloc__alloc_zero_size_returns_nonnull();
 extern void memory__malloc__alloc_respects_alignment();
 extern void memory__malloc__free_null_is_safe();
 extern void memory__malloc__realloc_preserves_data();
@@ -64,15 +64,15 @@ extern void memory__macros__alloc_t_on_arena_runs_default_initialisers();
 
 TestSuite MEMORY__memory__tl_linear__tests[] = {
 	{ "alloc_returns_nonnull", memory__tl_linear__alloc_returns_nonnull },
-	{ "alloc_zero_size_returns_null", memory__tl_linear__alloc_zero_size_returns_null },
+	{ "alloc_zero_size_returns_nonnull", memory__tl_linear__alloc_zero_size_returns_nonnull },
 	{ "alloc_respects_alignment", memory__tl_linear__alloc_respects_alignment },
 	{ "sequential_allocs_dont_overlap", memory__tl_linear__sequential_allocs_dont_overlap },
 	{ "free_is_noop", memory__tl_linear__free_is_noop },
-	{ "realloc_zero_size_returns_null", memory__tl_linear__realloc_zero_size_returns_null },
+	{ "realloc_zero_size_returns_nonnull", memory__tl_linear__realloc_zero_size_returns_nonnull },
 	{ "realloc_last_alloc_is_inplace", memory__tl_linear__realloc_last_alloc_is_inplace },
 	{ "realloc_non_last_alloc_copies_data", memory__tl_linear__realloc_non_last_alloc_copies_data },
 	{ "realloc_null_ptr_acts_as_alloc", memory__tl_linear__realloc_null_ptr_acts_as_alloc },
-	{ "extend_zero_size_returns_null", memory__tl_linear__extend_zero_size_returns_null },
+	{ "extend_zero_size_returns_nonnull", memory__tl_linear__extend_zero_size_returns_nonnull },
 	{ "extend_last_alloc_is_inplace", memory__tl_linear__extend_last_alloc_is_inplace },
 	{ "extend_non_last_alloc_does_not_copy_data", memory__tl_linear__extend_non_last_alloc_does_not_copy_data },
 	{ "reset_to_start", memory__tl_linear__reset_to_start },
@@ -87,7 +87,7 @@ TestSuite MEMORY__memory__linear__tests[] = {
 
 TestSuite MEMORY__memory__malloc__tests[] = {
 	{ "alloc_returns_nonnull", memory__malloc__alloc_returns_nonnull },
-	{ "alloc_zero_size_returns_null", memory__malloc__alloc_zero_size_returns_null },
+	{ "alloc_zero_size_returns_nonnull", memory__malloc__alloc_zero_size_returns_nonnull },
 	{ "alloc_respects_alignment", memory__malloc__alloc_respects_alignment },
 	{ "free_null_is_safe", memory__malloc__free_null_is_safe },
 	{ "realloc_preserves_data", memory__malloc__realloc_preserves_data },
