@@ -17,6 +17,7 @@ extern void memory__tl_linear__reset_to_start();
 extern void memory__tl_linear__reset_to_restore_point();
 extern void memory__tl_linear__alloc_beyond_capacity_panics();
 extern void memory__tl_linear__get_allocator_info_reports_usage();
+extern void memory__linear__get_allocator_info_reports_usage();
 extern void memory__malloc__alloc_returns_nonnull();
 extern void memory__malloc__alloc_zero_size_returns_null();
 extern void memory__malloc__alloc_respects_alignment();
@@ -25,6 +26,10 @@ extern void memory__malloc__realloc_preserves_data();
 extern void memory__malloc__realloc_null_ptr_acts_as_alloc();
 extern void memory__malloc__extend_is_fresh_alloc_no_copy();
 extern void memory__malloc__reset_logs_error_and_returns_null();
+extern void memory__malloc__get_allocator_info_reports_zero_usage();
+extern void memory__malloc__get_allocator_info_stays_zero_after_allocations();
+extern void memory__vm_freelist__get_allocator_info_reports_capacity();
+extern void memory__vm_freelist__get_allocator_info_tracks_alloc_and_free();
 extern void memory__scratch__alloc_returns_usable_memory();
 extern void memory__scratch__release_restores_to_restore_point();
 extern void memory__scratch__no_conflict_reuses_same_underlying_arena();
@@ -76,6 +81,10 @@ TestSuite MEMORY__memory__tl_linear__tests[] = {
 	{ "get_allocator_info_reports_usage", memory__tl_linear__get_allocator_info_reports_usage },
 };
 
+TestSuite MEMORY__memory__linear__tests[] = {
+	{ "get_allocator_info_reports_usage", memory__linear__get_allocator_info_reports_usage },
+};
+
 TestSuite MEMORY__memory__malloc__tests[] = {
 	{ "alloc_returns_nonnull", memory__malloc__alloc_returns_nonnull },
 	{ "alloc_zero_size_returns_null", memory__malloc__alloc_zero_size_returns_null },
@@ -85,6 +94,13 @@ TestSuite MEMORY__memory__malloc__tests[] = {
 	{ "realloc_null_ptr_acts_as_alloc", memory__malloc__realloc_null_ptr_acts_as_alloc },
 	{ "extend_is_fresh_alloc_no_copy", memory__malloc__extend_is_fresh_alloc_no_copy },
 	{ "reset_logs_error_and_returns_null", memory__malloc__reset_logs_error_and_returns_null },
+	{ "get_allocator_info_reports_zero_usage", memory__malloc__get_allocator_info_reports_zero_usage },
+	{ "get_allocator_info_stays_zero_after_allocations", memory__malloc__get_allocator_info_stays_zero_after_allocations },
+};
+
+TestSuite MEMORY__memory__vm_freelist__tests[] = {
+	{ "get_allocator_info_reports_capacity", memory__vm_freelist__get_allocator_info_reports_capacity },
+	{ "get_allocator_info_tracks_alloc_and_free", memory__vm_freelist__get_allocator_info_tracks_alloc_and_free },
 };
 
 TestSuite MEMORY__memory__scratch__tests[] = {
@@ -133,10 +149,12 @@ TestSuite MEMORY__memory__macros__tests[] = {
 TestSuite MEMORY__tests[] = {
 	{ "memory/arena", nullptr, MEMORY__memory__arena__tests, sizeof(MEMORY__memory__arena__tests)/sizeof(MEMORY__memory__arena__tests[0]) },
 	{ "memory/buffer", nullptr, MEMORY__memory__buffer__tests, sizeof(MEMORY__memory__buffer__tests)/sizeof(MEMORY__memory__buffer__tests[0]) },
+	{ "memory/linear", nullptr, MEMORY__memory__linear__tests, sizeof(MEMORY__memory__linear__tests)/sizeof(MEMORY__memory__linear__tests[0]) },
 	{ "memory/macros", nullptr, MEMORY__memory__macros__tests, sizeof(MEMORY__memory__macros__tests)/sizeof(MEMORY__memory__macros__tests[0]) },
 	{ "memory/malloc", nullptr, MEMORY__memory__malloc__tests, sizeof(MEMORY__memory__malloc__tests)/sizeof(MEMORY__memory__malloc__tests[0]) },
 	{ "memory/scratch", nullptr, MEMORY__memory__scratch__tests, sizeof(MEMORY__memory__scratch__tests)/sizeof(MEMORY__memory__scratch__tests[0]) },
 	{ "memory/tl_linear", nullptr, MEMORY__memory__tl_linear__tests, sizeof(MEMORY__memory__tl_linear__tests)/sizeof(MEMORY__memory__tl_linear__tests[0]) },
+	{ "memory/vm_freelist", nullptr, MEMORY__memory__vm_freelist__tests, sizeof(MEMORY__memory__vm_freelist__tests)/sizeof(MEMORY__memory__vm_freelist__tests[0]) },
 };
 
 #endif // MEMORY_TEST_H

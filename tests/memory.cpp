@@ -232,6 +232,21 @@ TEST_PROC(memory__tl_linear__get_allocator_info_reports_usage)
     ASSERT(after.size == before.size);
 }
 
+TEST_PROC(memory__linear__get_allocator_info_reports_usage)
+{
+    Allocator a = linear_allocator(256);
+
+    AllocatorInfo before = get_allocator_info(a);
+    ASSERT(before.size > 0);
+
+    void *p = ALLOC(a, 64);
+    ASSERT(p != nullptr);
+
+    AllocatorInfo after = get_allocator_info(a);
+    ASSERT(after.used >= before.used + 64);
+    ASSERT(after.size == before.size);
+}
+
 
 TEST_PROC(memory__malloc__alloc_returns_nonnull)
 {
@@ -320,6 +335,56 @@ TEST_PROC(memory__malloc__reset_logs_error_and_returns_null)
 {
     Allocator a = malloc_allocator();
     EXPECT_FAIL(RESET_ALLOC(a));
+}
+
+TEST_PROC(memory__malloc__get_allocator_info_reports_zero_usage)
+{
+    Allocator a = malloc_allocator();
+
+    AllocatorInfo info = get_allocator_info(a);
+    ASSERT(info.size == 0);
+    ASSERT(info.used == 0);
+}
+
+TEST_PROC(memory__malloc__get_allocator_info_stays_zero_after_allocations)
+{
+    Allocator a = malloc_allocator();
+
+    void *p = ALLOC(a, 256);
+    ASSERT(p != nullptr);
+
+    AllocatorInfo info = get_allocator_info(a);
+    ASSERT(info.size == 0);
+    ASSERT(info.used == 0);
+
+    FREE(a, p);
+}
+
+TEST_PROC(memory__vm_freelist__get_allocator_info_reports_capacity)
+{
+    Allocator a = vm_freelist_allocator(4 * MiB);
+
+    AllocatorInfo info = get_allocator_info(a);
+    ASSERT(info.size >= 4 * MiB);
+    ASSERT(info.used == 0);
+}
+
+TEST_PROC(memory__vm_freelist__get_allocator_info_tracks_alloc_and_free)
+{
+    Allocator a = vm_freelist_allocator(4 * MiB);
+
+    AllocatorInfo before = get_allocator_info(a);
+    void *p = ALLOC(a, 4096);
+    ASSERT(p != nullptr);
+
+    AllocatorInfo after_alloc = get_allocator_info(a);
+    ASSERT(after_alloc.used >= before.used + 4096);
+
+    FREE(a, p);
+
+    AllocatorInfo after_free = get_allocator_info(a);
+    ASSERT(after_free.used == before.used);
+    ASSERT(after_free.size == before.size);
 }
 
 

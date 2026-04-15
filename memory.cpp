@@ -97,9 +97,8 @@ MArena tl_arena(i32 initial_size)
 
 AllocatorInfo get_allocator_info(Allocator alloc)
 {
-    AllocatorInfo info;
-    info.size = ((TlLinearAllocatorState*)alloc.state)->end - ((TlLinearAllocatorState*)alloc.state)->start;
-    info.used = ((TlLinearAllocatorState*)alloc.state)->current - ((TlLinearAllocatorState*)alloc.state)->start;
+    AllocatorInfo info{};
+    alloc.proc(alloc.state, M_INFO, &info, 0, 0, 0);
     return info;
 }
 
@@ -141,6 +140,12 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_si
         }
     case M_FREE:
         return nullptr;
+    case M_INFO: {
+        auto info = (AllocatorInfo*)const_cast<void*>(old_ptr);
+        info->size = state->end - state->start;
+        info->used = state->current - state->start;
+        return nullptr;
+        }
     case M_REALLOC: {
         if (size == 0) return nullptr;
 
@@ -169,6 +174,9 @@ void* tl_linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_si
         state->current = old_ptr ? (u8*)old_ptr : state->start;
         return nullptr;
     }
+
+    PANIC("unhandled allocator procedure: %d", cmd);
+    return nullptr;
 }
 
 void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment)
@@ -192,6 +200,14 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
         }
     case M_FREE:
         return nullptr;
+    case M_INFO: {
+        auto info = (AllocatorInfo*)const_cast<void*>(old_ptr);
+        GUARD_MUTEX(state->mutex) {
+            info->size = state->end - state->start;
+            info->used = state->current - state->start;
+        }
+        return nullptr;
+        }
     case M_REALLOC: {
         if (size == 0) return nullptr;
 
@@ -244,6 +260,9 @@ void* linear_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
         }
         return nullptr;
     }
+
+    PANIC("unhandled allocator procedure: %d", cmd);
+    return nullptr;
 }
 
 void* malloc_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment)
@@ -272,6 +291,12 @@ void* malloc_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_size,
             free(unaligned_ptr);
         }
         return nullptr;
+    case M_INFO: {
+        auto info = (AllocatorInfo*)const_cast<void*>(old_ptr);
+        info->size = 0;
+        info->used = 0;
+        return nullptr;
+        }
     case M_REALLOC: {
         void *old_unaligned_ptr = nullptr;
         if (old_ptr) {
@@ -348,7 +373,6 @@ void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_
     using Block = VMFreeListState::Block;
 
     auto state = (VMFreeListState*)v_state;
-
     switch (cmd) {
     case M_ALLOC: {
             if (size == 0) return nullptr;
@@ -422,6 +446,19 @@ void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_
 #endif
 
             return aligned_ptr;
+        } break;
+    case M_INFO: {
+            auto info = (AllocatorInfo*)const_cast<void*>(old_ptr);
+            lock_mutex(state->mutex);
+            defer { unlock_mutex(state->mutex); };
+
+            i64 free_size = 0;
+            for (VMFreeListState::Block *block = state->free_block; block; block = block->next) {
+                free_size += block->size;
+            }
+
+            info->size = state->reserved;
+            info->used = state->committed - free_size;
         } break;
     case M_FREE: {
             if (!old_ptr) break;

@@ -20,7 +20,7 @@ extern "C" void* memmove(void *destination, const void *source, size_t num) NOTH
 #define M_SCRATCH_ARENAS 16
 #define M_DEFAULT_ALIGN 16
 
-enum M_Proc { M_ALLOC, M_FREE, M_EXTEND, M_REALLOC, M_RESET, };
+enum M_Proc { M_ALLOC, M_FREE, M_EXTEND, M_REALLOC, M_RESET, M_INFO, };
 typedef void* allocate_t(void *state, M_Proc cmd, const void *old_ptr, i64 old_size, i64 size, u8 alignment);
 
 struct Allocator {
