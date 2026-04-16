@@ -693,6 +693,7 @@ extern "C" {
         LPPROCESS_INFORMATION lpProcessInformation);
 
     WINDLL DWORD GetCurrentProcessId();
+    WINDLL DWORD GetCurrentThreadId();
 
     WINDLL BOOL GetExitCodeProcess(
         HANDLE  hProcess,
