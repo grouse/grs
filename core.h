@@ -180,7 +180,7 @@ extern jl_panic_handler_proc jl_panic_handler;
 
 #ifndef ASSERT
 #define ASSERT(...) do {\
-    if (bool result_ = __VA_ARGS__; !result_ && ASSERT_HANDLER(cond)) {\
+    if (bool result_ = __VA_ARGS__; !result_ && ASSERT_HANDLER((__VA_ARGS__))) {\
         DEBUG_BREAK();\
     }\
 } while(0)
