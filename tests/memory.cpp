@@ -13,6 +13,22 @@ static bool is_overlapping(void *a, i64 a_size, void *b, i64 b_size)
     return a_end > b_begin && b_end > a_begin;
 }
 
+struct VMFreeListHeaderProbe {
+    u64 total_size;
+    u8 offset;
+    u8 alignment;
+};
+
+static i64 vm_freelist_exact_page_request_size(VMFreeListState *state, u8 alignment = M_DEFAULT_ALIGN)
+{
+    return state->page_size - alignment - (i64)sizeof(VMFreeListHeaderProbe) + 1;
+}
+
+static i64 vm_freelist_near_exact_page_request_size(VMFreeListState *state, u8 alignment = M_DEFAULT_ALIGN)
+{
+    return vm_freelist_exact_page_request_size(state, alignment) - ((i64)sizeof(VMFreeListState::Block) - 1);
+}
+
 TEST_PROC(memory__tl_linear__alloc_returns_nonnull)
 {
     Allocator a = tl_linear_allocator(4096);
@@ -386,6 +402,88 @@ TEST_PROC(memory__vm_freelist__get_allocator_info_tracks_alloc_and_free)
     AllocatorInfo after_free = get_allocator_info(a);
     ASSERT(after_free.used == before.used);
     ASSERT(after_free.size == before.size);
+}
+
+TEST_PROC(memory__vm_freelist__near_exact_initial_alloc_succeeds)
+{
+    Allocator a = vm_freelist_allocator(4 * MiB);
+    auto *state = (VMFreeListState*)a.state;
+
+    void *p = ALLOC(a, vm_freelist_near_exact_page_request_size(state));
+    ASSERT(p != nullptr);
+    ASSERT(state->committed > 0);
+
+    FREE(a, p);
+}
+
+TEST_PROC(memory__vm_freelist__free_then_exact_fit_reuses_committed_page)
+{
+    Allocator a = vm_freelist_allocator(4 * MiB);
+    auto *state = (VMFreeListState*)a.state;
+
+    i64 size = vm_freelist_exact_page_request_size(state);
+
+    void *p0 = ALLOC(a, size);
+    ASSERT(p0 != nullptr);
+    i64 committed_after_first_alloc = state->committed;
+    ASSERT(committed_after_first_alloc > 0);
+
+    FREE(a, p0);
+    ASSERT(state->committed == committed_after_first_alloc);
+
+    void *p1 = ALLOC(a, size);
+    ASSERT(p1 != nullptr);
+    ASSERT(state->committed == committed_after_first_alloc);
+
+    FREE(a, p1);
+}
+
+TEST_PROC(memory__vm_freelist__free_then_near_exact_fit_reuses_committed_page)
+{
+    Allocator a = vm_freelist_allocator(4 * MiB);
+    auto *state = (VMFreeListState*)a.state;
+
+    i64 exact_size = vm_freelist_exact_page_request_size(state);
+    i64 near_size = vm_freelist_near_exact_page_request_size(state);
+
+    void *p0 = ALLOC(a, exact_size);
+    ASSERT(p0 != nullptr);
+
+    FREE(a, p0);
+    i64 committed_after_free = state->committed;
+    ASSERT(committed_after_free > 0);
+
+    void *p1 = ALLOC(a, near_size);
+    ASSERT(p1 != nullptr);
+    ASSERT(state->committed == committed_after_free);
+
+    FREE(a, p1);
+}
+
+TEST_PROC(memory__vm_freelist__alternating_near_page_sizes_do_not_grow_committed)
+{
+    Allocator a = vm_freelist_allocator(4 * MiB);
+    auto *state = (VMFreeListState*)a.state;
+
+    i64 near_size = vm_freelist_near_exact_page_request_size(state);
+
+    void *seed = ALLOC(a, vm_freelist_exact_page_request_size(state));
+    ASSERT(seed != nullptr);
+    FREE(a, seed);
+
+    i64 committed_baseline = state->committed;
+    ASSERT(committed_baseline > 0);
+
+    for (i32 i = 0; i < 8; i++) {
+        i64 size = (i & 1) ? near_size : vm_freelist_exact_page_request_size(state);
+
+        void *p = ALLOC(a, size);
+        ASSERT(p != nullptr);
+        ASSERT(state->committed == committed_baseline);
+
+        FREE(a, p);
+        ASSERT(state->committed == committed_baseline);
+    }
 }
 
 

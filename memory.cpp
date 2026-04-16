@@ -371,7 +371,7 @@ void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_
 
             auto block = state->free_block;
             while (block && block->size < required_size) block = block->next;
-            if (!block || block->size - required_size < minimum_size) {
+            if (!block) {
                 i64 commit_size = ROUND_TO(required_size, state->page_size);
                 if (state->committed + commit_size > state->reserved) {
                     LOG_ERROR("virtual size exceeded");
@@ -400,10 +400,10 @@ void* vm_freelist_alloc(void *v_state, M_Proc cmd, const void *old_ptr, i64 old_
                 LOG_INFO("popping block [%p] of size %d", block, block->size);
 #endif
                 if (state->free_block == block) {
-                    state->free_block = block->next ? block->next : block->prev;
+                    state->free_block = block->next;
                 }
 
-                if (block->next->prev) block->next->prev = block->prev;
+                if (block->next) block->next->prev = block->prev;
                 if (block->prev) block->prev->next = block->next;
                 total_size = block->size;
                 ptr = block;

@@ -30,6 +30,10 @@ extern void memory__malloc__get_allocator_info_reports_zero_usage();
 extern void memory__malloc__get_allocator_info_stays_zero_after_allocations();
 extern void memory__vm_freelist__get_allocator_info_reports_capacity();
 extern void memory__vm_freelist__get_allocator_info_tracks_alloc_and_free();
+extern void memory__vm_freelist__near_exact_initial_alloc_succeeds();
+extern void memory__vm_freelist__free_then_exact_fit_reuses_committed_page();
+extern void memory__vm_freelist__free_then_near_exact_fit_reuses_committed_page();
+extern void memory__vm_freelist__alternating_near_page_sizes_do_not_grow_committed();
 extern void memory__scratch__alloc_returns_usable_memory();
 extern void memory__scratch__release_restores_to_restore_point();
 extern void memory__scratch__no_conflict_reuses_same_underlying_arena();
@@ -101,6 +105,10 @@ TestSuite MEMORY__memory__malloc__tests[] = {
 TestSuite MEMORY__memory__vm_freelist__tests[] = {
 	{ "get_allocator_info_reports_capacity", memory__vm_freelist__get_allocator_info_reports_capacity },
 	{ "get_allocator_info_tracks_alloc_and_free", memory__vm_freelist__get_allocator_info_tracks_alloc_and_free },
+	{ "near_exact_initial_alloc_succeeds", memory__vm_freelist__near_exact_initial_alloc_succeeds },
+	{ "free_then_exact_fit_reuses_committed_page", memory__vm_freelist__free_then_exact_fit_reuses_committed_page },
+	{ "free_then_near_exact_fit_reuses_committed_page", memory__vm_freelist__free_then_near_exact_fit_reuses_committed_page },
+	{ "alternating_near_page_sizes_do_not_grow_committed", memory__vm_freelist__alternating_near_page_sizes_do_not_grow_committed },
 };
 
 TestSuite MEMORY__memory__scratch__tests[] = {
