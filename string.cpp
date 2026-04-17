@@ -1295,6 +1295,33 @@ bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2]) EXP
     return false;
 }
 
+Array<String> split_lines(String str, Allocator mem) EXPORT
+{
+    i32 num_lines = 0;
+    for (i32 i = 0; i < str.length; i++) {
+        if (str[i] == '\n' || str[i] == '\r') num_lines++;
+        if (i+1 < str.length) {
+            if ((str[i] == '\n' && str[i+1] == '\r') ||
+                (str[i] == '\r' && str[i+1] == '\n'))
+            {
+                i++;
+            }
+        }
+    }
+
+    Array<String> lines = array_create<String>(num_lines, mem);
+    for (i32 i = 0, s = 0, l = 0; i < str.length; i++) {
+        if (str[i] == '\n' || str[i] == '\r') {
+            lines[l++] = slice(str, s, i);
+            s = ++i;
+        }
+        if (str[i] == '\n' && str[i+1] == '\r') s = ++i; 
+        if (str[i] == '\r' && str[i+1] == '\n') s = ++i;
+    }
+
+    return lines;
+}
+
 #if defined(_WIN32)
 i32 utf8_from_utf16(u8 *dst, i32 capacity, const wchar_t *src, i32 length)
 {

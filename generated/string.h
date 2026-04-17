@@ -60,6 +60,7 @@ extern i32 first_of(String str, char c);
 extern i32 first_of(const char *str, char c);
 extern bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2]);
 extern bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2]);
+extern Array<String> split_lines(String str, Allocator mem);
 
 #endif // STRING_GENERATED_H
 

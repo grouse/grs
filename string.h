@@ -3,6 +3,7 @@
 
 #include "core.h"
 #include "memory.h"
+#include "array.h"
 
 #define STRFMT(str) (str).length, (str).data
 
