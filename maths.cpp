@@ -2091,6 +2091,21 @@ Vector2 round_to(Vector2 v, f32 multiple) EXPORT
     return { round_to(v.x, multiple), round_to(v.y, multiple) };
 }
 
+XORShift128 make_rand(u64 entropy) EXPORT
+{
+    XORShift128 series;
+    series.state[0] = (u32)(entropy & 0xFFFFFFFF);
+    series.state[1] = (u32)((entropy >> 32) & 0xFFFFFFFF);
+    series.state[2] = (u32)((entropy >> 16) & 0xFFFFFFFF);
+    series.state[3] = (u32)((entropy >> 48) & 0xFFFFFFFF);
+
+    if (series.state[0] == 0 && series.state[1] == 0 && series.state[2] == 0 && series.state[3] == 0) {
+        series.state[0] = 1;
+    }
+
+    return series;
+}
+
 u32 rand_u32(XORShift128 *series) EXPORT
 {
     u32 t = series->state[3];
