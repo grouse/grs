@@ -1322,6 +1322,13 @@ Array<String> split_lines(String str, Allocator mem) EXPORT
     return lines;
 }
 
+void string_replace(String *str, char c, char with) EXPORT
+{
+    for (i32 i = 0; i < str->length; i++) {
+        if (str->data[i] == c) str->data[i] = with;
+    }
+}
+
 #if defined(_WIN32)
 i32 utf8_from_utf16(u8 *dst, i32 capacity, const wchar_t *src, i32 length)
 {
