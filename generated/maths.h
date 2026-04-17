@@ -136,7 +136,9 @@ extern bool aabb_intersect_swept_aabb(Vector2 pos_a, Vector2 half_size_a, Vector
 extern f32 calc_center(f32 min, f32 max, f32 size);
 extern f32 round_to(f32 value, f32 multiple);
 extern Vector2 round_to(Vector2 v, f32 multiple);
+extern XORShift128 make_rand(u64 entropy);
 extern u32 rand_u32(XORShift128 *series);
+extern i32 rand_i32(XORShift128 *series, i32 min, i32 max);
 extern f32 rand_f32(XORShift128 *series);
 extern f32 rand_f32(XORShift128 *series, f32 min, f32 max);
 extern Vector3 rand_sphere(XORShift128 *series);

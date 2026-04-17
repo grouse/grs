@@ -2120,6 +2120,12 @@ u32 rand_u32(XORShift128 *series) EXPORT
     return series->state[0];
 }
 
+i32 rand_i32(XORShift128 *series, i32 min, i32 max) EXPORT
+{
+    u32 r = rand_u32(series);
+    return min + (r % (max - min + 1));
+}
+
 f32 rand_f32(XORShift128 *series) EXPORT
 {
     u32 r = rand_u32(series);
