@@ -50,6 +50,5 @@ Thread* create_thread(ThreadProc proc, void *user_data)
 
 i32 thread_id() 
 {
-    extern "C" DWORD GetCurrentThreadId();
     return (i32)GetCurrentThreadId();
 }
