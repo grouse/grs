@@ -626,7 +626,18 @@ Quaternion quat_euler(f32 x_angle, f32 y_angle, f32 z_angle) EXPORT
     return normalise(q);
 }
 
-Quaternion quat_from_mat4(Matrix4 M) EXPORT
+Quaternion quat_look_at(Vector3 forward, Vector3 up) EXPORT
+{
+    Matrix3 rot = mat3_identity();
+    rot[2] = -normalise(forward);
+    rot[0] = normalise(cross(up, rot[2]));
+    rot[1] = cross(rot[2], rot[0]);
+    return quat_from_mat3(rot);
+}
+
+Quaternion quat_from_mat4(Matrix4 M) EXPORT { return quat_from_mat3(mat3_truncate(M)); }
+
+Quaternion quat_from_mat3(Matrix3 M) EXPORT
 {
     Quaternion q;
     if (f32 sum = M.m00 + M.m11 + M.m22; sum > 0) {
@@ -962,6 +973,15 @@ Matrix3 mat3_inverse(Matrix3 M) EXPORT
         { r0.y*inv_det, r1.y*inv_det, r2.y*inv_det },
         { r0.z*inv_det, r1.z*inv_det, r2.z*inv_det },
     }};
+}
+
+Matrix3 mat3_truncate(Matrix4 M) EXPORT
+{
+    Matrix3 r{};
+    r[0] = M[0].xyz;
+    r[1] = M[1].xyz;
+    r[2] = M[2].xyz;
+    return r;
 }
 
 f32 mat3_determinant(Matrix3 M) EXPORT
