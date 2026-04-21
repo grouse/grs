@@ -324,6 +324,14 @@ bool ends_with(String lhs, String rhs)
     return lhs.length >= rhs.length && memcmp(lhs.data+lhs.length-rhs.length, rhs.data, rhs.length) == 0;
 }
 
+String trim_whitespace(String str)
+{
+    i32 start = 0, end = str.length;
+    while (start < str.length && is_whitespace(str[start])) start++;
+    while (end > start && is_whitespace(str[end-1])) end--;
+    return slice(str, start, end);
+}
+
 bool string_contains(String lhs, String rhs) EXPORT
 {
     for (i32 i = 0; i < lhs.length; i++) {
