@@ -199,7 +199,7 @@ bool window_is_headless(AppWindow *wnd)
     return wnd->headless;
 }
 
-bool next_event(AppWindow *wnd, WindowEvent *dst)
+bool next_event_(AppWindow *wnd, WindowEvent *dst)
 {
     if (wnd->headless) return false;
 
@@ -352,13 +352,20 @@ bool next_event(AppWindow *wnd, WindowEvent *dst)
     *dst = queue->at(0);
     array_remove(queue, 0);
 
-    if (translate_input_event(queue, *dst)) {
-        if (!queue->count) return false;
-        *dst = queue->at(0);
-        array_remove(queue, 0);
+    return true;
+}
+
+bool translate_input_event(AppWindow *wnd, WindowEvent event) 
+{
+    if (wnd->headless) return false;
+
+    DynamicArray<WindowEvent> *queue = &wnd->event_queue;
+    if (translate_input_event(queue, event)) {
+        if (!wnd->events.count) return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void wait_for_next_event(AppWindow *wnd)

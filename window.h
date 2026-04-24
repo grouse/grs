@@ -491,6 +491,7 @@ Vector2 get_client_resolution(AppWindow *wnd);
 
 void wait_for_next_event(AppWindow *wnd);
 bool next_event(AppWindow *wnd, WindowEvent *dst);
+bool translate_input_event(AppWindow *wnd, WindowEvent event);
 
 void capture_mouse(AppWindow *wnd);
 void release_mouse(AppWindow *wnd);

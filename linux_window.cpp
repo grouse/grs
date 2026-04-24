@@ -608,7 +608,7 @@ Vector2 get_client_resolution(AppWindow *wnd)
     return wnd->client_resolution;
 }
 
-bool next_event(AppWindow *wnd, WindowEvent *dst)
+bool next_event_(AppWindow *wnd, WindowEvent *dst)
 {
     if (wnd->headless) return false;
 
@@ -622,13 +622,19 @@ bool next_event(AppWindow *wnd, WindowEvent *dst)
     *dst = wnd->events[0];
     array_remove(&wnd->events, 0);
 
-    if (translate_input_event(&wnd->events, *dst)) {
+    return true;
+}
+
+bool translate_input_event(AppWindow *wnd, WindowEvent event) 
+{
+    if (wnd->headless) return false;
+
+    if (translate_input_event(&wnd->events, event)) {
         if (!wnd->events.count) return false;
-        *dst = wnd->events[0];
-        array_remove(&wnd->events, 0);
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void wait_for_next_event(AppWindow *wnd)

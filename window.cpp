@@ -291,6 +291,26 @@ bool input_map_active(InputMapId id) EXPORT
     return false;
 }
 
+bool next_event(AppWindow *wnd, WindowEvent *event)
+{
+    extern bool next_event_(AppWindow *wnd, WindowEvent *dst);
+    bool result = next_event_(wnd, event);
+
+    switch (event->type) {
+    case WE_MOUSE_PRESS:
+        (*map_find_emplace(&input.mouse, EDGE_DOWN, u8(0))) |= event->mouse.button;
+        (*map_find_emplace(&input.mouse, HOLD, u8(0))) |= event->mouse.button;
+        break;
+    case WE_MOUSE_RELEASE:
+        (*map_find_emplace(&input.mouse, EDGE_UP, u8(0))) |= event->mouse.button;
+        (*map_find_emplace(&input.mouse, HOLD, u8(0))) &= ~event->mouse.button;
+        break;
+    default: break;
+    }
+
+    return result;
+}
+
 bool translate_input_event(
     DynamicArray<WindowEvent> *queue,
     InputMapId map_id,
@@ -650,14 +670,7 @@ bool translate_input_event(
     handled = handled || translate_input_event(queue, input.active_map, event);
 
     switch (event.type) {
-    case WE_MOUSE_PRESS:
-        (*map_find_emplace(&input.mouse, EDGE_DOWN, u8(0))) |= event.mouse.button;
-        (*map_find_emplace(&input.mouse, HOLD, u8(0))) |= event.mouse.button;
-        break;
     case WE_MOUSE_RELEASE:
-        (*map_find_emplace(&input.mouse, EDGE_UP, u8(0))) |= event.mouse.button;
-        (*map_find_emplace(&input.mouse, HOLD, u8(0))) &= ~event.mouse.button;
-
         for (auto &map : input.maps) {
             for (auto &it : map.by_device[MOUSE][HOLD]) {
                 if (it.input.key.code == event.key.keycode) {
