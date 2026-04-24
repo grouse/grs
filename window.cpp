@@ -294,7 +294,7 @@ bool input_map_active(InputMapId id) EXPORT
 bool next_event(AppWindow *wnd, WindowEvent *event)
 {
     extern bool next_event_(AppWindow *wnd, WindowEvent *dst);
-    bool result = next_event_(wnd, event);
+    if (!next_event_(wnd, event)) return false;
 
     switch (event->type) {
     case WE_MOUSE_PRESS:
@@ -308,7 +308,7 @@ bool next_event(AppWindow *wnd, WindowEvent *event)
     default: break;
     }
 
-    return result;
+    return true;
 }
 
 bool translate_input_event(
