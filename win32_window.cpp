@@ -361,7 +361,7 @@ bool translate_input_event(AppWindow *wnd, WindowEvent event)
 
     DynamicArray<WindowEvent> *queue = &wnd->event_queue;
     if (translate_input_event(queue, event)) {
-        if (!wnd->events.count) return false;
+        if (!queue->count) return false;
         return true;
     }
 
