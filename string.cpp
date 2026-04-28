@@ -1211,6 +1211,13 @@ bool is_number(i32 c) EXPORT
     return c >= '0' && c <= '9';
 }
 
+bool is_numeric(String str) EXPORT
+{
+    if (!str) return false;
+    for (char c : str) if (!is_number(c)) return false;
+    return true;
+}
+
 bool is_alpha(i32 c) EXPORT
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
