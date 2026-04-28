@@ -277,6 +277,13 @@ T* array_tail(Array<T> &arr)
 }
 
 template<typename T>
+T array_tail_or(Array<T> &arr, const T &fallback)
+{
+    if (arr.count == 0) return fallback;
+    return arr.data[arr.count-1];
+}
+
+template<typename T>
 void array_create(Array<T> *arr, i32 count, Allocator mem)
 {
     T *nptr = ALLOC_ARR(mem, T, count);
