@@ -33,6 +33,7 @@ extern i32 utf8_decr(String str, i32 i);
 extern i32 utf8_incr(String str, i32 i);
 extern bool path_equals(String lhs, String rhs);
 extern String extension_of(String path);
+extern String basename_of(String path);
 extern const char *sz_extension_of(const char *path);
 extern String filename_of(String path);
 extern String filename_of_sz(const char *path);

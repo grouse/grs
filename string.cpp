@@ -838,6 +838,12 @@ String extension_of(String path) EXPORT
     return {};
 }
 
+String basename_of(String path) EXPORT
+{
+    String ext = extension_of(path);
+    return ext ? slice(path, 0, path.length-ext.length) : path;
+}
+
 const char* sz_extension_of(const char *path) EXPORT
 {
     char *ext = nullptr;
