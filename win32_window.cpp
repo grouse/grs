@@ -368,6 +368,19 @@ bool translate_input_event(AppWindow *wnd, WindowEvent event)
     return false;
 }
 
+bool translate_input_event(AppWindow *wnd, InputMapId map, WindowEvent event) 
+{
+    if (wnd->headless) return false;
+
+    DynamicArray<WindowEvent> *queue = &wnd->event_queue;
+    if (translate_input_event(queue, map, event)) {
+        if (!queue->count) return false;
+        return true;
+    }
+
+    return false;
+}
+
 void wait_for_next_event(AppWindow *wnd)
 {
     MSG msg;

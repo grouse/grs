@@ -637,6 +637,18 @@ bool translate_input_event(AppWindow *wnd, WindowEvent event)
     return false;
 }
 
+bool translate_input_event(AppWindow *wnd, InputMapId map, WindowEvent event) 
+{
+    if (wnd->headless) return false;
+
+    if (translate_input_event(&wnd->events, map, event)) {
+        if (!wnd->events.count) return false;
+        return true;
+    }
+
+    return false;
+}
+
 void wait_for_next_event(AppWindow *wnd)
 {
     while (!wnd->events.count) {

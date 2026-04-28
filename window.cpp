@@ -708,9 +708,8 @@ bool translate_input_event(
             break;
         }
     }
-    handled = handled || translate_input_event(queue, input.active_map, event);
 
-    return handled;
+    return handled || translate_input_event(queue, input.active_map, event);
 }
 
 bool text_input_enabled() EXPORT
