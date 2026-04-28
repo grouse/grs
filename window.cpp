@@ -304,6 +304,62 @@ bool next_event(AppWindow *wnd, WindowEvent *event)
     case WE_MOUSE_RELEASE:
         (*map_find_emplace(&input.mouse, EDGE_UP, u8(0))) |= event->mouse.button;
         (*map_find_emplace(&input.mouse, HOLD, u8(0))) &= ~event->mouse.button;
+
+        for (auto &map : input.maps) {
+            for (auto &it : map.by_device[MOUSE][HOLD]) {
+                if (it.input.key.code == event->key.keycode) {
+                    (*map_find_emplace(&map.held, it.id, false)) = false;
+                }
+            }
+            for (auto &it : map.by_device[MOUSE][HOLD]) {
+                bool *active = map_find(&map.active, it);
+                if (!active || !*active) continue;
+
+                if ((it.input.mouse.button & event->mouse.button) ||
+                    it.input.mouse.button == MB_ANY)
+                {
+                    (*map_find_emplace(&map.held, it.id, false)) = false;
+                    *active = false;
+                }
+            }
+        }
+        break;
+
+    case WE_MOUSE_MOVE:
+        for (auto &map : input.maps) {
+            for (auto &it : map.by_device[MOUSE][CURSOR]) {
+                if (auto *cursor = map_find_emplace(&map.cursors, it.id, {})) {
+                    cursor->x = event->mouse.x;
+                    cursor->y = event->mouse.y;
+                }
+            }
+        } break;
+    case WE_KEY_RELEASE:
+        for (auto &map : input.maps) {
+            for (auto &it : map.by_device[KEYBOARD][HOLD]) {
+                bool *active = map_find(&map.active, it);
+                if (!active || !*active) continue;
+
+                if (it.input.key.code == event->key.keycode) {
+                    (*map_find_emplace(&map.held, it.id, false)) = false;
+                    *active = false;
+                }
+            }
+
+            for (i32 i = AXIS; i < AXIS_2D; i++) {
+                for (auto &it : map.by_device[KEYBOARD][i]) {
+                    bool *active = map_find(&map.active, it);
+                    if (!active || !*active) continue;
+
+                    if (f32 *axis = map_find(&map.axes, it.id);
+                        axis && it.input.key.code == event->key.keycode)
+                    {
+                        axis[it.input.key.axis] -= it.input.key.faxis;
+                        *active = false;
+                    }
+                }
+            }
+        }
         break;
     default: break;
     }
@@ -645,21 +701,6 @@ bool translate_input_event(
     DynamicArray<WindowEvent> *queue,
     WindowEvent event) INTERNAL
 {
-    if (false) switch (event.type) {
-    case WE_KEY_PRESS:
-        LOG_INFO("KEY_PRESS: %.*s [0x%X]; modifiers: [0x%X]; prev_state: %d",
-                 STRFMT(string_from_enum((KeyCode_)event.key.keycode)), event.key.keycode,
-                 event.key.modifiers,
-                 event.key.prev_state);
-        break;
-    case WE_KEY_RELEASE:
-        LOG_INFO("KEY_RELEASE: %.*s [0x%X]; modifiers: [0x%X]; prev_state: %d",
-                 STRFMT(string_from_enum((KeyCode_)event.key.keycode)), event.key.keycode,
-                 event.key.modifiers,
-                 event.key.prev_state);
-        break;
-    }
-
     bool handled = false;
     for (auto it : reverse(input.layers)) {
         if (translate_input_event(queue, it, event)) {
@@ -668,66 +709,6 @@ bool translate_input_event(
         }
     }
     handled = handled || translate_input_event(queue, input.active_map, event);
-
-    switch (event.type) {
-    case WE_MOUSE_RELEASE:
-        for (auto &map : input.maps) {
-            for (auto &it : map.by_device[MOUSE][HOLD]) {
-                if (it.input.key.code == event.key.keycode) {
-                    (*map_find_emplace(&map.held, it.id, false)) = false;
-                }
-            }
-            for (auto &it : map.by_device[MOUSE][HOLD]) {
-                bool *active = map_find(&map.active, it);
-                if (!active || !*active) continue;
-
-                if ((it.input.mouse.button & event.mouse.button) ||
-                    it.input.mouse.button == MB_ANY)
-                {
-                    (*map_find_emplace(&map.held, it.id, false)) = false;
-                    *active = false;
-                }
-            }
-        }
-        break;
-    case WE_MOUSE_MOVE:
-        for (auto &map : input.maps) {
-            for (auto &it : map.by_device[MOUSE][CURSOR]) {
-                if (auto *cursor = map_find_emplace(&map.cursors, it.id, {})) {
-                    cursor->x = event.mouse.x;
-                    cursor->y = event.mouse.y;
-                }
-            }
-        } break;
-    case WE_KEY_RELEASE:
-        for (auto &map : input.maps) {
-            for (auto &it : map.by_device[KEYBOARD][HOLD]) {
-                bool *active = map_find(&map.active, it);
-                if (!active || !*active) continue;
-
-                if (it.input.key.code == event.key.keycode) {
-                    (*map_find_emplace(&map.held, it.id, false)) = false;
-                    *active = false;
-                }
-            }
-
-            for (i32 i = AXIS; i < AXIS_2D; i++) {
-                for (auto &it : map.by_device[KEYBOARD][i]) {
-                    bool *active = map_find(&map.active, it);
-                    if (!active || !*active) continue;
-
-                    if (f32 *axis = map_find(&map.axes, it.id);
-                        axis && it.input.key.code == event.key.keycode)
-                    {
-                        axis[it.input.key.axis] -= it.input.key.faxis;
-                        *active = false;
-                    }
-                }
-            }
-        }
-        break;
-    default: break;
-    }
 
     return handled;
 }
