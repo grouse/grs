@@ -26,7 +26,19 @@ struct Array {
         return data[i];
     }
 
+    constexpr const T& operator[](i32 i) const
+    {
+        ASSERT_BOUNDS(i, 0, count-1);
+        return data[i];
+    }
+
     T& at(i32 i)
+    {
+        ASSERT_BOUNDS(i, 0, count-1);
+        return data[i];
+    }
+
+    const T& at(i32 i) const
     {
         ASSERT_BOUNDS(i, 0, count-1);
         return data[i];
@@ -734,6 +746,13 @@ void array_resize(FixedArray<T, N> *arr, i32 count)
 {
     PANIC_IF(count > N, "FixedArray overflow");
     arr->count = count;
+}
+
+template<typename T, i32 N>
+void array_grow(FixedArray<T, N> *arr, i32 additional_elements)
+{
+    ASSERT(arr->count + additional_elements <= arr->capacity());
+    arr->count = MIN(arr->capacity(), arr->count+additional_elements);
 }
 
 #endif // ARRAY_H
