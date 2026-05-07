@@ -476,9 +476,44 @@ void quick_sort_asc(Array<T> arr, Array<Tail>... tail)
 }
 
 template<typename T>
+void quick_sort(Array<T> arr, i32 l, i32 r, bool (*compare)(T &a, T &b))
+{
+    if (l < 0 || r < 0 || l >= r) return;
+
+    T pivot = arr[(r+l)/2];
+
+    i32 i = l-1;
+    i32 j = r+1;
+
+    i32 pi = -1;
+    while (true) {
+        do i += 1; while(compare(arr[i], pivot));
+        do j -= 1; while(compare(pivot, arr[j]));
+
+        if (i >= j) {
+            pi = j;
+            break;
+        }
+
+        array_swap(arr, i, j);
+    }
+
+    ASSERT(pi >= 0);
+
+    quick_sort(arr, l, pi, compare);
+    quick_sort(arr, pi+1, r, compare);
+}
+
+template<typename T>
 void array_sort(Array<T> arr)
 {
     quick_sort_asc(arr);
+}
+
+template<typename T>
+void array_sort(Array<T> arr, bool (*compare)(T &a, T &b))
+{
+    quick_sort(arr, 0, arr.count-1, compare);
 }
 
 // -- dynamic array procedures
