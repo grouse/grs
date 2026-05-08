@@ -542,13 +542,16 @@ Array<String> list_asset_files(Allocator mem) EXPORT
     return files;
 }
 
-Array<String> list_asset_files(i32 type, Allocator mem) EXPORT
+Array<String> list_asset_files(i32 type) EXPORT
 {
     auto *files = map_find_emplace(&assets.by_type, type);
+
     if (!files->alloc) {
+        files->alloc = mem_dynamic;
+
         for (auto f : assets.folders) {
             i32 c = files->count;
-            list_files(files, f, mem, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
+            list_files(files, f, files->alloc, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
 
             // NOTE(jesper): dumb type filtering. The asset system probably ought to keep track of the filesystem better on its own, so these kinds of queries can be O(1), or close to it
             for (i32 i = c; i < files->count; i++) {
