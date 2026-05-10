@@ -120,6 +120,34 @@ bool ini_value(
 bool ini_value(
     IniSerializer *ini,
     String name,
+    u32 *value, int count /*= 1*/) EXPORT
+{
+    switch (ini->mode) {
+    case INI_WRITE:
+        append_stringf(&ini->out, "%.*s = %d", STRFMT(name), *value);
+        for (i32 i = 1; i < count; i++) append_stringf(&ini->out, ", %u", value[i]);
+        append_string(&ini->out, "\n");
+        return true;
+    case INI_READ:
+        if (is_identifier(ini->lexer.t, name)) {
+            if (!require_next_token(&ini->lexer, '=', &ini->lexer.t)) return false;
+            for (i32 i = 0; i < count; i++) {
+                if (!parse_u32(&ini->lexer, &value[i])) return false;
+                if (i == count-1 || !optional_token(&ini->lexer, ',', &ini->lexer.t)) break;
+            }
+
+            next_token(&ini->lexer);
+            return true;
+        }
+        break;
+    }
+
+    return false;
+}
+
+bool ini_value(
+    IniSerializer *ini,
+    String name,
     f32 *value, i32 count /*= 1*/) EXPORT
 {
     switch (ini->mode) {

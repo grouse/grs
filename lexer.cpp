@@ -232,6 +232,18 @@ bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/) EXPORT
     return true;
 }
 
+bool parse_u32(Lexer *lexer, u32 *value, i32 n /*= 1*/) EXPORT
+{
+    for (i32 i = 0; i < n; i++) {
+        if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
+        if (!u32_from_string(lexer->t.str, &value[i])) {
+            PARSE_ERROR(lexer, "invalid float string: '%.*s'", STRFMT(lexer->t.str));
+            return false;
+        }
+    }
+    return true;
+}
+
 bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 1*/) EXPORT
 {
     for (i32 i = 0; i < n; i++) {
