@@ -1876,6 +1876,19 @@ extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance) INTER
 
 GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count) EXPORT
 {
+    PANIC_IF(index_count > indices.count,
+        "[gfx] mesh index count exceeds index buffer length: %d > %d",
+        index_count,
+        indices.count);
+
+    for (i32 i = 0; i < indices.count; i++) {
+        PANIC_IF(indices[i] >= u32(vertices.count),
+            "[gfx] mesh index out of range: index_buffer[%d] = %u, vertex_count = %d",
+            i,
+            indices[i],
+            vertices.count);
+    }
+
     Vector3 min = vec3_MAX, max = -vec3_MAX;
     for (i32 i = 0; i < vertices.count; i++) {
         min = vec3_min(min, vertices[i].position);
@@ -1948,27 +1961,21 @@ GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
     u32 indices[] = {
         // front
         0, 1, 2,  2, 3, 0,
-        4, 5, 6,  6, 7, 4,
 
         // back
-        8, 9,10, 10,11, 8,
-        12,13,14, 14,15,12,
+        4, 5, 6,  6, 7, 4,
 
         // top
-        16,17,18, 18,19,16,
-        20,21,22, 22,23,20,
+        8, 9,10, 10,11, 8,
 
         // bottom
-        24, 25,26, 26,27,24,
-        28,29,30, 30,31,28,
+        12,13,14, 14,15,12,
 
         // right
-        32,33,34, 34,35,32,
-        36,37,38, 38,39,36,
+        16,17,18, 18,19,16,
 
         // left
-        40,41,42, 42,43,40,
-        44,45,46, 46,47,44,
+        20,21,22, 22,23,20,
     };
 
     *mesh = gfx_create_mesh({ vertices, ARRAY_COUNT(vertices) }, { indices, ARRAY_COUNT(indices) }, ARRAY_COUNT(indices));
