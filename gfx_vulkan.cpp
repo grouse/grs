@@ -127,7 +127,7 @@ extern void vk_destroy_swapchain() INTERNAL
     }
 }
 
-extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
+extern void vk_create_swapchain(VkExtent2D extent, VkPresentModeKHR present_mode) INTERNAL
 {
     LOG_INFO("[vk] creating swapchain: %d, %d", extent.width, extent.height);
     SArena scratch = tl_scratch_arena();
@@ -172,6 +172,11 @@ extern void vk_create_swapchain(VkExtent2D extent) INTERNAL
     for (auto it : iterator(modes)) {
         LOG_INFO("present mode [%d]: %s", it.index, sz_from_enum(*it));
         if (it == VK_PRESENT_MODE_FIFO_KHR) chosen_mode = it.index;
+
+        if (it == present_mode) {
+            chosen_mode = it.index;
+            break;
+        }
     }
     PANIC_IF(chosen_mode == -1, "no suitable present mode found");
     LOG_INFO("chosen present mode: %s", sz_from_enum(modes[chosen_mode]));
@@ -267,7 +272,7 @@ extern void vk_recreate_swapchain() INTERNAL
         frame.image_available = nullptr;
     }
 
-    vk_create_swapchain(vk.swapchain.extent);
+    vk_create_swapchain(vk.swapchain.extent, vk.swapchain.present_mode);
     for (auto &frame : vk.frames) {
         VkSemaphoreCreateInfo semaphore_info{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
         VK_CHECK(vkCreateSemaphore(vk.device, &semaphore_info, nullptr, &frame.image_available));

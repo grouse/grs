@@ -354,6 +354,7 @@ extern struct GfxVkContext {
         VkSwapchainKHR handle;
         VkFormat format;
         VkExtent2D extent;
+        VkPresentModeKHR present_mode;
 
         FixedArray<VkImage, MAX_SWAPCHAIN_IMAGES> images;
         FixedArray<VkImageView, MAX_SWAPCHAIN_IMAGES> views;
