@@ -355,9 +355,9 @@ GfxBuffer gfx_create_vertex_buffer(void *data, i32 size) EXPORT
 {
     GfxVkBuffer buffer = vk_create_buffer(
         size,
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_KHR,
         VMA_MEMORY_USAGE_GPU_ONLY,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
+        VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT);
 
     GfxVkBuffer staging = vk_create_buffer(
         size,
@@ -633,7 +633,7 @@ extern GfxVkBuffer vk_create_buffer(
     i32 size,
     VkBufferUsageFlags usage,
     VmaMemoryUsage mem_usage,
-    VmaAllocationCreateFlagBits flags) INTERNAL
+    VmaAllocationCreateFlags flags) INTERNAL
 {
     if (!size) return {};
 
@@ -644,12 +644,23 @@ extern GfxVkBuffer vk_create_buffer(
     };
 
     VmaAllocationCreateInfo alloc_info{
-        .flags = (VmaAllocationCreateFlags)flags,
+        .flags = flags,
         .usage = mem_usage,
     };
 
     GfxVkBuffer buffer{ .size = size };
     VK_CHECK(vmaCreateBuffer(vk.allocator, &buffer_info, &alloc_info, &buffer.handle, &buffer.allocation, &buffer.allocation_info));
+
+
+    if (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) {
+        VkBufferDeviceAddressInfo address_info{
+            .sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
+            .buffer = buffer.handle,
+        };
+
+        buffer.gpu = vkGetBufferDeviceAddress(vk.device, &address_info);
+    }
+
     return buffer;
 }
 

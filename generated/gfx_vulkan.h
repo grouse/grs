@@ -48,7 +48,7 @@ extern void vk_set_scissor(VkCommandBuffer cmd, f32 width, f32 height);
 extern void vk_transition_image(VkCommandBuffer cmd, GfxVkTexture texture, VkImageLayout old_layout, VkImageLayout new_layout);
 extern void vk_transition_image(VkCommandBuffer cmd, VkImage image, VkImageAspectFlags aspect, VkImageLayout old_layout, VkImageLayout new_layout);
 extern VkDeviceAddress vk_get_buffer_address(VkBuffer buffer);
-extern GfxVkBuffer vk_create_buffer(i32 size, VkBufferUsageFlags usage, VmaMemoryUsage mem_usage, VmaAllocationCreateFlagBits flags);
+extern GfxVkBuffer vk_create_buffer(i32 size, VkBufferUsageFlags usage, VmaMemoryUsage mem_usage, VmaAllocationCreateFlags flags);
 extern GfxVkBuffer vk_create_buffer(void *data, i32 size, VkBufferUsageFlags usage, VmaMemoryUsage mem_usage, VmaAllocationCreateFlagBits flags);
 extern void vk_destroy_buffer(GfxVkBuffer buffer);
 extern void vk_set_image_label(VkImage image, String label);

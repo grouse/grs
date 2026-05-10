@@ -43,6 +43,7 @@ struct SpvCompilationResult {
 
 struct GfxVkBuffer {
     VkBuffer handle;
+    VkDeviceAddress gpu;
     VmaAllocation allocation;
     VmaAllocationInfo allocation_info;
 
