@@ -4,6 +4,8 @@
 #include "string.h"
 #include "memory.h"
 
+#include <tracy/Tracy.hpp>
+
 #include "vulkan/vulkan_core.h"
 
 GfxVkContext vk;
@@ -111,6 +113,8 @@ Vector2 gfx_resolution() EXPORT
 
 void gfx_wait_frame() EXPORT
 {
+    ZoneScopedN("gfx_wait_frame");
+
     auto *frame = &vk.frames[vk.current_frame];
     VK_CHECK(vkWaitForFences(vk.device, 1, &frame->fence, VK_TRUE, UINT64_MAX));
 }
@@ -253,6 +257,8 @@ extern void vk_create_swapchain(VkExtent2D extent, VkPresentModeKHR present_mode
 
 void gfx_wait_for_frame() EXPORT
 {
+    ZoneScopedN("gfx_wait_for_frame");
+
     vk.current_frame = (vk.current_frame + 1) % vk.frames.count;
 
     auto *frame = &vk.frames[vk.current_frame];
@@ -1425,6 +1431,11 @@ extern const char* sz_from_enum(VkImageViewType type) INTERNAL
 
 void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
 {
+    ZoneScopedN("gfx_begin_pass");
+    if (desc.debug_name.data && desc.debug_name.length) {
+        ZoneName(desc.debug_name.data, desc.debug_name.length);
+    }
+
     SArena scratch = tl_scratch_arena();
 
     auto *frame = &vk.frames[vk.current_frame];
@@ -1493,6 +1504,8 @@ void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
 
 void gfx_end_pass() EXPORT
 {
+    ZoneScopedN("gfx_end_pass");
+
     auto *frame = &vk.frames[vk.current_frame];
     auto cmd = frame->cmd;
 
