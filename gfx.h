@@ -5,6 +5,7 @@
 #include "core.h"
 #include "hash.h"
 #include "maths.h"
+#include "assets.h"
 
 #define GFX_HANDLE(name, underlying_t)\
     struct name {\
@@ -197,9 +198,10 @@ GfxTexture gfx_create_texture(GfxTextureFormat format, GfxSwizzle swizzle, u32 w
 GfxTexture gfx_create_texture(void *pixels, GfxTextureFormat format, GfxSwizzle swizzle, u32 width, u32 height);
 void gfx_copy_texture(GfxTexture dst, u32 dst_x, u32 dst_y, u32 w, u32 h, const void *pixels);
 
-GfxTexture gfx_load_texture(String image_path, bool sRGB);
-
 GfxMaterial gfx_material(GfxMaterialDesc desc);
+GfxTexture gfx_load_texture(String path, bool sRGB = true);
+GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB = true);
+AssetHandle gfx_get_texture_asset(GfxTexture texture);
 
 GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
 GfxBuffer gfx_create_vertex_buffer(void *data, i32 size);

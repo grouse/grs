@@ -397,13 +397,13 @@ GfxBuffer gfx_create_index_buffer(void *data, i32 size) EXPORT
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
-GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) EXPORT
+GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) 
 {
     AssetHandle handle = find_asset_handle(path);
     return gfx_load_texture(handle, sRGB);
 }
 
-GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
+GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) 
 {
     if (!handle) return GfxTexture_INVALID;
 
@@ -431,6 +431,15 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/) EXPORT
 
     map_set(&vk.texture_assets, { handle, sRGB }, texture_idx);
     return texture_idx;
+}
+
+AssetHandle gfx_get_texture_asset(GfxTexture texture) 
+{
+    for (auto it : vk.texture_assets) {
+        if (*it == texture) return it.key.asset;
+    }
+
+    return ASSET_HANDLE_INVALID;
 }
 
 extern GfxTexture vk_create_texture(
