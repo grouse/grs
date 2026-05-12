@@ -516,6 +516,22 @@ void array_sort(Array<T> arr, bool (*compare)(T &a, T &b))
     quick_sort(arr, 0, arr.count-1, compare);
 }
 
+template<typename T>
+i32 array_count_if(Array<T> arr, bool (*predicate)(T &e))
+{
+    i32 count = 0;
+    for (i32 i = 0; i < arr.count; i++) if (predicate(arr[i])) count++;
+    return count;
+}
+
+template<typename T>
+i32 array_count(Array<T> arr, const T &needle)
+{
+    i32 count = 0;
+    for (i32 i = 0; i < arr.count; i++) if (arr[i] == needle) count++;
+    return count;
+}
+
 // -- dynamic array procedures
 template<typename T>
 void array_grow(DynamicArray<T> *arr, i32 additional_elements)
