@@ -703,3 +703,31 @@ TEST_PROC(array__sort)
         ASSERT(key_arr[4] == 5 && value_arr[4] == 'a');
     }
 }
+
+TEST_PROC(array__sort_comparator_ascending)
+{
+    i32 data[] = { 5, 3, 1, 4, 2 };
+    Array<i32> arr{ data, ARRAY_COUNT(data) };
+
+    array_sort(arr, +[](i32 &a, i32 &b) -> bool { return a < b; });
+
+    ASSERT(arr[0] == 1);
+    ASSERT(arr[1] == 2);
+    ASSERT(arr[2] == 3);
+    ASSERT(arr[3] == 4);
+    ASSERT(arr[4] == 5);
+}
+
+TEST_PROC(array__sort_comparator_descending)
+{
+    i32 data[] = { 1, 3, 5, 4, 2 };
+    Array<i32> arr{ data, ARRAY_COUNT(data) };
+
+    array_sort(arr, +[](i32 &a, i32 &b) -> bool { return a > b; });
+
+    ASSERT(arr[0] == 5);
+    ASSERT(arr[1] == 4);
+    ASSERT(arr[2] == 3);
+    ASSERT(arr[3] == 2);
+    ASSERT(arr[4] == 1);
+}
