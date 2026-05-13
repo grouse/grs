@@ -674,7 +674,7 @@ TEST_PROC(array__sort)
         int data[] = {5, 3, 1, 4, 2};
         Array<int> arr{data, 5};
 
-        quick_sort_asc(arr);
+        quick_sort(arr, [](int &a, int &b) { return a < b; });
         for (int i = 0; i < arr.count-1; i++) {
             ASSERT(arr[i] <= arr[i+1]);
         }
@@ -685,7 +685,7 @@ TEST_PROC(array__sort)
         int data[] = {1, 3, 5, 4, 2};
         Array<int> arr{data, 5};
 
-        quick_sort_desc(arr);
+        quick_sort(arr, [](int &a, int &b) { return a > b; });
         for (int i = 0; i < arr.count-1; i++) {
             ASSERT(arr[i] >= arr[i+1]);
         }
@@ -698,9 +698,20 @@ TEST_PROC(array__sort)
         Array<int> key_arr{keys, 5};
         Array<char> value_arr{values, 5};
 
-        quick_sort_asc(key_arr, value_arr);
+        quick_sort(key_arr, [](int &a, int &b) { return a < b; }, value_arr);
         ASSERT(key_arr[0] == 1 && value_arr[0] == 'c');
         ASSERT(key_arr[4] == 5 && value_arr[4] == 'a');
+    }
+}
+
+TEST_PROC(array__default_sort_is_ascending)
+{
+    int data[] = {5, 3, 1, 4, 2};
+    Array<int> arr{data, 5};
+
+    array_sort(arr);
+    for (int i = 0; i < arr.count-1; i++) {
+        ASSERT(arr[i] <= arr[i+1]);
     }
 }
 

@@ -23,6 +23,7 @@ extern void array__slice();
 extern void array__find();
 extern void array__swap();
 extern void array__sort();
+extern void array__default_sort_is_ascending();
 extern void array__sort_comparator_ascending();
 extern void array__sort_comparator_descending();
 
@@ -37,6 +38,7 @@ TestSuite ARRAY__array__tests[] = {
 	{ "find", array__find },
 	{ "swap", array__swap },
 	{ "sort", array__sort },
+	{ "default_sort_is_ascending", array__default_sort_is_ascending },
 	{ "sort_comparator_ascending", array__sort_comparator_ascending },
 	{ "sort_comparator_descending", array__sort_comparator_descending },
 };
