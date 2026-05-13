@@ -475,8 +475,8 @@ void quick_sort_asc(Array<T> arr, Array<Tail>... tail)
     quick_sort_asc(arr, 0, arr.count-1, tail...);
 }
 
-template<typename T>
-void quick_sort(Array<T> arr, i32 l, i32 r, bool (*compare)(T &a, T &b))
+template<typename T, typename Compare>
+void quick_sort(Array<T> arr, i32 l, i32 r, Compare compare)
 {
     if (l < 0 || r < 0 || l >= r) return;
 
@@ -510,8 +510,8 @@ void array_sort(Array<T> arr)
     quick_sort_asc(arr);
 }
 
-template<typename T>
-void array_sort(Array<T> arr, bool (*compare)(T &a, T &b))
+template<typename T, typename Compare>
+void array_sort(Array<T> arr, Compare compare)
 {
     quick_sort(arr, 0, arr.count-1, compare);
 }
