@@ -22,6 +22,7 @@ enum TokenType : u16 {
     TOKEN_WHITESPACE, // automatically eaten unless LEXER_WHITESPACE
     TOKEN_NEWLINE,    // automatically eaten unless LEXER_NEWLINE
 
+    TOKEN_COMMENT, // NOTE(jesper): currently hard-coded to `//`
     TOKEN_EOF,
 };
 
@@ -42,6 +43,7 @@ struct Token {
 enum LexerFlags : u8 {
     LEXER_NEWLINE    = 1 << 0,
     LEXER_WHITESPACE = 1 << 1,
+    LEXER_COMMENT    = 1 << 2,
 
     LEXER_ALL        = 0xFF,
 };
