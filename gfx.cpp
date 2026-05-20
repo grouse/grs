@@ -4,8 +4,6 @@
 
 #include <stb/stb_image.h>
 
-GfxContext gfx;
-
 void* gfx_load_texture_asset(
     AssetHandle handle,
     void *existing,
