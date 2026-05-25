@@ -147,6 +147,8 @@ extern f32 rand_f32(XORShift128 *series);
 extern f32 rand_f32(XORShift128 *series, f32 min, f32 max);
 extern Vector3 rand_sphere(XORShift128 *series);
 extern Vector3 rand_color3(XORShift128 *series);
+extern Vector3 rand_vec3(XORShift128 *series, Vector3 min, Vector3 max);
+extern Vector2 rand_vec2(XORShift128 *series, Vector2 min, Vector2 max);
 extern Vector3 rand_hemisphere(Vector3 normal, XORShift128 *series);
 extern Vector3 rand_disc(XORShift128 *series);
 extern f32 radf(f32 theta);

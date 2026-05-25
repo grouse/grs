@@ -2182,6 +2182,23 @@ Vector3 rand_color3(XORShift128 *series) EXPORT
     return v;
 }
 
+Vector3 rand_vec3(XORShift128 *series, Vector3 min, Vector3 max) EXPORT
+{
+    Vector3 v;
+    v.x = rand_f32(series, min.x, max.x);
+    v.y = rand_f32(series, min.y, max.y);
+    v.z = rand_f32(series, min.z, max.z);
+    return v;
+}
+
+Vector2 rand_vec2(XORShift128 *series, Vector2 min, Vector2 max) EXPORT
+{
+    Vector2 v;
+    v.x = rand_f32(series, min.x, max.x);
+    v.y = rand_f32(series, min.y, max.y);
+    return v;
+}
+
 Vector3 rand_hemisphere(Vector3 normal, XORShift128 *series) EXPORT
 {
     Vector3 s = rand_sphere(series);
