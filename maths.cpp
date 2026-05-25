@@ -2206,6 +2206,25 @@ Vector3 rand_hemisphere(Vector3 normal, XORShift128 *series) EXPORT
     return -s;
 }
 
+Vector3 rand_cone(XORShift128 *series, Vector3 axis, f32 theta) EXPORT
+{
+    f32 lsq = length_sq(axis);
+    if (lsq == 0.0f || theta >= 2*f32_PI) return rand_sphere(series);
+
+    f32 half_t = 0.5f*theta;
+
+    Vector3 right = cross(axis, fabs(axis.x) > fabs(axis.y) ? Vector3{ 0.0f, 1.0f, 0.0f } : Vector3{ 1.0f, 0.0f, 0.0f });
+    Vector3 up    = cross(axis, right);
+
+    f32 z   = lerp(cosf(half_t), 1.0f, rand_f32(series));
+    f32 phi = rand_f32(series)*2*f32_PI;
+    f32 r   = sqrtf(1 - z*z);
+
+    Vector3 ls_dir = { cosf(phi)*r, sinf(phi)*r, z };
+    Vector3 ws_dir = ls_dir.x*right + ls_dir.y*up + ls_dir.z*axis;
+    return ws_dir;
+}
+
 Vector3 rand_disc(XORShift128 *series) EXPORT
 {
     for (;;) {
