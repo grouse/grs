@@ -19,6 +19,7 @@ extern f32 length_sq(Vector3 v);
 extern Vector3 lerp(Vector3 a, Vector3 b, f32 t);
 extern Vector3 normalise(Vector3 v);
 extern Vector3 normalise_zero(Vector3 v);
+extern Vector3 normalise_or(Vector3 v, Vector3 fallback);
 extern Vector3 project(Vector3 a, Vector3 b);
 extern Vector3 project_unit(Vector3 a, Vector3 b);
 extern Vector3 reject(Vector3 a, Vector3 b);

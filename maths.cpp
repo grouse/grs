@@ -188,8 +188,13 @@ Vector3 normalise(Vector3 v) EXPORT
 
 Vector3 normalise_zero(Vector3 v) EXPORT
 {
+    return normalise_or(v, { 0, 0, 0 });
+}
+
+Vector3 normalise_or(Vector3 v, Vector3 fallback) EXPORT
+{
     f32 length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-    if (length == 0) return Vector3{ 0, 0, 0 };
+    if (length == 0) return fallback;
 
     Vector3 r;
     r.x = v.x / length;
