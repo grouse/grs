@@ -42,6 +42,7 @@ AppWindow* create_window(WindowCreateDesc desc)
     }
 
     init_x11();
+    init_sdl3();
 
     SArena scratch = tl_scratch_arena();
 

@@ -1,7 +1,8 @@
+#include <SDL3/SDL.h>
 #include <X11/Xlib.h>
-#include <X11/keysym.h>
 #include <X11/cursorfont.h>
 #include <X11/extensions/XInput2.h>
+#include <X11/keysym.h>
 #include <dlfcn.h>
 
 #include "window.h"
@@ -30,6 +31,16 @@ struct {
     Atom WM_PROTOCOLS;
     Atom WM_DELETE_WINDOW;
 } x11{};
+
+struct GamepadState {
+    SDL_Gamepad *sdl;
+    f32 joy0[2];
+    f32 joy1[2];
+};
+
+struct { 
+    DynamicMap<SDL_JoystickID, GamepadState> gamepads;
+} sdl3;
 
 #define X11_GET_ATOM(dsp, name) x11.name = XInternAtom(dsp, #name, False)
 
@@ -526,6 +537,11 @@ static void init_x11()
     }
 }
 
+void init_sdl3()
+{
+    SDL_InitSubSystem(SDL_INIT_GAMEPAD);
+}
+
 static const char* Xcursor_name(MouseCursor cursor)
 {
     switch (cursor) {
@@ -550,7 +566,7 @@ static void init_cursors(Window wnd)
         if (x11_XcursorLibraryLoadCursor) {
             for (auto it : iterator(cursors)) {
                 cursors[it.index] = x11_XcursorLibraryLoadCursor(
-                    x11.dsp, 
+                    x11.dsp,
                     Xcursor_name(MouseCursor(it.index)));
             }
         }
@@ -612,10 +628,98 @@ bool next_event_(AppWindow *wnd, WindowEvent *dst)
 {
     if (wnd->headless) return false;
 
-    XEvent event;
+    XEvent x11_event;
     while (!wnd->events.count && XPending(x11.dsp)) {
-        XNextEvent(x11.dsp, &event);
-        linux_input_event(&wnd->events, wnd, event);
+        XNextEvent(x11.dsp, &x11_event);
+        linux_input_event(&wnd->events, wnd, x11_event);
+    }
+
+    constexpr auto normalise_axis_value = [](i16 value) -> f32 
+    {
+        return value >= 0 ? value / 32767.0f : value / 32768.0f;
+    };
+
+    for (SDL_Event sdl_event; !wnd->events.count && SDL_PollEvent(&sdl_event);) {
+        WindowEvent event{};
+        switch (sdl_event.type) {
+        case SDL_EVENT_GAMEPAD_ADDED: {
+            event.type = WE_PAD_CONNECT;
+            SDL_Gamepad *pad = SDL_OpenGamepad(sdl_event.gdevice.which);
+            map_set(&sdl3.gamepads, sdl_event.gdevice.which, { .sdl = pad });
+            } break;
+        case SDL_EVENT_GAMEPAD_REMOVED: {
+            event.type = WE_PAD_DISCONNECT;
+            GamepadState *pad = map_find(&sdl3.gamepads, sdl_event.gdevice.which);
+            if (pad) { 
+                SDL_CloseGamepad(pad->sdl);
+                map_remove(&sdl3.gamepads, sdl_event.gdevice.which);
+            }
+            } break;
+        case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
+            GamepadState *pad = map_find(&sdl3.gamepads, sdl_event.gaxis.which);
+            if (!pad) {
+                LOG_ERROR("received axis motion event for unknown gamepad: %d", sdl_event.gaxis.which);
+                break;
+            }
+
+            switch (sdl_event.gaxis.axis) {
+            case SDL_GAMEPAD_AXIS_LEFTX:
+                pad->joy0[0] = normalise_axis_value(sdl_event.gaxis.value);
+                break;
+            case SDL_GAMEPAD_AXIS_LEFTY:
+                pad->joy0[1] = normalise_axis_value(sdl_event.gaxis.value);
+                break;
+            case SDL_GAMEPAD_AXIS_RIGHTX:
+                pad->joy1[0] = normalise_axis_value(sdl_event.gaxis.value);
+                break;
+            case SDL_GAMEPAD_AXIS_RIGHTY:
+                pad->joy1[1] = normalise_axis_value(sdl_event.gaxis.value);
+                break;
+            }
+
+            event.type = WE_PAD_AXIS2;
+            switch (sdl_event.gaxis.axis) {
+            case SDL_GAMEPAD_AXIS_LEFTX:
+            case SDL_GAMEPAD_AXIS_LEFTY:
+                event.axis2.id = PAD_JOY0;
+                event.axis2.value[0] = pad->joy0[0];
+                event.axis2.value[1] = pad->joy0[1];
+                break;
+            case SDL_GAMEPAD_AXIS_RIGHTX:
+            case SDL_GAMEPAD_AXIS_RIGHTY:
+                event.axis2.id = PAD_JOY1;
+                event.axis2.value[0] = pad->joy1[0];
+                event.axis2.value[1] = pad->joy1[1];
+                break;
+            }
+            } break;
+        case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+            event.type = WE_PAD_PRESS;
+            break;
+        case SDL_EVENT_GAMEPAD_BUTTON_UP:
+            event.type = WE_PAD_RELEASE;
+            break;
+        }
+
+        switch (sdl_event.type) {
+        case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+        case SDL_EVENT_GAMEPAD_BUTTON_UP:
+            switch (sdl_event.gbutton.button) {
+            case SDL_GAMEPAD_BUTTON_EAST:           event.pad.button = PAD_F_RIGHT; break;
+            case SDL_GAMEPAD_BUTTON_SOUTH:          event.pad.button = PAD_F_DOWN;  break;
+            case SDL_GAMEPAD_BUTTON_WEST:           event.pad.button = PAD_F_LEFT;  break;
+            case SDL_GAMEPAD_BUTTON_NORTH:          event.pad.button = PAD_F_UP;    break;
+            case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:     event.pad.button = PAD_D_RIGHT; break;
+            case SDL_GAMEPAD_BUTTON_DPAD_LEFT:      event.pad.button = PAD_D_LEFT;  break;
+            case SDL_GAMEPAD_BUTTON_DPAD_DOWN:      event.pad.button = PAD_D_DOWN;  break;
+            case SDL_GAMEPAD_BUTTON_DPAD_UP:        event.pad.button = PAD_D_UP;    break;
+            case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:  event.pad.button = PAD_LB;      break;
+            case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER: event.pad.button = PAD_RB;      break;
+            }
+            break;
+        }
+
+        if (event.type) array_add(&wnd->events, event);
     }
 
     if (!wnd->events.count) return false;
@@ -625,7 +729,7 @@ bool next_event_(AppWindow *wnd, WindowEvent *dst)
     return true;
 }
 
-bool translate_input_event(AppWindow *wnd, WindowEvent event) 
+bool translate_input_event(AppWindow *wnd, WindowEvent event)
 {
     if (wnd->headless) return false;
 
@@ -637,7 +741,7 @@ bool translate_input_event(AppWindow *wnd, WindowEvent event)
     return false;
 }
 
-bool translate_input_event(AppWindow *wnd, InputMapId map, WindowEvent event) 
+bool translate_input_event(AppWindow *wnd, InputMapId map, WindowEvent event)
 {
     if (wnd->headless) return false;
 
@@ -669,4 +773,3 @@ String select_folder_dialog(Allocator /*mem*/)
 	LOG_ERROR("unimplemented");
 	return {};
 }
-
