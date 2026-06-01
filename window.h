@@ -285,6 +285,11 @@ struct MouseEvent {
     i16 dx, dy;
 };
 
+struct GamepadButtonEvent {
+    u32 button : 8;
+    u32 unused : 24;
+};
+
 struct WindowCreateDesc {
     String title;
     i32 width, height;
@@ -416,10 +421,7 @@ struct WindowEvent {
             u32 repeat     : 1;
             u32 unused     : 14;
         } key;
-        struct {
-            u32 button     : 8;
-            u32 unused     : 24;
-        } pad;
+        GamepadButtonEvent pad;
         struct {
             u8  id;
             f32 value;

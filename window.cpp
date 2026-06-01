@@ -403,6 +403,17 @@ bool translate_input_event(
         array_insert(queue, 0, { id, .input = { map, type } });
     };
 
+    constexpr auto apply_deadzone = [](f32 value, f32 deadzone) -> f32
+    {
+        if (value > deadzone) {
+            return (value - deadzone) / (1.0f - deadzone);
+        } else if (value < -deadzone) {
+            return (value + deadzone) / (1.0f - deadzone);
+        } else {
+            return 0.0f;
+        } 
+    };
+
     if (event.type < WE_INPUT && map_id != -1) {
         InputMap *map = &input.maps[map_id];
 
@@ -420,8 +431,8 @@ bool translate_input_event(
             for (auto &it : map->by_device[GAMEPAD][AXIS_2D]) {
                 if (event.axis2.id == it.input.axis.id) {
                     f32 *axis = map_find_emplace(&map->axes, it.id);
-                    axis[0] = event.axis2.value[0];
-                    axis[1] = event.axis2.value[1];
+                    axis[0] = apply_deadzone(event.axis2.value[0], 0.2f);
+                    axis[1] = apply_deadzone(event.axis2.value[1], 0.2f);
 
                     insert_axis2d_event(queue, map_id, it.id, it.input.type, event.axis2.value);
                     handled = handled || !(it.flags & FALLTHROUGH);
