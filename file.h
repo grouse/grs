@@ -106,4 +106,6 @@ void set_working_dir(String path);
 
 u64 file_modified_timestamp(String path);
 
+String local_user_log_dir(Allocator mem);
+
 #endif //FILE_H

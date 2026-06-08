@@ -12,6 +12,7 @@
 #include <string.h>
 
 extern "C" char *realpath(const char *path, char *resolved_path);
+extern "C" char *getenv(const char *name);
 extern String jl_exe_path;
 
 bool file_exists_sz(const char *sz_path)
@@ -452,4 +453,21 @@ u64 file_modified_timestamp(String path)
     }
 
     return st.st_mtim.tv_sec;
+}
+
+String local_user_log_dir(Allocator mem)
+{
+    if (const char *xdg_state_home = getenv("XDG_STATE_HOME"); 
+        xdg_state_home && xdg_state_home[0]) 
+    {
+        return string(xdg_state_home, mem);
+    }
+
+    if (const char *home = getenv("HOME"); 
+        home && home[0]) 
+    {
+        return join_path(string(home), ".local/state", mem);
+    }
+
+    return {};
 }
