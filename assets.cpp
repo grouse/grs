@@ -112,7 +112,10 @@ AssetHandle find_asset_handle(String path) EXPORT
 
     String ext = extension_of(apath);
     i32 *type = map_find(&assets.types, ext);
-    if (!type) LOG_ERROR("unknown asset type for asset '%.*s' with ext: '%.*s'", STRFMT(apath), STRFMT(ext));
+    if (!type) {
+        LOG_ERROR("unknown asset type for asset '%.*s' with ext: '%.*s'", STRFMT(apath), STRFMT(ext));
+        return ASSET_HANDLE_INVALID;
+    }
 
     return create_asset(apath, *type, nullptr);
 }
@@ -371,7 +374,10 @@ AssetHandle load_asset(String path, u8 *contents, i32 size) EXPORT
     AssetHandle handle = find_loaded_asset(path);
     if (handle == ASSET_HANDLE_INVALID) {
         i32 *type = map_find(&assets.types, ext);
-        if (!type) LOG_ERROR("unknown asset type for asset '%.*s' with ext: '%.*s'", STRFMT(path), STRFMT(ext));
+        if (!type) {
+            LOG_ERROR("unknown asset type for asset '%.*s' with ext: '%.*s'", STRFMT(path), STRFMT(ext));
+            return ASSET_HANDLE_INVALID;
+        }
 
         handle = create_asset(path, *type, nullptr);
     }

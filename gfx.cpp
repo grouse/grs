@@ -13,9 +13,11 @@ void* gfx_load_texture_asset(
     SArena scratch = tl_scratch_arena();
 
     int width, height, components;
-    if (stbi_info_from_memory(data, size, &width, &height, &components) != 0) {
-        if (components == 3) components = 4;
+    if (stbi_info_from_memory(data, size, &width, &height, &components) == 0) {
+        LOG_ERROR("[gfx] failed reading image info for '%.*s': %s", STRFMT(identifier), stbi_failure_reason());
+        return nullptr;
     }
+    if (components == 3) components = 4;
 
     GfxTextureAsset *asset = (GfxTextureAsset*)existing;
     if (asset) stbi_image_free(asset->data);
@@ -24,6 +26,11 @@ void* gfx_load_texture_asset(
     asset->data   = stbi_load_from_memory(data, size, &width, &height, nullptr, components);
     asset->width  = width;
     asset->height = height;
+
+    if (!asset->data) {
+        LOG_ERROR("[gfx] failed loading image '%.*s': %s", STRFMT(identifier), stbi_failure_reason());
+        return nullptr;
+    }
 
     switch (components) {
     case 1: asset->format = GFX_TEXTURE_R8_SRGB; break;

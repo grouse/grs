@@ -400,6 +400,11 @@ GfxBuffer gfx_create_index_buffer(void *data, i32 size) EXPORT
 GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) 
 {
     AssetHandle handle = find_asset_handle(path);
+    if (!handle) {
+        LOG_ERROR("[gfx] texture not found: %.*s", STRFMT(path));
+        return GfxTexture_INVALID;
+    }
+
     return gfx_load_texture(handle, sRGB);
 }
 
@@ -412,7 +417,10 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/)
     }
 
     GfxTextureAsset *asset = get_asset<GfxTextureAsset>(handle);
-    if (!asset) return GfxTexture_INVALID;
+    if (!asset) {
+        LOG_ERROR("[gfx] failed loading texture asset: %.*s", STRFMT(get_asset_path(handle)));
+        return GfxTexture_INVALID;
+    }
 
     GfxSwizzle swizzle = GFX_SWIZZLE_IDENTITY;
 

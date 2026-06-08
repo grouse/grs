@@ -13,6 +13,7 @@
 
 #include "file.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -90,21 +91,31 @@ bool init_file_log_sink(const char *sz_app_name, const char *sz_filename)
 
     SArena scratch = tl_scratch_arena();
     String log_dir = local_user_log_dir(scratch);
-    if (!log_dir) return false;
+    if (!log_dir) {
+        LOG_ERROR("unable to initialize file log: no local user log directory");
+        return false;
+    }
 
     String app_dir = join_path(log_dir, app_name, scratch);
-    String log_filename = filename ? filename : stringf(scratch, "%.*s.log", STRFMT(filename));
+    String log_filename = filename ? filename : stringf(scratch, "%.*s.log", STRFMT(app_name));
     String log_path = join_path(app_dir, log_filename, scratch);
 
     FileHandle file = open_file(log_path, FILE_OPEN_WRITE | FILE_OPEN_TRUNCATE);
-    if (file == FILE_HANDLE_INVALID) return false;
+    if (file == FILE_HANDLE_INVALID) {
+        LOG_ERROR("unable to initialize file log: failed creating '%.*s'", STRFMT(log_path));
+        return false;
+    }
     close_file(file);
 
     char *sz_log_path = sz_string(log_path, scratch);
     file_log = fopen(sz_log_path, "a");
-    if (!file_log) return false;
+    if (!file_log) {
+        LOG_ERROR("unable to initialize file log: failed opening '%s': %s", sz_log_path, strerror(errno));
+        return false;
+    }
 
     if (!add_log_sink(file_log_sink)) {
+        LOG_ERROR("unable to initialize file log: failed adding log sink");
         close_file_log_sink();
         return false;
     }
