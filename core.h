@@ -51,7 +51,13 @@ typedef double f64;
 #elif defined(_WIN32)
 
 #define NOTHROW
-#define CRTIMP __declspec(dllimport)
+#ifndef CRTIMP
+#  if defined(_DLL) && !defined(_STATIC_CPPLIB)
+#    define CRTIMP __declspec(dllimport)
+#  else
+#    define CRTIMP
+#  endif
+#endif
 
 #define DEBUG_BREAK() __debugbreak() // TODO(jesper): remove in non-debug builds
 #define BREAK() __debugbreak()
