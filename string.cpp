@@ -890,6 +890,22 @@ String directory_of(String path) EXPORT
     return "";
 }
 
+char* sz_directory_of_sz(const char *path, Allocator mem) EXPORT
+{
+    const char *last = path;
+    for (const char *ptr = path; *ptr; ptr++) {
+        if (*ptr == '/' || *ptr == '\\') last = ptr;
+    }
+
+    i32 length = i32(last - path);
+    char *dir = ALLOC_ARR(mem, char, length+1);
+    memcpy(dir, path, length);
+    dir[length] = '\0';
+
+    return dir;
+}
+
+
 String path_relative_to(String path, String root) EXPORT
 {
     ASSERT(path.length > root.length);
