@@ -2,7 +2,7 @@
 #include "win32_core.h"
 #include "win32_shlwapi.h"
 
-extern "C" WINDLL char *getenv(const char *name);
+extern "C" CRTIMP char *getenv(const char *name);
 
 const char* win32_string_from_file_attribute(DWORD dwFileAttribute)
 {
@@ -554,24 +554,23 @@ void set_working_dir(String path)
 
 String local_user_log_dir(Allocator mem)
 {
-    if (const char *local_app_data = getenv("LOCALAPPDATA"); 
-        local_app_data && local_app_data[0]) 
+    if (const char *local_app_data = getenv("LOCALAPPDATA");
+        local_app_data && local_app_data[0])
     {
         return string(local_app_data, mem);
     }
 
-    if (const char *user_profile = getenv("USERPROFILE"); 
-        user_profile && user_profile[0]) 
+    if (const char *user_profile = getenv("USERPROFILE");
+        user_profile && user_profile[0])
     {
         SArena scratch = tl_scratch_arena(mem);
         String app_data = join_path(string(user_profile), "AppData", scratch);
         return join_path(app_data, "Local", mem);
     }
 
-    if (const char *app_data = getenv("APPDATA"); 
-        app_data && app_data[0]) 
+    if (const char *app_data = getenv("APPDATA");
+        app_data && app_data[0])
     {
         return string(app_data, mem);
     }
 }
-
