@@ -2,7 +2,7 @@
 #include "win32_core.h"
 #include "win32_shlwapi.h"
 
-extern "C" char *getenv(const char *name);
+extern "C" WINDLL char *getenv(const char *name);
 
 const char* win32_string_from_file_attribute(DWORD dwFileAttribute)
 {
@@ -109,6 +109,15 @@ FileInfo read_file(String path, Allocator mem, i32 retry_count)
 
 HANDLE win32_open_file(char *sz_path, u32 creation_mode, u32 access_mode)
 {
+    SArena scratch = tl_scratch_arena();
+
+    char *sz_dir = sz_directory_of_sz(sz_path, scratch);
+    if (int result = SHCreateDirectoryExA(NULL, sz_dir, NULL);
+        result != ERROR_SUCCESS && result != ERROR_ALREADY_EXISTS)
+    {
+        LOG_ERROR("failed creating folder: %s, code: %d, msg: '%s'", sz_dir, result, win32_system_error_message(result));
+    }
+
     HANDLE file = CreateFileA(
         sz_path,
         access_mode,
@@ -123,33 +132,8 @@ HANDLE win32_open_file(char *sz_path, u32 creation_mode, u32 access_mode)
          creation_mode == CREATE_NEW))
     {
         DWORD code = GetLastError();
-        if (code == 3) {
-            char *ptr = sz_path;
-            char *end = ptr + strlen(ptr);
-
-            while (ptr < end) {
-                if (*ptr == '\\' || *ptr == '/') {
-                    char c = *ptr;
-                    *ptr = '\0';
-                    defer{ *ptr = c; };
-
-                    if (CreateDirectoryA(sz_path, NULL) == 0) {
-                        DWORD create_dir_error = GetLastError();
-                        if (create_dir_error != ERROR_ALREADY_EXISTS) {
-                            LOG_ERROR("failed creating folder: %s, code: %d, msg: '%s'",
-                                      sz_path,
-                                      create_dir_error,
-                                      win32_system_error_message(create_dir_error));
-                            return INVALID_HANDLE_VALUE;
-                        }
-                    }
-                }
-                ptr++;
-            }
-        } else {
-            LOG_ERROR("failed creating file: '%s', code: %d, msg: '%s'", sz_path, code, win32_system_error_message(code));
-            return INVALID_HANDLE_VALUE;
-        }
+        LOG_ERROR("failed creating file: '%s', code: %d, msg: '%s'", sz_path, code, win32_system_error_message(code));
+        return INVALID_HANDLE_VALUE;
     }
 
     return file;
@@ -590,3 +574,4 @@ String local_user_log_dir(Allocator mem)
         return string(app_data, mem);
     }
 }
+

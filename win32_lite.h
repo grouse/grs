@@ -25,6 +25,7 @@
 #define FILE_SHARE_WRITE                0x00000002
 #define FILE_SHARE_DELETE               0x00000004
 
+#define ERROR_SUCCESS             0L
 #define ERROR_FILE_NOT_FOUND      0x2
 #define ERROR_SHARING_VIOLATION   0x20
 #define ERROR_ALREADY_EXISTS      0xB7
