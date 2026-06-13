@@ -78,7 +78,7 @@ struct GfxVkTextureDesc {
 };
 
 struct GfxVkMaterial {
-    GfxPipeline pipeline;
+    GfxPipelineIdx pipeline;
     VkDescriptorSet set;
     VkCullModeFlagBits cull_mode;
 
@@ -98,14 +98,14 @@ struct GfxVkShader {
 };
 
 struct GfxVkPipeline {
-    GfxPipeline handle;
+    GfxPipelineIdx handle;
 
     VkPipeline pipeline;
     VkPipelineLayout layout;
 
     VkDescriptorSetLayout sets[MAX_DESCRIPTOR_SETS];
 
-    operator GfxPipeline() { return handle; }
+    operator GfxPipelineIdx() { return handle; }
     operator VkPipeline() { return pipeline; }
     explicit operator bool() { return pipeline != VK_NULL_HANDLE; }
 };
@@ -379,7 +379,7 @@ extern struct GfxVkContext {
     DynamicArray<GfxVkTextureDesc> texture_descs;
 
     DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_assets;
-    DynamicMap<GfxSamplerDesc, VkSampler> samplers;
+    DynamicMap<GfxSampler, VkSampler> samplers;
 
     DynamicArray<GfxVkBuffer> buffers;
 
@@ -389,7 +389,7 @@ extern struct GfxVkContext {
     DynamicMap<GfxMaterialParameters, GfxVkBuffer> material_parameters;
 
     DynamicArray<GfxVkShader> shaders;
-    DynamicMap<GfxShader, DynamicArray<GfxPipeline>> shaders_used_by;
+    DynamicMap<GfxShader, DynamicArray<GfxPipelineIdx>> shaders_used_by;
 
     VkDescriptorPool descriptor_pool;
     DynamicArray<VkDescriptorPool> descriptor_pools;

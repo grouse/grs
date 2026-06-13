@@ -118,7 +118,7 @@ u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/) EXPORT
     return hash32_digest(&state);
 }
 
-u32 hash32(const GfxSamplerDesc &it, u32 seed /*= HASH32_SEED*/) EXPORT
+u32 hash32(const GfxSampler &it, u32 seed /*= HASH32_SEED*/) EXPORT
 {
     h32s state = hash32_start(seed);
     hash32_update(&state, it.min_filter);

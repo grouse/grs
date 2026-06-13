@@ -23,7 +23,7 @@
 
 GFX_HANDLE(GfxTexture, u32);
 GFX_HANDLE(GfxBuffer, u32);
-GFX_HANDLE(GfxPipeline, u32);
+GFX_HANDLE(GfxPipelineIdx, u32);
 GFX_HANDLE(GfxShader, u32);
 GFX_HANDLE(GfxMaterialIdx, u64);
 
@@ -108,14 +108,14 @@ enum GfxSampleBorderColor {
     GFX_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
 };
 
-struct GfxSamplerDesc {
+struct GfxSampler {
     GfxSampleWrap wrap_u;
     GfxSampleWrap wrap_v;
     GfxSampleFilter mag_filter;
     GfxSampleFilter min_filter;
     GfxSampleBorderColor border_color;
 
-    bool operator==(const GfxSamplerDesc &other) const = default;
+    bool operator==(const GfxSampler &other) const = default;
 };
 
 struct GfxUVTransform {
@@ -126,14 +126,14 @@ struct GfxUVTransform {
 
 struct GfxMaterialTextureDesc {
     GfxTexture texture;
-    GfxSamplerDesc sampler;
+    GfxSampler sampler;
 
     explicit operator bool() { return texture;}
 };
 
 struct GfxMaterial {
     String debug_name;
-    GfxPipeline pipeline;
+    GfxPipelineIdx pipeline;
     GfxMaterialTextureDesc albedo;
     GfxMaterialTextureDesc metallic_roughness;
     GfxMaterialTextureDesc normal;

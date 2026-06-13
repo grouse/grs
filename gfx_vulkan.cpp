@@ -755,7 +755,7 @@ extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
 }
 
-extern void vk_set_pipeline_label(GfxPipeline handle, String label) INTERNAL
+extern void vk_set_pipeline_label(GfxPipelineIdx handle, String label) INTERNAL
 {
     if (!vkSetDebugUtilsObjectNameEXT) return;
     SArena scratch = tl_scratch_arena();
@@ -1639,7 +1639,7 @@ extern bool operator==(
     return true;
 }
 
-extern VkSampler vk_sampler(GfxSamplerDesc desc) INTERNAL
+extern VkSampler vk_sampler(GfxSampler desc) INTERNAL
 {
     auto *it = map_find_emplace(&vk.samplers, desc, {});
 
