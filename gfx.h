@@ -25,7 +25,7 @@ GFX_HANDLE(GfxTexture, u32);
 GFX_HANDLE(GfxBuffer, u32);
 GFX_HANDLE(GfxPipeline, u32);
 GFX_HANDLE(GfxShader, u32);
-GFX_HANDLE(GfxMaterial, u64);
+GFX_HANDLE(GfxMaterialIdx, u64);
 
 enum GfxShaderStageFlagsBits {
     GFX_VERTEX   = 1 << 0,
@@ -131,7 +131,7 @@ struct GfxMaterialTextureDesc {
     explicit operator bool() { return texture;}
 };
 
-struct GfxMaterialDesc {
+struct GfxMaterial {
     String debug_name;
     GfxPipeline pipeline;
     GfxMaterialTextureDesc albedo;
@@ -171,7 +171,7 @@ GfxTexture gfx_create_texture(GfxTextureFormat format, GfxSwizzle swizzle, u32 w
 GfxTexture gfx_create_texture(void *pixels, GfxTextureFormat format, GfxSwizzle swizzle, u32 width, u32 height);
 void gfx_copy_texture(GfxTexture dst, u32 dst_x, u32 dst_y, u32 w, u32 h, const void *pixels);
 
-GfxMaterial gfx_material(GfxMaterialDesc desc);
+GfxMaterialIdx gfx_material(GfxMaterial desc);
 GfxTexture gfx_load_texture(String path, bool sRGB = true);
 GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB = true);
 AssetHandle gfx_get_texture_asset(GfxTexture texture);
