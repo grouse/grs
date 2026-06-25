@@ -117,6 +117,14 @@ struct Vector3 {
         f32 data[3];
     };
 
+    constexpr Vector3 xxx() const { return { x, x, x }; }
+    constexpr Vector3 yyy() const { return { y, y, y }; }
+    constexpr Vector3 zzz() const { return { z, z, z }; }
+
+    constexpr Vector3 rrr() const { return { r, r, r }; }
+    constexpr Vector3 ggg() const { return { g, g, g }; }
+    constexpr Vector3 bbb() const { return { b, b, b }; }
+
     M_SUBSCRIPT_OPS(f32, data);
 };
 M_VECTOR_OPS(Vector3);
@@ -134,6 +142,16 @@ struct Vector4 {
         struct { f32 _r; Vector3 gba; };
         f32 data[4];
     };
+
+    constexpr Vector3 xxx() const { return { x, x, x }; }
+    constexpr Vector3 yyy() const { return { y, y, y }; }
+    constexpr Vector3 zzz() const { return { z, z, z }; }
+    constexpr Vector3 www() const { return { w, w, w }; }
+
+    constexpr Vector3 rrr() const { return { r, r, r }; }
+    constexpr Vector3 ggg() const { return { g, g, g }; }
+    constexpr Vector3 bbb() const { return { b, b, b }; }
+    constexpr Vector3 aaa() const { return { a, a, a }; }
 
     M_SUBSCRIPT_OPS(f32, data);
 };
