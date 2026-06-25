@@ -220,6 +220,9 @@ struct Rect {
     Rect() = default;
     Rect(Vector2 tl, Vector2 br) : tl(tl), br(br) {}
 
+    constexpr Vector2 tr() const { return { br.x, tl.y }; }
+    constexpr Vector2 bl() const { return { tl.x, br.y }; }
+
     constexpr Vector2 center() const { return tl + size() * 0.5f; }
     constexpr Vector2 pos() const { return tl; }
     constexpr Vector2 pos(Vector2 pos)
