@@ -3,6 +3,7 @@
 
 extern Vector2 abs(Vector2 v);
 extern Vector2 vec2_max(Vector2 lhs, Vector2 rhs);
+extern Vector2 vec2_clamp(Vector2 v, Vector2 min, Vector2 max);
 extern Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size);
 extern Vector2 lerp(Vector2 a, Vector2 b, f32 t);
 extern f32 length(Vector2 v);
@@ -160,6 +161,10 @@ extern bool almost_equal(Quaternion q1, Quaternion q2, f32 epsilon =1e-6f);
 extern bool almost_equal(Matrix3 A, Matrix3 B, f32 epsilon =1e-6f);
 extern bool almost_equal(Matrix4 A, Matrix4 B, f32 epsilon);
 extern f32 angle_between(Vector3 v0, Vector3 v1);
+extern Vector3 rgb_from_hsl(f32 h, f32 s, f32 l);
+extern Vector3 rgb_from_hsv(f32 h, f32 s, f32 v);
+extern Vector3 rgb_from_hsv(Vector3 hsv);
+extern Vector3 hsv_from_rgb(Vector3 rgb);
 extern Vector3 rgb_unpack(u32 argb);
 extern Vector4 argb_unpack(u32 argb);
 extern f32 linear_from_sRGB(f32 s);

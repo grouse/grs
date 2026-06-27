@@ -2406,7 +2406,7 @@ f32 rgb_from_hue(f32 p, f32 q, f32 t)
     return p;
 }
 
-Vector3 rgb_from_hsl(f32 h, f32 s, f32 l)
+Vector3 rgb_from_hsl(f32 h, f32 s, f32 l) EXPORT
 {
     Vector3 rgb;
 
@@ -2423,6 +2423,60 @@ Vector3 rgb_from_hsl(f32 h, f32 s, f32 l)
 
     return rgb;
 }
+
+Vector3 rgb_from_hsv(f32 h, f32 s, f32 v) EXPORT
+{
+    Vector3 rgb{};
+    f32 chroma = v*s;
+    f32 hs = h*6.0f;
+    i32 hsi = i32(hs);
+    f32 fraction = hs - hsi;
+
+    f32 p = v * (1 - s);
+    f32 q = v * (1-s*fraction);
+    f32 t = v * (1-s*(1-fraction));
+
+    switch (hsi % 6) {
+    case 0: return { v, t, p };
+    case 1: return { q, v, p };
+    case 2: return { p, v, t };
+    case 3: return { p, q, v };
+    case 4: return { t, p, v };
+    case 5: return { v, p, q };
+    }
+
+    return {};
+}
+
+Vector3 rgb_from_hsv(Vector3 hsv) EXPORT { return rgb_from_hsv(hsv.x, hsv.y, hsv.z); }
+
+Vector3 hsv_from_rgb(Vector3 rgb) EXPORT
+{
+    Vector3 hsv;
+    f32 maxc = MAX3(rgb.r, rgb.g, rgb.b);
+    f32 minc = MIN3(rgb.r, rgb.g, rgb.b);
+    f32 delta = maxc-minc;
+
+    f32 v = maxc;
+    f32 s = maxc > 0.0f ? delta / maxc : 0.0f;
+    f32 h = 0.0f;
+    if (delta != 0.0f) {
+        if (maxc == rgb.r) {
+            h = (rgb.g - rgb.b) / delta;
+            if (h < 0.0f) h += 6.0f;
+        } else if (maxc == rgb.g) {
+            h = (rgb.b - rgb.r) / delta + 2.0f;
+        } else {
+            h = (rgb.r - rgb.g) / delta + 4.0f;
+        }
+
+        h /= 6.0f;
+    } 
+
+
+    return { h, s, v };
+}
+
 
 Vector3 rgb_unpack(u32 argb) EXPORT
 {

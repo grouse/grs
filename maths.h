@@ -297,7 +297,6 @@ u32 rgb_pack(Vector3 c);
 u32 bgr_pack(Vector3 c);
 Vector3 bgr_unpack(u32 argb);
 Vector4 bgra_unpack(u32 argb);
-Vector3 rgb_from_hsl(f32 h, f32 s, f32 l);
 Vector3 rgb_mul(Vector3 rgb, f32 v);
 
 
