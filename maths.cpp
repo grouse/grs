@@ -17,6 +17,11 @@ Vector2 vec2_max(Vector2 lhs, Vector2 rhs) EXPORT
     return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y) };
 }
 
+Vector2 vec2_clamp(Vector2 v, Vector2 min, Vector2 max) EXPORT
+{
+    return { CLAMP(v.x, min.x, max.x), CLAMP(v.y, min.y, max.y) };
+}
+
 Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size) EXPORT
 {
     return {
