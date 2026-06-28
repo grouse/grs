@@ -651,28 +651,28 @@ Quaternion quat_from_mat3(Matrix3 M) EXPORT
 {
     Quaternion q;
     if (f32 sum = M.m00 + M.m11 + M.m22; sum > 0) {
-        f32 s = sqrt(sum + 1.0f) * 2.0f; 
-        f32 denom = 1/s; 
+        f32 s = sqrt(sum + 1.0f) * 2.0f;
+        f32 denom = 1/s;
         q.x = (M.m21 - M.m12) * denom;
         q.y = (M.m02 - M.m20) * denom;
         q.z = (M.m10 - M.m01) * denom;
         q.w = 0.25f * s;
     } else if (M.m00 > M.m11 && M.m00 > M.m22) {
-        f32 s = sqrt(1.0f + M.m00 - M.m11 - M.m22) * 2.0f; 
+        f32 s = sqrt(1.0f + M.m00 - M.m11 - M.m22) * 2.0f;
         f32 denom = 1/s;
         q.x = 0.25f * s;
         q.y = (M.m01 + M.m10) * denom;
         q.z = (M.m02 + M.m20) * denom;
         q.w = (M.m21 - M.m12) * denom;
     } else if (M.m11 > M.m22) {
-        f32 s = sqrt(1.0f + M.m11 - M.m00 - M.m22) * 2.0f; 
+        f32 s = sqrt(1.0f + M.m11 - M.m00 - M.m22) * 2.0f;
         f32 denom = 1/s;
         q.x = (M.m01 + M.m10) * denom;
         q.y = 0.25f * s;
         q.z = (M.m12 + M.m21) * denom;
         q.w = (M.m02 - M.m20) * denom;
     } else {
-        f32 s = sqrt(1.0f + M.m22 - M.m00 - M.m11) * 2.0f; 
+        f32 s = sqrt(1.0f + M.m22 - M.m00 - M.m11) * 2.0f;
         f32 denom = 1/s;
         q.x = (M.m02 + M.m20) * denom;
         q.y = (M.m12 + M.m21) * denom;
@@ -2426,8 +2426,6 @@ Vector3 rgb_from_hsl(f32 h, f32 s, f32 l) EXPORT
 
 Vector3 rgb_from_hsv(f32 h, f32 s, f32 v) EXPORT
 {
-    Vector3 rgb{};
-    f32 chroma = v*s;
     f32 hs = h*6.0f;
     i32 hsi = i32(hs);
     f32 fraction = hs - hsi;
@@ -2471,7 +2469,7 @@ Vector3 hsv_from_rgb(Vector3 rgb) EXPORT
         }
 
         h /= 6.0f;
-    } 
+    }
 
 
     return { h, s, v };
