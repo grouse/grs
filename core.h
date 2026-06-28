@@ -145,6 +145,7 @@ static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MAX3(a, b, c) MAX(MAX(a, b), c)
 #define MAX4(a, b, c, d) MAX(MAX(a, b), MAX(c, d))
+#define MAX5(a, b, c, d, e) MAX(MAX(a, b), MAX3(c, d, e))
 
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
 #define MIN3(a, b, c) MIN(MIN(a, b), c)
