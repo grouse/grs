@@ -18,6 +18,9 @@
 #define INTERNAL __attribute__((annotate("internal")))
 #define INTERNALS namespace __attribute__((annotate("internal")))
 
+#define META(...) [[clang::annotate("meta(" #__VA_ARGS__ ")")]]
+
+
 #else
 #error "unsupported compiler"
 #endif
