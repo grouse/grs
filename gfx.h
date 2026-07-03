@@ -76,9 +76,9 @@ struct GfxTextureAsset {
 };
 
 struct GfxMaterialParameters {
-    Vector4 albedo_factor             = {1, 1, 1, 1};
-    Vector4 metallic_roughness_factor = {1, 1, 0, 0 };
-
+    META(ColorRgb)
+    Vector4 albedo_factor                      = {1, 1, 1, 1};
+    Vector4 metallic_roughness_factor          = {1, 1, 0, 0 };
     Vector4 albedo_uv_offset_scale             = { 0, 0, 1, 1 };
     Vector4 metallic_roughness_uv_offset_scale = { 0, 0, 1, 1 };
     Vector4 normal_uv_offset_scale             = { 0, 0, 1, 1 };
