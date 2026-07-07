@@ -129,6 +129,7 @@ struct GfxMaterialTextureDesc {
     GfxSampler sampler;
 
     explicit operator bool() { return texture;}
+    bool operator==(const GfxMaterialTextureDesc &other) const = default;
 };
 
 struct GfxMaterial {
@@ -139,6 +140,8 @@ struct GfxMaterial {
     GfxMaterialTextureDesc normal;
     GfxMaterialParameters parameters;
     bool double_sided;
+
+    bool operator==(const GfxMaterial &other) const = default;
 };
 
 struct MeshVertex {
