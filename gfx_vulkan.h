@@ -31,7 +31,7 @@ constexpr i32 MAX_DYNAMIC_STATES          = 8;
         PANIC_IF(result != VK_SUCCESS, "vulkan fatal error: '%s' [%u] from call '%s': %s", sz_from_enum(result), result, #call);\
     } while (0)
 
-#define VK_IMM SCOPE_EXPR(vk_imm_begin(), vk_imm_end())
+#define VK_IMM SCOPE_VEXPR(vk_imm_begin(), vk_imm_end())
 
 
 struct SpvCompilationResult {

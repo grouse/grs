@@ -19,7 +19,7 @@
     constexpr name name##_INVALID = 0
 
 #define GFX_RENDER_PASS(...)\
-    SCOPE_EXPR(gfx_begin_pass(__VA_ARGS__), gfx_end_pass())
+    SCOPE_VEXPR(gfx_begin_pass(__VA_ARGS__), gfx_end_pass())
 
 GFX_HANDLE(GfxTexture, u32);
 GFX_HANDLE(GfxBuffer, u32);
