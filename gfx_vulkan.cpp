@@ -412,7 +412,7 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/)
 {
     if (!handle) return GfxTexture_INVALID;
 
-    if (auto *asset = map_find(&vk.texture_assets, { handle, sRGB })) {
+    if (auto *asset = map_find(&vk.texture_asset_map, { handle, sRGB })) {
         return *asset;
     }
 
@@ -437,13 +437,13 @@ GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB /*= true*/)
 
     vk_set_texture_label(texture, get_asset_identifier(handle));
 
-    map_set(&vk.texture_assets, { handle, sRGB }, texture_idx);
+    map_set(&vk.texture_asset_map, { handle, sRGB }, texture_idx);
     return texture_idx;
 }
 
 AssetHandle gfx_get_texture_asset(GfxTexture texture) 
 {
-    for (auto it : vk.texture_assets) {
+    for (auto it : vk.texture_asset_map) {
         if (*it == texture) return it.key.asset;
     }
 

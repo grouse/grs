@@ -375,10 +375,10 @@ extern struct GfxVkContext {
     DynamicArray<GfxVkPipeline> pipelines;
     DynamicArray<GfxVkPipelineDesc> pipeline_descs;
 
-    DynamicArray<GfxVkTexture> textures;
-    DynamicArray<GfxVkTextureDesc> texture_descs;
+    DynamicArray<GfxVkTexture>        textures;
+    DynamicArray<GfxVkTextureDesc>    texture_descs;
+    DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_asset_map;
 
-    DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_assets;
     DynamicMap<GfxSampler, VkSampler> samplers;
 
     DynamicArray<GfxVkBuffer> buffers;
