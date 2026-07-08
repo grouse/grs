@@ -1151,47 +1151,33 @@ char* sz_string(StringBuilder *sb, Allocator mem) EXPORT
     return str;
 }
 
-void append_char(StringBuilder *sb, char c) EXPORT
+void append_data(StringBuilder *sb, void *data, i32 size) EXPORT
 {
-    i32 available = sizeof sb->current->data - sb->current->written;
+    u8 *src = (u8*)data;
+    i32 written = 0;
 
-    if (available < 1) {
-        StringBuilder::Block *block = (StringBuilder::Block*)malloc(sizeof(StringBuilder::Block));
-        memset(block, 0, sizeof *block);
+    i32 rem = size;
+    while (rem) {
+        i32 to_write = MIN(i32(sizeof sb->current->data) - sb->current->written, rem);
+        if (to_write) memcpy(sb->current->data+sb->current->written, src+written, to_write);
+        rem -= to_write;
 
-        sb->current->next = block;
-        sb->current = block;
-    }
-
-    *(sb->current->data+sb->current->written) = c;
-    sb->current->written += 1;
-}
-
-void append_string(StringBuilder *sb, String str)
-{
-    i32 available = MIN((i32)sizeof sb->current->data - sb->current->written, str.length);
-    i32 rest = str.length - available;
-
-    memcpy(sb->current->data+sb->current->written, str.data, available);
-    sb->current->written += available;
-
-    i32 written = available;
-    while(rest > 0) {
-        if (sb->current->next == nullptr) {
+        if (rem) {
             StringBuilder::Block *block = ALLOC_T(sb->alloc, StringBuilder::Block) {};
             sb->current->next = block;
+            sb->current = block;
         }
-
-        sb->current = sb->current->next;
-        sb->current->written = 0;
-
-        i32 to_write = MIN((i32)sizeof sb->current->data, rest);
-        memcpy(sb->current->data, str.data+written, to_write);
-        sb->current->written += to_write;
-
-        rest -= to_write;
-        written += to_write;
     }
+}
+
+void append_char(StringBuilder *sb, char c) EXPORT
+{
+    append_data(sb, &c, c);
+}
+
+void append_string(StringBuilder *sb, String str) EXPORT
+{
+    append_data(sb, str.data, str.length);
 }
 
 void append_stringf(StringBuilder *sb, const char *fmt, ...) EXPORT
