@@ -1160,7 +1160,10 @@ void append_data(StringBuilder *sb, void *data, i32 size) EXPORT
     while (rem) {
         i32 to_write = MIN(i32(sizeof sb->current->data) - sb->current->written, rem);
         if (to_write) memcpy(sb->current->data+sb->current->written, src+written, to_write);
+        sb->current->written += to_write;
+
         rem -= to_write;
+        written += to_write;
 
         if (rem) {
             StringBuilder::Block *block = ALLOC_T(sb->alloc, StringBuilder::Block) {};
