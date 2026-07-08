@@ -141,7 +141,6 @@ char* sztringf(Allocator mem, const char *fmt, ...)
     return result;
 }
 
-
 String slice(String str, i32 start, i32 end) EXPORT
 {
     String r;
@@ -300,6 +299,15 @@ bool f64_from_string(String s, f64 *dst) EXPORT
 i32 find_first(String s, char c) EXPORT
 {
     for (i32 i = 0; i < s.length; i++) if (s[i] == c) return i;
+    return -1;
+}
+
+i32 find_first(String lhs, String rhs) EXPORT
+{
+    for (i32 i = 0; i < lhs.length; i++) {
+        if (starts_with(slice(lhs, i), rhs)) return i;
+    }
+
     return -1;
 }
 
