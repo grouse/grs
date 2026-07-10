@@ -1,6 +1,30 @@
 #ifndef GFX_VULKAN_GENERATED_H
 #define GFX_VULKAN_GENERATED_H
 
+extern void hash32_update(h32s *state, const GfxTextureAssetDesc & it);
+extern u32 hash32(const GfxTextureAssetDesc & it, u32 seed);
+extern void hash32_update(h32s *state, const GfxTextureAssetDesc & it);
+extern void hash32_update(h32s *state, const GfxVkBuffer & it);
+extern u32 hash32(const GfxVkBuffer & it, u32 seed);
+extern void hash32_update(h32s *state, const GfxVkBuffer & it);
+extern void hash32_update(h32s *state, const GfxVkTexture & it);
+extern u32 hash32(const GfxVkTexture & it, u32 seed);
+extern void hash32_update(h32s *state, const GfxVkTexture & it);
+extern void hash32_update(h32s *state, const GfxVkDescriptorDesc & desc);
+extern u32 hash32(const GfxVkDescriptorDesc & desc, u32 seed);
+extern void hash32_update(h32s *state, const GfxVkDescriptorDesc & desc);
+extern void hash32_update(h32s *state, const GfxVkDescriptorSetDesc & desc);
+extern u32 hash32(const GfxVkDescriptorSetDesc & desc, u32 seed);
+extern void hash32_update(h32s *state, const GfxVkDescriptorSetDesc & desc);
+extern void hash32_update(h32s *state, const VkDescriptorSetLayoutCreateInfo & info);
+extern u32 hash32(const VkDescriptorSetLayoutCreateInfo & info, u32 seed);
+extern void hash32_update(h32s *state, const VkDescriptorSetLayoutCreateInfo & info);
+extern void hash32_update(h32s *state, const GfxPrimitiveDesc & desc);
+extern u32 hash32(const GfxPrimitiveDesc & desc, u32 seed);
+extern void hash32_update(h32s *state, const GfxPrimitiveDesc & desc);
+extern void hash32_update(h32s *state, const GfxVkMaterial & mat);
+extern u32 hash32(const GfxVkMaterial & mat, u32 seed);
+extern void hash32_update(h32s *state, const GfxVkMaterial & mat);
 extern Vector2 gfx_resolution();
 extern void gfx_wait_frame();
 extern void gfx_wait_for_frame();
@@ -8,6 +32,9 @@ extern GfxBuffer gfx_create_buffer(i32 size);
 extern GfxBuffer gfx_create_buffer(void *data, i32 size);
 extern GfxBuffer gfx_create_vertex_buffer(void *data, i32 size);
 extern GfxBuffer gfx_create_index_buffer(void *data, i32 size);
+extern GfxTexture gfx_load_texture(String path, bool sRGB = true);
+extern GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB = true);
+extern AssetHandle gfx_get_texture_asset(GfxTexture texture);
 extern void gfx_begin_pass(const GfxVkRenderPassDesc & desc);
 extern void gfx_end_pass();
 extern const char *sz_from_enum(GfxLoadOp op);

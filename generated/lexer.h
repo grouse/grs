@@ -11,6 +11,7 @@ extern bool require_next_token(Lexer *lexer, char c, Token *t = nullptr);
 extern bool require_next_identifier(Lexer *lexer, String identifier, Token *t = nullptr);
 extern bool optional_token(Lexer *lexer, TokenType type, Token *t = nullptr);
 extern bool optional_token(Lexer *lexer, char c, Token *t = nullptr);
+extern bool optional_identifier(Lexer *lexer, String str, Token *t = nullptr);
 extern bool is_identifier(Token t, String str);
 extern bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version);
 extern bool parse_float(Lexer *lexer, f32 *value, i32 n = 1);
