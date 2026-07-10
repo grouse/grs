@@ -173,6 +173,15 @@ inline T read_memory(MemoryBuffer *buf)
 }
 
 template<typename T>
+inline T* read_memory_ptr(MemoryBuffer *buf)
+{
+    PANIC_IF(buf->offset + (i32)sizeof(T) > buf->size, "reading beyond end of buffer");
+    T *val = (T*)(buf->data + buf->offset);
+    buf->offset += sizeof(T);
+    return val;
+}
+
+template<typename T>
 inline void write_memory(MemoryBuffer *buf, T val)
 {
     PANIC_IF(buf->offset + (i32)sizeof(T) > buf->size, "reading beyond end of buffer");
