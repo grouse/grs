@@ -1,4 +1,3 @@
-#define GFX_VULKAN_GENERATED_IMPL
 #include "gfx_vulkan.h"
 #include "gfx.h"
 #include "string.h"
@@ -7,6 +6,9 @@
 #include <tracy/Tracy.hpp>
 
 #include "vulkan/vulkan_core.h"
+
+#define GFX_VULKAN_GENERATED_IMPL
+#include "generated/gfx_vulkan.h"
 
 GfxVkContext vk;
 
