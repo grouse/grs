@@ -25,7 +25,7 @@ bool operator<(String lhs, String rhs)
     return strncmp(lhs.data, rhs.data, MIN(lhs.length, rhs.length)) < 0;
 }
 
-String string(const char *str, i32 length, Allocator mem) EXPORT
+String string(const char *str, i32 length, Allocator mem)
 {
     String s;
     s.data = ALLOC_ARR(mem, char, length);
@@ -34,13 +34,13 @@ String string(const char *str, i32 length, Allocator mem) EXPORT
     return s;
 }
 
-String string(const char *sz_str, Allocator mem)  EXPORT
+String string(const char *sz_str, Allocator mem) 
 {
     if (sz_str == nullptr) return {};
     return string(sz_str, i32(strlen(sz_str)), mem);
 }
 
-String string(const char *begin, const char *end) EXPORT
+String string(const char *begin, const char *end)
 {
     if (!begin) return {};
     return { begin, (i32)(u64)(end-begin) };
@@ -57,7 +57,7 @@ String duplicate_string(String other, Allocator mem)
     return str;
 }
 
-char* duplicate_sz(const char *other, Allocator mem) EXPORT
+char* duplicate_sz(const char *other, Allocator mem)
 {
     if (!other) return nullptr;
     i32 len = strlen(other);
@@ -141,7 +141,7 @@ char* sztringf(Allocator mem, const char *fmt, ...)
     return result;
 }
 
-String slice(String str, i32 start, i32 end) EXPORT
+String slice(String str, i32 start, i32 end)
 {
     String r;
     r.data = str.data+start;
@@ -149,7 +149,7 @@ String slice(String str, i32 start, i32 end) EXPORT
     return r;
 }
 
-String slice(String str, i32 start) EXPORT
+String slice(String str, i32 start)
 {
     String r;
     r.data = str.data+start;
@@ -157,7 +157,7 @@ String slice(String str, i32 start) EXPORT
     return r;
 }
 
-String slice(const char *str, i32 start, i32 end) EXPORT
+String slice(const char *str, i32 start, i32 end)
 {
     String r;
     r.data = (char*)str+start;
@@ -192,7 +192,7 @@ bool i32_from_string(String s, i32 *dst)
     return true;
 }
 
-bool i64_from_string(String s, i64 *dst) EXPORT
+bool i64_from_string(String s, i64 *dst)
 {
     if (!s) return false;
 
@@ -213,7 +213,7 @@ bool i64_from_string(String s, i64 *dst) EXPORT
     return true;
 }
 
-bool u32_from_string(String s, u32 *dst) EXPORT
+bool u32_from_string(String s, u32 *dst)
 {
     if (!s) return false;
 
@@ -230,13 +230,13 @@ bool u32_from_string(String s, u32 *dst) EXPORT
     return true;
 }
 
-u8 u8_from_string(String s) EXPORT
+u8 u8_from_string(String s)
 {
     if (u8 value; u8_from_string(s, &value)) return value;
     return -1;
 }
 
-bool u8_from_string(String s, u8 *dst) EXPORT
+bool u8_from_string(String s, u8 *dst)
 {
     u8 result = 0;
 
@@ -251,13 +251,13 @@ bool u8_from_string(String s, u8 *dst) EXPORT
     return true;
 }
 
-u64 u64_from_string(String s) EXPORT
+u64 u64_from_string(String s)
 {
     if (u64 value; u64_from_string(s, &value)) return value;
     return -1;
 }
 
-bool u64_from_string(String s, u64 *dst) EXPORT
+bool u64_from_string(String s, u64 *dst)
 {
     if (!s) return false;
 
@@ -274,7 +274,7 @@ bool u64_from_string(String s, u64 *dst) EXPORT
     return true;
 }
 
-bool f32_from_string(String s, f32 *dst) EXPORT
+bool f32_from_string(String s, f32 *dst)
 {
     if (!s) return false;
 
@@ -284,7 +284,7 @@ bool f32_from_string(String s, f32 *dst) EXPORT
     return r == 1;
 }
 
-bool f64_from_string(String s, f64 *dst) EXPORT
+bool f64_from_string(String s, f64 *dst)
 {
     if (!s) return false;
 
@@ -296,13 +296,13 @@ bool f64_from_string(String s, f64 *dst) EXPORT
     return false;
 }
 
-i32 find_first(String s, char c) EXPORT
+i32 find_first(String s, char c)
 {
     for (i32 i = 0; i < s.length; i++) if (s[i] == c) return i;
     return -1;
 }
 
-i32 find_first(String lhs, String rhs) EXPORT
+i32 find_first(String lhs, String rhs)
 {
     for (i32 i = 0; i < lhs.length; i++) {
         if (starts_with(slice(lhs, i), rhs)) return i;
@@ -311,7 +311,7 @@ i32 find_first(String lhs, String rhs) EXPORT
     return -1;
 }
 
-i32 find_last(String s, char c) EXPORT
+i32 find_last(String s, char c)
 {
     for (i32 i = s.length-1; i >= 0; i--) if (s[i] == c) return i;
     return -1;
@@ -340,7 +340,7 @@ String trim_whitespace(String str)
     return slice(str, start, end);
 }
 
-bool string_contains(String lhs, String rhs) EXPORT
+bool string_contains(String lhs, String rhs)
 {
     for (i32 i = 0; i < lhs.length; i++) {
         if (lhs[i] == rhs[0]) {
@@ -517,7 +517,7 @@ String string_from_utf16(const u16 *in_str, i32 length, Allocator mem)
     return str;
 }
 
-i32 utf8_length(const u16 *str, i32 utf16_len, i32 limit) EXPORT
+i32 utf8_length(const u16 *str, i32 utf16_len, i32 limit)
 {
     i32 length = 0;
     for (i32 i = 0; i < utf16_len; i++) {
@@ -562,7 +562,7 @@ i32 utf8_length(const u16 *str, i32 utf16_len, i32 limit) EXPORT
     return length;
 }
 
-i32 utf8_length(const u16 *str, i32 utf16_len) EXPORT
+i32 utf8_length(const u16 *str, i32 utf16_len)
 {
     i32 length = 0;
     for (i32 i = 0; i < utf16_len; i++) {
@@ -603,7 +603,7 @@ i32 utf8_length(const u16 *str, i32 utf16_len) EXPORT
     return length;
 }
 
-i32 utf16_length(String str) EXPORT
+i32 utf16_length(String str)
 {
     i32 length = 0;
     for (i32 i = 0; i < str.length; i++) {
@@ -646,7 +646,7 @@ end:
     return length;
 }
 
-void utf16_from_string(u16 *dst, i32 capacity, String src) EXPORT
+void utf16_from_string(u16 *dst, i32 capacity, String src)
 {
     i32 length = 0;
     for (i32 i = 0; i < src.length; i++) {
@@ -694,7 +694,7 @@ end:
     return;
 }
 
-u16* utf16_from_string(String str, i32 *utf16_length, Allocator mem) EXPORT
+u16* utf16_from_string(String str, i32 *utf16_length, Allocator mem)
 {
     i32 length = 0;
     i32 capacity = str.length;
@@ -755,7 +755,7 @@ end:
     return utf16;
 }
 
-i32 byte_index_from_codepoint_index(String str, i32 codepoint) EXPORT
+i32 byte_index_from_codepoint_index(String str, i32 codepoint)
 {
     i32 i, ci;
     for (i = 0, ci = 0; i < str.length; i++, ci++) {
@@ -771,7 +771,7 @@ i32 byte_index_from_codepoint_index(String str, i32 codepoint) EXPORT
     return i;
 }
 
-i32 codepoint_index_from_byte_index(String str, i32 byte) EXPORT
+i32 codepoint_index_from_byte_index(String str, i32 byte)
 {
     i32 ci = 0;
     for (i32 i = 0; i < str.length; i++) {
@@ -788,14 +788,14 @@ i32 codepoint_index_from_byte_index(String str, i32 byte) EXPORT
     return ci;
 }
 
-i64 utf8_decr(char *str, i64 i) EXPORT
+i64 utf8_decr(char *str, i64 i)
 {
     i--;
     while (i > 0 && (str[i] & 0b11000000) == 0b10000000) i--;
     return i;
 }
 
-i64 utf8_incr(char *str, i64 length, i64 i) EXPORT
+i64 utf8_incr(char *str, i64 length, i64 i)
 {
     if (i < length) {
         char c = str[i++];
@@ -808,18 +808,18 @@ i64 utf8_incr(char *str, i64 length, i64 i) EXPORT
     return i;
 }
 
-i32 utf8_decr(String str, i32 i) EXPORT
+i32 utf8_decr(String str, i32 i)
 {
     return (i32)utf8_decr(str.data, i);
 }
 
-i32 utf8_incr(String str, i32 i) EXPORT
+i32 utf8_incr(String str, i32 i)
 {
     return (i32)utf8_incr(str.data, str.length, i);
 }
 
 
-bool path_equals(String lhs, String rhs) EXPORT
+bool path_equals(String lhs, String rhs)
 {
     if (lhs.length != rhs.length) return false;
 
@@ -835,7 +835,7 @@ bool path_equals(String lhs, String rhs) EXPORT
     return true;
 }
 
-String extension_of(String path) EXPORT
+String extension_of(String path)
 {
     for (i32 i = path.length-1; i >= 0; i--) {
         if (path.data[i] == '.') {
@@ -846,13 +846,13 @@ String extension_of(String path) EXPORT
     return {};
 }
 
-String basename_of(String path) EXPORT
+String basename_of(String path)
 {
     String ext = extension_of(path);
     return ext ? slice(path, 0, path.length-ext.length) : path;
 }
 
-const char* sz_extension_of(const char *path) EXPORT
+const char* sz_extension_of(const char *path)
 {
     char *ext = nullptr;
     for (const char *p = path; *p; p++) {
@@ -863,7 +863,7 @@ const char* sz_extension_of(const char *path) EXPORT
     return ext;
 }
 
-String filename_of(String path) EXPORT
+String filename_of(String path)
 {
     for (i32 i = path.length-1; i >= 0; i--) {
         if (path.data[i] == '/' || path.data[i] == '\\') {
@@ -874,7 +874,7 @@ String filename_of(String path) EXPORT
     return path;
 }
 
-String filename_of_sz(const char *path) EXPORT
+String filename_of_sz(const char *path)
 {
     const char *p = path;
 
@@ -887,7 +887,7 @@ String filename_of_sz(const char *path) EXPORT
     return { path, i32(p-path) };
 }
 
-String directory_of(String path) EXPORT
+String directory_of(String path)
 {
     for (i32 i = path.length-1; i >= 0; i--) {
         if (path.data[i] == '/' || path.data[i] == '\\') {
@@ -898,7 +898,7 @@ String directory_of(String path) EXPORT
     return "";
 }
 
-char* sz_directory_of_sz(const char *path, Allocator mem) EXPORT
+char* sz_directory_of_sz(const char *path, Allocator mem)
 {
     const char *last = path;
     for (const char *ptr = path; *ptr; ptr++) {
@@ -914,7 +914,7 @@ char* sz_directory_of_sz(const char *path, Allocator mem) EXPORT
 }
 
 
-String path_relative_to(String path, String root) EXPORT
+String path_relative_to(String path, String root)
 {
     ASSERT(path.length > root.length);
     String proot = slice(path, 0, root.length);
@@ -929,7 +929,7 @@ String path_relative_to(String path, String root) EXPORT
     return short_path;
 }
 
-String join_path(String root, String filename, Allocator mem) EXPORT
+String join_path(String root, String filename, Allocator mem)
 {
     bool add_slash = false;
     i32 required_length = root.length + filename.length;
@@ -953,7 +953,7 @@ String join_path(String root, String filename, Allocator mem) EXPORT
     return path;
 }
 
-char* join_path(const char *sz_root, const char *sz_filename, Allocator mem) EXPORT
+char* join_path(const char *sz_root, const char *sz_filename, Allocator mem)
 {
     i32 root_length = strlen(sz_root);
     i32 filename_length = strlen(sz_filename);
@@ -980,7 +980,7 @@ char* join_path(const char *sz_root, const char *sz_filename, Allocator mem) EXP
     return sz_path;
 }
 
-i32 utf8_from_utf32(u8 utf8[4], i32 utf32) EXPORT
+i32 utf8_from_utf32(u8 utf8[4], i32 utf32)
 {
     if (utf32 <= 0x007F) {
         utf8[0] = (u8)utf32;
@@ -1005,7 +1005,7 @@ i32 utf8_from_utf32(u8 utf8[4], i32 utf32) EXPORT
     return -1;
 }
 
-u32 utf32_it_next(char *str, i64 length, i64 *offset) EXPORT
+u32 utf32_it_next(char *str, i64 length, i64 *offset)
 {
     u32 c = str[*offset];
     i64 end = (i64)(str + length);
@@ -1041,7 +1041,7 @@ u32 utf32_it_next(char *str, i64 length, i64 *offset) EXPORT
     return c;
 }
 
-u32 utf32_it_next(String str, i32 *offset) EXPORT
+u32 utf32_it_next(String str, i32 *offset)
 {
     i32 c = str[*offset];
     i64 end = (i64)(str.data + str.length);
@@ -1077,7 +1077,7 @@ u32 utf32_it_next(String str, i32 *offset) EXPORT
     return c;
 }
 
-i32 utf32_it_next(char **utf8, char *end) EXPORT
+i32 utf32_it_next(char **utf8, char *end)
 {
     i32 c = **utf8;
 
@@ -1113,7 +1113,7 @@ i32 utf32_it_next(char **utf8, char *end) EXPORT
     return c;
 }
 
-void reset_string_builder(StringBuilder *sb) EXPORT
+void reset_string_builder(StringBuilder *sb)
 {
     for (auto it = &sb->head; it; it = it->next) {
         it->written = 0;
@@ -1122,7 +1122,7 @@ void reset_string_builder(StringBuilder *sb) EXPORT
     sb->current = &sb->head;
 }
 
-String create_string(StringBuilder *sb, Allocator mem) EXPORT
+String create_string(StringBuilder *sb, Allocator mem)
 {
     i32 length = 0;
     for (auto it = &sb->head; it && it->written > 0; it = it->next) {
@@ -1140,7 +1140,7 @@ String create_string(StringBuilder *sb, Allocator mem) EXPORT
     return str;
 }
 
-char* sz_string(StringBuilder *sb, Allocator mem) EXPORT
+char* sz_string(StringBuilder *sb, Allocator mem)
 {
     i32 length = 0;
     for (auto it = sb->current; it; it = it->next) {
@@ -1159,7 +1159,7 @@ char* sz_string(StringBuilder *sb, Allocator mem) EXPORT
     return str;
 }
 
-void append_data(StringBuilder *sb, void *data, i32 size) EXPORT
+void append_data(StringBuilder *sb, void *data, i32 size)
 {
     u8 *src = (u8*)data;
     i32 written = 0;
@@ -1181,17 +1181,17 @@ void append_data(StringBuilder *sb, void *data, i32 size) EXPORT
     }
 }
 
-void append_char(StringBuilder *sb, char c) EXPORT
+void append_char(StringBuilder *sb, char c)
 {
     append_data(sb, &c, c);
 }
 
-void append_string(StringBuilder *sb, String str) EXPORT
+void append_string(StringBuilder *sb, String str)
 {
     append_data(sb, str.data, str.length);
 }
 
-void append_stringf(StringBuilder *sb, const char *fmt, ...) EXPORT
+void append_stringf(StringBuilder *sb, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -1214,41 +1214,41 @@ void append_stringf(StringBuilder *sb, const char *fmt, ...) EXPORT
     }
 }
 
-bool is_whitespace(i32 c) EXPORT
+bool is_whitespace(i32 c)
 {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-bool is_number(i32 c) EXPORT
+bool is_number(i32 c)
 {
     return c >= '0' && c <= '9';
 }
 
-bool is_numeric(String str) EXPORT
+bool is_numeric(String str)
 {
     if (!str) return false;
     for (char c : str) if (!is_number(c)) return false;
     return true;
 }
 
-bool is_alpha(i32 c) EXPORT
+bool is_alpha(i32 c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-bool is_newline(i32 c) EXPORT
+bool is_newline(i32 c)
 {
     return c == '\n' || c == '\r';
 }
 
-String to_lower(String s, Allocator mem) EXPORT
+String to_lower(String s, Allocator mem)
 {
     String l = duplicate_string(s, mem);
     for (i32 i = 0; i < l.length; i++) l[i] = to_lower(l[i]);
     return l;
 }
 
-i32 last_of(String str, char c) EXPORT
+i32 last_of(String str, char c)
 {
 	i32 p = -1;
 	for (i32 i = 0; i < str.length; i++) {
@@ -1257,7 +1257,7 @@ i32 last_of(String str, char c) EXPORT
 	return p;
 }
 
-i32 last_of(const char *str, char c) EXPORT
+i32 last_of(const char *str, char c)
 {
     i32 p = -1;
     for (i32 i = 0; str[i]; i++) {
@@ -1266,14 +1266,14 @@ i32 last_of(const char *str, char c) EXPORT
     return p;
 }
 
-i32 first_of(String str, char c) EXPORT
+i32 first_of(String str, char c)
 {
     i32 i = 0;
     while (i < str.length && str[i] != c) i++;
     return i;
 }
 
-i32 first_of(const char *str, char c) EXPORT
+i32 first_of(const char *str, char c)
 {
     i32 i = 0;
     while (str[i] && str[i] != c) i++;
@@ -1301,7 +1301,7 @@ char* last_of(char *str, char c)
     return p;
 }
 
-bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2]) EXPORT
+bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2])
 {
     for (i32 i = 0; i < count; i++) {
         if (args[i] == name) {
@@ -1315,7 +1315,7 @@ bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2]) EXP
     return false;
 }
 
-bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2]) EXPORT
+bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2])
 {
     for (i32 i = 0; i < count; i++) {
         if (args[i] == name) {
@@ -1329,7 +1329,7 @@ bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2]) EXP
     return false;
 }
 
-Array<String> split_lines(String str, Allocator mem) EXPORT
+Array<String> split_lines(String str, Allocator mem)
 {
     i32 num_lines = 0;
     for (i32 i = 0; i < str.length; i++) {
@@ -1356,7 +1356,7 @@ Array<String> split_lines(String str, Allocator mem) EXPORT
     return lines;
 }
 
-void string_replace(String *str, char c, char with) EXPORT
+void string_replace(String *str, char c, char with)
 {
     for (i32 i = 0; i < str->length; i++) {
         if (str->data[i] == c) str->data[i] = with;

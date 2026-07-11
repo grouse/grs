@@ -137,12 +137,12 @@ void win32_client_rect(HWND hwnd, f32 *x, f32 *y)
     }
 }
 
-void sleep(i32 milliseconds) EXPORT
+void sleep(i32 milliseconds)
 {
     Sleep(milliseconds);
 }
 
-i32 current_process_id() EXPORT
+i32 current_process_id()
 {
     return (i32)GetCurrentProcessId();
 }

@@ -3,7 +3,7 @@
 #include "lexer.h"
 #include "file.h"
 
-IniSerializer ini_writer(Allocator mem) EXPORT
+IniSerializer ini_writer(Allocator mem)
 {
     return {
         .mode = INI_WRITE,
@@ -11,7 +11,7 @@ IniSerializer ini_writer(Allocator mem) EXPORT
     };
 }
 
-IniSerializer ini_reader(u8 *data, i32 size) EXPORT
+IniSerializer ini_reader(u8 *data, i32 size)
 {
     IniSerializer ini = { .mode = INI_READ };
     ini.lexer = Lexer{ data, size, "ini" };
@@ -20,7 +20,7 @@ IniSerializer ini_reader(u8 *data, i32 size) EXPORT
     return ini;
 }
 
-IniSerializer ini_read_file(String path, Allocator mem) EXPORT
+IniSerializer ini_read_file(String path, Allocator mem)
 {
     FileInfo f = read_file(path, mem);
 
@@ -30,7 +30,7 @@ IniSerializer ini_read_file(String path, Allocator mem) EXPORT
     return ini;
 }
 
-bool ini_section_begin(IniSerializer *ini, String name) EXPORT
+bool ini_section_begin(IniSerializer *ini, String name)
 {
     switch (ini->mode) {
     case INI_WRITE:
@@ -60,7 +60,7 @@ bool ini_section_begin(IniSerializer *ini, String name) EXPORT
     return true;
 }
 
-bool ini_section_end(IniSerializer *ini) EXPORT
+bool ini_section_end(IniSerializer *ini)
 {
     if (ini->sections.count > 0) {
         array_pop(&ini->sections);
@@ -70,7 +70,7 @@ bool ini_section_end(IniSerializer *ini) EXPORT
     return false;
 }
 
-bool ini_value(IniSerializer *ini, String name, bool *value) EXPORT
+bool ini_value(IniSerializer *ini, String name, bool *value)
 {
     switch (ini->mode) {
     case INI_WRITE:
@@ -92,7 +92,7 @@ bool ini_value(IniSerializer *ini, String name, bool *value) EXPORT
 bool ini_value(
     IniSerializer *ini,
     String name,
-    i32 *value, int count /*= 1*/) EXPORT
+    i32 *value, int count /*= 1*/)
 {
     switch (ini->mode) {
     case INI_WRITE:
@@ -120,7 +120,7 @@ bool ini_value(
 bool ini_value(
     IniSerializer *ini,
     String name,
-    u32 *value, int count /*= 1*/) EXPORT
+    u32 *value, int count /*= 1*/)
 {
     switch (ini->mode) {
     case INI_WRITE:
@@ -148,7 +148,7 @@ bool ini_value(
 bool ini_value(
     IniSerializer *ini,
     String name,
-    f32 *value, i32 count /*= 1*/) EXPORT
+    f32 *value, i32 count /*= 1*/)
 {
     switch (ini->mode) {
     case INI_WRITE:
@@ -172,7 +172,7 @@ bool ini_value(
     return false;
 }
 
-bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem) EXPORT
+bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem)
 {
     switch (ini->mode) {
     case INI_WRITE:
@@ -194,7 +194,7 @@ bool ini_value(IniSerializer *ini, String name, String *value, Allocator mem) EX
 }
 
 
-bool ini_in_section(IniSerializer *ini) EXPORT
+bool ini_in_section(IniSerializer *ini)
 {
     switch (ini->mode) {
     case INI_WRITE: return false;
@@ -204,7 +204,7 @@ bool ini_in_section(IniSerializer *ini) EXPORT
     }
 }
 
-bool ini_next(IniSerializer *ini) EXPORT
+bool ini_next(IniSerializer *ini)
 {
     switch (ini->mode) {
     case INI_WRITE:

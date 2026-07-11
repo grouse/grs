@@ -25,9 +25,17 @@ extern void hash32_update(h32s *state, const GfxPrimitiveDesc & desc);
 extern void hash32_update(h32s *state, const GfxVkMaterial & mat);
 extern u32 hash32(const GfxVkMaterial & mat, u32 seed);
 extern void hash32_update(h32s *state, const GfxVkMaterial & mat);
+extern bool vk_image_format_supported(VkFormat format, VkImageCreateInfo image_info);
+extern void vk_imm_begin();
+extern void vk_imm_end();
 extern Vector2 gfx_resolution();
 extern void gfx_wait_frame();
+extern void vk_destroy_swapchain();
+extern void vk_create_swapchain(VkExtent2D extent, VkPresentModeKHR present_mode);
 extern void gfx_wait_for_frame();
+extern void vk_recreate_swapchain();
+extern void vk_copy_buffer(VkCommandBuffer cmd, VkBuffer dst, VkBuffer src, VkDeviceSize size);
+extern void vk_copy_buffer_to_image(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, u32 width, u32 height, i32 dst_x = 0, i32 dst_y = 0);
 extern GfxBuffer gfx_create_buffer(i32 size);
 extern GfxBuffer gfx_create_buffer(void *data, i32 size);
 extern GfxBuffer gfx_create_vertex_buffer(void *data, i32 size);
@@ -35,35 +43,6 @@ extern GfxBuffer gfx_create_index_buffer(void *data, i32 size);
 extern GfxTexture gfx_load_texture(String path, bool sRGB = true);
 extern GfxTexture gfx_load_texture(AssetHandle handle, bool sRGB = true);
 extern AssetHandle gfx_get_texture_asset(GfxTexture texture);
-extern void gfx_begin_pass(const GfxVkRenderPassDesc & desc);
-extern void gfx_end_pass();
-extern const char *sz_from_enum(GfxLoadOp op);
-extern const char *sz_from_enum(GfxStoreOp op);
-extern GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
-extern GfxMesh gfx_cube(f32 width, f32 height, f32 depth);
-extern GfxMesh gfx_sphere(f32 radius, i32 detail);
-extern GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail);
-extern GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness);
-extern GfxMesh gfx_ramp(f32 length, f32 height, f32 width);
-extern bool operator==(const GfxPrimitiveDesc & lhs, const GfxPrimitiveDesc & rhs);
-
-#endif // GFX_VULKAN_GENERATED_H
-
-#ifdef GFX_VULKAN_GENERATED_IMPL
-#define GFX_VULKAN_INTERNAL
-#endif
-
-#if defined(GFX_VULKAN_INTERNAL) && !defined(GFX_VULKAN_INTERNAL_ONCE)
-#define GFX_VULKAN_INTERNAL_ONCE
-
-extern bool vk_image_format_supported(VkFormat format, VkImageCreateInfo image_info);
-extern void vk_imm_begin();
-extern void vk_imm_end();
-extern void vk_destroy_swapchain();
-extern void vk_create_swapchain(VkExtent2D extent, VkPresentModeKHR present_mode);
-extern void vk_recreate_swapchain();
-extern void vk_copy_buffer(VkCommandBuffer cmd, VkBuffer dst, VkBuffer src, VkDeviceSize size);
-extern void vk_copy_buffer_to_image(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, u32 width, u32 height, i32 dst_x = 0, i32 dst_y = 0);
 extern GfxTexture vk_create_texture(VkFormat format, VkComponentMapping swizzle, u32 width, u32 height, VkImageUsageFlags usage);
 extern GfxTexture vk_create_texture(VkFormat format, VkComponentMapping swizzle, u32 width, u32 height);
 extern GfxTexture vk_create_texture(void *pixels, VkFormat format, VkComponentMapping swizzle, u32 width, u32 height);
@@ -96,9 +75,13 @@ extern const char *sz_from_enum(VkFormat format);
 extern const char *sz_from_enum(VkPresentModeKHR mode);
 extern const char *sz_from_enum(VkImageType type);
 extern const char *sz_from_enum(VkImageViewType type);
+extern void gfx_begin_pass(const GfxVkRenderPassDesc & desc);
+extern void gfx_end_pass();
 extern void vk_update_uniform_buffer(GfxVkBuffer buffer, void *data, i32 size);
-static VkAttachmentLoadOp vk_load_op(GfxLoadOp op);
-static VkAttachmentStoreOp vk_store_op(GfxStoreOp op);
+extern VkAttachmentLoadOp vk_load_op(GfxLoadOp op);
+extern VkAttachmentStoreOp vk_store_op(GfxStoreOp op);
+extern const char *sz_from_enum(GfxLoadOp op);
+extern const char *sz_from_enum(GfxStoreOp op);
 extern bool operator==(const VkExtensionProperties & lhs, const char *rhs);
 extern bool operator==(const VkLayerProperties & lhs, const char *rhs);
 extern bool operator==(const VkDescriptorSetLayoutCreateInfo & lhs, const VkDescriptorSetLayoutCreateInfo & rhs);
@@ -112,5 +95,16 @@ extern void vk_set_uniform(VkDescriptorSet set, u32 binding, VkBuffer buffer, Vk
 extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params);
 extern VkDescriptorPool vk_descriptor_pool(u32 set_count =100);
 extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance);
+extern GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
+extern GfxMesh gfx_cube(f32 width, f32 height, f32 depth);
+extern GfxMesh gfx_sphere(f32 radius, i32 detail);
+extern GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail);
+extern GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness);
+extern GfxMesh gfx_ramp(f32 length, f32 height, f32 width);
+extern bool operator==(const GfxPrimitiveDesc & lhs, const GfxPrimitiveDesc & rhs);
 
+#endif // GFX_VULKAN_GENERATED_H
+
+#ifdef GFX_VULKAN_GENERATED_IMPL
+#define GFX_VULKAN_INTERNAL
 #endif

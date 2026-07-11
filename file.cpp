@@ -8,7 +8,7 @@
 #error "unsupported platform"
 #endif
 
-String uri_from_path(String path, Allocator mem) EXPORT
+String uri_from_path(String path, Allocator mem)
 {
     SArena scratch = tl_scratch_arena(mem);
     path = absolute_path(path, scratch);

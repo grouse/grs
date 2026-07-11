@@ -45,7 +45,7 @@ void* gfx_load_texture_asset(
     return asset;
 }
 
-GfxTextureFormat gfx_format_srgb(GfxTextureFormat format) EXPORT
+GfxTextureFormat gfx_format_srgb(GfxTextureFormat format)
 {
     switch (format) {
     case GFX_TEXTURE_R8_UNORM:            return GFX_TEXTURE_R8_SRGB;
@@ -64,7 +64,7 @@ GfxTextureFormat gfx_format_srgb(GfxTextureFormat format) EXPORT
     return format;
 }
 
-GfxTextureFormat gfx_format_unorm(GfxTextureFormat format) EXPORT
+GfxTextureFormat gfx_format_unorm(GfxTextureFormat format)
 {
     switch (format) {
     case GFX_TEXTURE_R8_SRGB:            return GFX_TEXTURE_R8_UNORM;
@@ -83,7 +83,7 @@ GfxTextureFormat gfx_format_unorm(GfxTextureFormat format) EXPORT
 }
 
 
-const char* sz_from_enum(GfxTextureFormat format) EXPORT
+const char* sz_from_enum(GfxTextureFormat format)
 {
     switch (format) {
     case GFX_TEXTURE_R8_UNORM:       return "GFX_TEXTURE_R8_UNORM";
@@ -100,7 +100,7 @@ const char* sz_from_enum(GfxTextureFormat format) EXPORT
     return "unknown";
 }
 
-u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/) EXPORT
+u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/)
 {
     h32s state = hash32_start(seed);
     hash32_update(&state, &it.albedo_factor, sizeof it.albedo_factor);
@@ -118,7 +118,7 @@ u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/) EXPORT
     return hash32_digest(&state);
 }
 
-u32 hash32(const GfxSampler &it, u32 seed /*= HASH32_SEED*/) EXPORT
+u32 hash32(const GfxSampler &it, u32 seed /*= HASH32_SEED*/)
 {
     h32s state = hash32_start(seed);
     hash32_update(&state, it.min_filter);

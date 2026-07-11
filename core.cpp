@@ -170,5 +170,5 @@ void stdio_sink(const char *path, u32 line, LogType type, const char *msg)
     fprintf(out, "%.*s:%d \033[%dm%s\033[m: %s\n", STRFMT(filename), line, color, type_s, msg);
 }
 
-void sleep(i32 milliseconds) EXPORT;
-i32 current_process_id() EXPORT;
+void sleep(i32 milliseconds);
+i32 current_process_id();

@@ -14,7 +14,7 @@ GfxVkContext vk;
 
 extern bool vk_image_format_supported(
     VkFormat format,
-    VkImageCreateInfo image_info) INTERNAL
+    VkImageCreateInfo image_info)
 {
     VkFormatFeatureFlags required_flags = 0;
     if (image_info.usage & VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
@@ -77,7 +77,7 @@ extern bool vk_image_format_supported(
 }
 
 
-extern void vk_imm_begin() INTERNAL
+extern void vk_imm_begin()
 {
     VK_CHECK(vkResetFences(vk.device, 1, &vk.imm.fence));
     VK_CHECK(vkResetCommandBuffer(vk.imm.cmd, 0));
@@ -90,7 +90,7 @@ extern void vk_imm_begin() INTERNAL
     VK_CHECK(vkBeginCommandBuffer(vk.imm.cmd, &begin_info));
 }
 
-extern void vk_imm_end() INTERNAL
+extern void vk_imm_end()
 {
     VK_CHECK(vkEndCommandBuffer(vk.imm.cmd));
 
@@ -108,12 +108,12 @@ extern void vk_imm_end() INTERNAL
 }
 
 
-Vector2 gfx_resolution() EXPORT
+Vector2 gfx_resolution()
 {
     return { (f32)vk.swapchain.extent.width, (f32)vk.swapchain.extent.height };
 }
 
-void gfx_wait_frame() EXPORT
+void gfx_wait_frame()
 {
     ZoneScopedN("gfx_wait_frame");
 
@@ -121,7 +121,7 @@ void gfx_wait_frame() EXPORT
     VK_CHECK(vkWaitForFences(vk.device, 1, &frame->fence, VK_TRUE, UINT64_MAX));
 }
 
-extern void vk_destroy_swapchain() INTERNAL
+extern void vk_destroy_swapchain()
 {
     for (auto it : vk.swapchain.views)
         vkDestroyImageView(vk.device, it, nullptr);
@@ -133,7 +133,7 @@ extern void vk_destroy_swapchain() INTERNAL
     }
 }
 
-extern void vk_create_swapchain(VkExtent2D extent, VkPresentModeKHR present_mode) INTERNAL
+extern void vk_create_swapchain(VkExtent2D extent, VkPresentModeKHR present_mode)
 {
     LOG_INFO("[vk] creating swapchain: %d, %d", extent.width, extent.height);
     SArena scratch = tl_scratch_arena();
@@ -257,7 +257,7 @@ extern void vk_create_swapchain(VkExtent2D extent, VkPresentModeKHR present_mode
     vk.swapchain.depth = vk.textures[idx];
 }
 
-void gfx_wait_for_frame() EXPORT
+void gfx_wait_for_frame()
 {
     ZoneScopedN("gfx_wait_for_frame");
 
@@ -270,7 +270,7 @@ void gfx_wait_for_frame() EXPORT
 
 }
 
-extern void vk_recreate_swapchain() INTERNAL
+extern void vk_recreate_swapchain()
 {
     vkDeviceWaitIdle(vk.device);
 
@@ -289,7 +289,7 @@ extern void vk_recreate_swapchain() INTERNAL
     vk.recreate_swapchain_requested = false;
 }
 
-extern void vk_copy_buffer(VkCommandBuffer cmd, VkBuffer dst, VkBuffer src, VkDeviceSize size) INTERNAL
+extern void vk_copy_buffer(VkCommandBuffer cmd, VkBuffer dst, VkBuffer src, VkDeviceSize size)
 {
     VkBufferCopy copy{ .size = size, };
     vkCmdCopyBuffer(cmd, src, dst, 1, &copy);
@@ -299,7 +299,7 @@ extern void vk_copy_buffer_to_image(
     VkCommandBuffer cmd,
     VkBuffer buffer, VkImage image,
     u32 width, u32 height,
-    i32 dst_x/*= 0*/, i32 dst_y /*= 0*/) INTERNAL
+    i32 dst_x/*= 0*/, i32 dst_y /*= 0*/)
 {
     VkBufferImageCopy copy{
         .bufferOffset      = 0,
@@ -319,7 +319,7 @@ extern void vk_copy_buffer_to_image(
 }
 
 
-GfxBuffer gfx_create_buffer(i32 size) EXPORT
+GfxBuffer gfx_create_buffer(i32 size)
 {
     GfxVkBuffer buffer = vk_create_buffer(
         size,
@@ -330,7 +330,7 @@ GfxBuffer gfx_create_buffer(i32 size) EXPORT
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
-GfxBuffer gfx_create_buffer(void *data, i32 size) EXPORT
+GfxBuffer gfx_create_buffer(void *data, i32 size)
 {
     GfxVkBuffer buffer = vk_create_buffer(
         size,
@@ -353,7 +353,7 @@ GfxBuffer gfx_create_buffer(void *data, i32 size) EXPORT
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
-GfxBuffer gfx_create_vertex_buffer(void *data, i32 size) EXPORT
+GfxBuffer gfx_create_vertex_buffer(void *data, i32 size)
 {
     GfxVkBuffer buffer = vk_create_buffer(
         size,
@@ -376,7 +376,7 @@ GfxBuffer gfx_create_vertex_buffer(void *data, i32 size) EXPORT
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
-GfxBuffer gfx_create_index_buffer(void *data, i32 size) EXPORT
+GfxBuffer gfx_create_index_buffer(void *data, i32 size)
 {
     GfxVkBuffer buffer = vk_create_buffer(
         size,
@@ -456,7 +456,7 @@ extern GfxTexture vk_create_texture(
     VkFormat format,
     VkComponentMapping swizzle,
     u32 width, u32 height,
-    VkImageUsageFlags usage) INTERNAL
+    VkImageUsageFlags usage)
 {
     GfxVkTexture texture{ .format = format, .width = width, .height = height };
 
@@ -521,7 +521,7 @@ extern GfxTexture vk_create_texture(
 extern GfxTexture vk_create_texture(
     VkFormat format,
     VkComponentMapping swizzle,
-    u32 width, u32 height) INTERNAL
+    u32 width, u32 height)
 {
     GfxTexture texture_idx = vk_create_texture(
         format, swizzle,
@@ -538,7 +538,7 @@ extern GfxTexture vk_create_texture(
     void *pixels,
     VkFormat format,
     VkComponentMapping swizzle,
-    u32 width, u32 height) INTERNAL
+    u32 width, u32 height)
 {
     GfxTexture texture_idx = vk_create_texture(format, swizzle, width, height);
     if (texture_idx == GfxTexture_INVALID) return GfxTexture_INVALID;
@@ -572,7 +572,7 @@ extern GfxTexture vk_create_texture(
     return texture_idx;
 }
 
-extern GfxTexture vk_create_depth_texture(VkExtent2D extent) INTERNAL
+extern GfxTexture vk_create_depth_texture(VkExtent2D extent)
 {
     return vk_create_texture(
         VK_FORMAT_D32_SFLOAT,
@@ -581,13 +581,13 @@ extern GfxTexture vk_create_depth_texture(VkExtent2D extent) INTERNAL
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
-extern void vk_set_viewport(VkCommandBuffer cmd, f32 width, f32 height) INTERNAL
+extern void vk_set_viewport(VkCommandBuffer cmd, f32 width, f32 height)
 {
     VkViewport viewport = { .width = width, .height = height, .minDepth = 0.0f, .maxDepth = 1.0f };
     vkCmdSetViewport(cmd, 0, 1, &viewport);
 }
 
-extern void vk_set_scissor(VkCommandBuffer cmd, f32 width, f32 height) INTERNAL
+extern void vk_set_scissor(VkCommandBuffer cmd, f32 width, f32 height)
 {
     VkRect2D scissor{ .extent = { u32(width), u32(height) } };
     vkCmdSetScissor(cmd, 0, 1, &scissor);
@@ -597,7 +597,7 @@ extern void vk_transition_image(
     VkCommandBuffer cmd,
     GfxVkTexture texture,
     VkImageLayout old_layout,
-    VkImageLayout new_layout) INTERNAL
+    VkImageLayout new_layout)
 {
     VkImageAspectFlags aspect = vk_aspect_mask(texture.format);
     vk_transition_image(cmd, texture.image, aspect, old_layout, new_layout);
@@ -608,7 +608,7 @@ extern void vk_transition_image(
     VkImage image,
     VkImageAspectFlags aspect,
     VkImageLayout old_layout,
-    VkImageLayout new_layout) INTERNAL
+    VkImageLayout new_layout)
 {
     VkImageMemoryBarrier2 barrier{
         VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -639,7 +639,7 @@ extern void vk_transition_image(
     vkCmdPipelineBarrier2(cmd, &dep_info);
 }
 
-extern VkDeviceAddress vk_get_buffer_address(VkBuffer buffer) INTERNAL
+extern VkDeviceAddress vk_get_buffer_address(VkBuffer buffer)
 {
     VkBufferDeviceAddressInfo address_info{
         VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
@@ -652,7 +652,7 @@ extern GfxVkBuffer vk_create_buffer(
     i32 size,
     VkBufferUsageFlags usage,
     VmaMemoryUsage mem_usage,
-    VmaAllocationCreateFlags flags) INTERNAL
+    VmaAllocationCreateFlags flags)
 {
     if (!size) return {};
 
@@ -687,7 +687,7 @@ extern GfxVkBuffer vk_create_buffer(
     void *data, i32 size,
     VkBufferUsageFlags usage,
     VmaMemoryUsage mem_usage,
-    VmaAllocationCreateFlagBits flags) INTERNAL
+    VmaAllocationCreateFlagBits flags)
 {
     GfxVkBuffer buffer = vk_create_buffer(size, usage, mem_usage, flags);
     vmaMapMemory(vk.allocator, buffer.allocation, &buffer.allocation_info.pMappedData);
@@ -696,12 +696,12 @@ extern GfxVkBuffer vk_create_buffer(
     return buffer;
 }
 
-extern void vk_destroy_buffer(GfxVkBuffer buffer) INTERNAL
+extern void vk_destroy_buffer(GfxVkBuffer buffer)
 {
     vmaDestroyBuffer(vk.allocator, buffer.handle, buffer.allocation);
 }
 
-extern void vk_set_image_label(VkImage image, String label) INTERNAL
+extern void vk_set_image_label(VkImage image, String label)
 {
     if (!vkSetDebugUtilsObjectNameEXT) return;
 
@@ -715,7 +715,7 @@ extern void vk_set_image_label(VkImage image, String label) INTERNAL
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
 }
 
-extern void vk_set_image_view_label(VkImageView view, String label) INTERNAL
+extern void vk_set_image_view_label(VkImageView view, String label)
 {
     if (!vkSetDebugUtilsObjectNameEXT) return;
     SArena scratch = tl_scratch_arena();
@@ -730,19 +730,19 @@ extern void vk_set_image_view_label(VkImageView view, String label) INTERNAL
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
 }
 
-extern void vk_set_texture_label(GfxVkTexture texture, String label) INTERNAL
+extern void vk_set_texture_label(GfxVkTexture texture, String label)
 {
     vk_set_image_label(texture.image, label);
     vk_set_image_view_label(texture.view, label);
 }
 
-extern void vk_set_texture_label(GfxTexture idx, String label) INTERNAL
+extern void vk_set_texture_label(GfxTexture idx, String label)
 {
     GfxVkTexture texture = vk.textures[idx];
     return vk_set_texture_label(texture, label);
 }
 
-extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
+extern void vk_set_buffer_label(VkBuffer buffer, String label)
 {
     if (!vkSetDebugUtilsObjectNameEXT) return;
     SArena scratch = tl_scratch_arena();
@@ -757,7 +757,7 @@ extern void vk_set_buffer_label(VkBuffer buffer, String label) INTERNAL
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
 }
 
-extern void vk_set_pipeline_label(GfxPipelineIdx handle, String label) INTERNAL
+extern void vk_set_pipeline_label(GfxPipelineIdx handle, String label)
 {
     if (!vkSetDebugUtilsObjectNameEXT) return;
     SArena scratch = tl_scratch_arena();
@@ -774,7 +774,7 @@ extern void vk_set_pipeline_label(GfxPipelineIdx handle, String label) INTERNAL
     vkSetDebugUtilsObjectNameEXT(vk.device, &name_info);
 }
 
-extern VkImageAspectFlags vk_aspect_mask(VkFormat format) INTERNAL
+extern VkImageAspectFlags vk_aspect_mask(VkFormat format)
 {
     switch (format) {
     case VK_FORMAT_D16_UNORM:
@@ -794,7 +794,7 @@ extern VkImageAspectFlags vk_aspect_mask(VkFormat format) INTERNAL
     }
 }
 
-extern VkFormat vk_format(GfxTextureFormat format) INTERNAL
+extern VkFormat vk_format(GfxTextureFormat format)
 {
     switch (format) {
     case GFX_TEXTURE_R8_UNORM:       return VK_FORMAT_R8_UNORM;
@@ -811,7 +811,7 @@ extern VkFormat vk_format(GfxTextureFormat format) INTERNAL
     return VK_FORMAT_UNDEFINED;
 }
 
-extern u32 vk_format_size(VkFormat format) INTERNAL
+extern u32 vk_format_size(VkFormat format)
 {
     switch (format) {
     case VK_FORMAT_R8_UNORM:
@@ -913,7 +913,7 @@ extern u32 vk_format_size(VkFormat format) INTERNAL
     }
 }
 
-extern u32 vk_block_size(VkFormat format) INTERNAL
+extern u32 vk_block_size(VkFormat format)
 {
     switch (format) {
     case VK_FORMAT_R8_UNORM:
@@ -1084,7 +1084,7 @@ extern u32 vk_block_size(VkFormat format) INTERNAL
     }
 }
 
-extern VkSamplerAddressMode vk_wrap_mode(GfxSampleWrap wrap) INTERNAL
+extern VkSamplerAddressMode vk_wrap_mode(GfxSampleWrap wrap)
 {
     switch (wrap) {
     case GFX_WRAP_REPEAT: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -1096,7 +1096,7 @@ extern VkSamplerAddressMode vk_wrap_mode(GfxSampleWrap wrap) INTERNAL
     return VK_SAMPLER_ADDRESS_MODE_REPEAT;
 }
 
-extern VkBorderColor vk_border_color(GfxSampleBorderColor border_color) INTERNAL
+extern VkBorderColor vk_border_color(GfxSampleBorderColor border_color)
 {
     switch (border_color) {
     case GFX_BORDER_COLOR_FLOAT_OPAQUE_WHITE:
@@ -1109,7 +1109,7 @@ extern VkBorderColor vk_border_color(GfxSampleBorderColor border_color) INTERNAL
     return VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
 }
 
-extern VkFilter vk_filter(GfxSampleFilter filter) INTERNAL
+extern VkFilter vk_filter(GfxSampleFilter filter)
 {
     switch (filter) {
     case GFX_FILTER_NEAREST: return VK_FILTER_NEAREST;
@@ -1120,7 +1120,7 @@ extern VkFilter vk_filter(GfxSampleFilter filter) INTERNAL
     return VK_FILTER_LINEAR;
 }
 
-extern VkComponentMapping vk_component_mapping(GfxSwizzle swizzle) INTERNAL
+extern VkComponentMapping vk_component_mapping(GfxSwizzle swizzle)
 {
     VkComponentMapping components{};
 
@@ -1141,7 +1141,7 @@ extern VkComponentMapping vk_component_mapping(GfxSwizzle swizzle) INTERNAL
     return components;
 }
 
-extern const char* sz_from_enum(shaderc_compilation_status status) INTERNAL
+extern const char* sz_from_enum(shaderc_compilation_status status)
 {
     switch (status) {
     case shaderc_compilation_status_success: return "success";
@@ -1159,7 +1159,7 @@ extern const char* sz_from_enum(shaderc_compilation_status status) INTERNAL
     return "unknown";
 }
 
-extern const char* sz_from_enum(VkResult result) INTERNAL
+extern const char* sz_from_enum(VkResult result)
 {
     switch (result) {
     case VK_SUCCESS: return "VK_SUCCESS";
@@ -1218,7 +1218,7 @@ extern const char* sz_from_enum(VkResult result) INTERNAL
     return "unknown";
 }
 
-extern const char* sz_from_enum(VkFormat format) INTERNAL
+extern const char* sz_from_enum(VkFormat format)
 {
     switch (format) {
     case VK_FORMAT_UNDEFINED: return "VK_FORMAT_UNDEFINED";
@@ -1412,7 +1412,7 @@ extern const char* sz_from_enum(VkFormat format) INTERNAL
     }
 }
 
-extern const char* sz_from_enum(VkPresentModeKHR mode) INTERNAL
+extern const char* sz_from_enum(VkPresentModeKHR mode)
 {
     switch (mode) {
     case VK_PRESENT_MODE_IMMEDIATE_KHR: return "VK_PRESENT_MODE_IMMEDIATE_KHR";
@@ -1429,7 +1429,7 @@ extern const char* sz_from_enum(VkPresentModeKHR mode) INTERNAL
     return "unknown";
 }
 
-extern const char* sz_from_enum(VkImageType type) INTERNAL
+extern const char* sz_from_enum(VkImageType type)
 {
     switch (type) {
     case VK_IMAGE_TYPE_1D: return "VK_IMAGE_TYPE_1D";
@@ -1442,7 +1442,7 @@ extern const char* sz_from_enum(VkImageType type) INTERNAL
     return "unknown";
 }
 
-extern const char* sz_from_enum(VkImageViewType type) INTERNAL
+extern const char* sz_from_enum(VkImageViewType type)
 {
     switch (type) {
     case VK_IMAGE_VIEW_TYPE_1D:         return "VK_IMAGE_VIEW_TYPE_1D";
@@ -1459,7 +1459,7 @@ extern const char* sz_from_enum(VkImageViewType type) INTERNAL
     return "unknown";
 }
 
-void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
+void gfx_begin_pass(const GfxVkRenderPassDesc& desc)
 {
     ZoneScopedN("gfx_begin_pass");
     if (desc.debug_name.data && desc.debug_name.length) {
@@ -1532,7 +1532,7 @@ void gfx_begin_pass(const GfxVkRenderPassDesc& desc) EXPORT
     vkCmdBeginRendering(cmd, &render_info);
 }
 
-void gfx_end_pass() EXPORT
+void gfx_end_pass()
 {
     ZoneScopedN("gfx_end_pass");
 
@@ -1543,14 +1543,14 @@ void gfx_end_pass() EXPORT
     if (vkCmdEndDebugUtilsLabelEXT) vkCmdEndDebugUtilsLabelEXT(cmd);
 }
 
-extern void vk_update_uniform_buffer(GfxVkBuffer buffer, void *data, i32 size) INTERNAL
+extern void vk_update_uniform_buffer(GfxVkBuffer buffer, void *data, i32 size)
 {
     vmaMapMemory(vk.allocator, buffer.allocation, &buffer.allocation_info.pMappedData);
     memcpy(buffer.allocation_info.pMappedData, data, size);
     vmaUnmapMemory(vk.allocator, buffer.allocation);
 }
 
-VkAttachmentLoadOp vk_load_op(GfxLoadOp op) INTERNAL
+VkAttachmentLoadOp vk_load_op(GfxLoadOp op)
 {
     switch (op) {
     case GFX_LOAD_OP_DONT_CARE: return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -1562,7 +1562,7 @@ VkAttachmentLoadOp vk_load_op(GfxLoadOp op) INTERNAL
     return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 }
 
-VkAttachmentStoreOp vk_store_op(GfxStoreOp op) INTERNAL
+VkAttachmentStoreOp vk_store_op(GfxStoreOp op)
 {
     switch (op) {
     case GFX_STORE_OP_DONT_CARE: return VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -1573,7 +1573,7 @@ VkAttachmentStoreOp vk_store_op(GfxStoreOp op) INTERNAL
     return VK_ATTACHMENT_STORE_OP_DONT_CARE;
 }
 
-const char* sz_from_enum(GfxLoadOp op) EXPORT
+const char* sz_from_enum(GfxLoadOp op)
 {
     switch (op) {
     case GFX_LOAD_OP_DONT_CARE: return "GFX_LOAD_OP_DONT_CARE";
@@ -1585,7 +1585,7 @@ const char* sz_from_enum(GfxLoadOp op) EXPORT
     return "unknown";
 }
 
-const char* sz_from_enum(GfxStoreOp op) EXPORT
+const char* sz_from_enum(GfxStoreOp op)
 {
     switch (op) {
     case GFX_STORE_OP_DONT_CARE: return "GFX_STORE_OP_DONT_CARE";
@@ -1596,19 +1596,19 @@ const char* sz_from_enum(GfxStoreOp op) EXPORT
     return "unknown";
 }
 
-extern bool operator==(const VkExtensionProperties &lhs, const char *rhs) INTERNAL
+extern bool operator==(const VkExtensionProperties &lhs, const char *rhs)
 {
     return strcmp(lhs.extensionName, rhs) == 0;
 }
 
-extern bool operator==(const VkLayerProperties &lhs, const char *rhs) INTERNAL
+extern bool operator==(const VkLayerProperties &lhs, const char *rhs)
 {
     return strcmp(lhs.layerName, rhs) == 0;
 }
 
 extern bool operator==(
     const VkDescriptorSetLayoutCreateInfo &lhs,
-    const VkDescriptorSetLayoutCreateInfo &rhs) INTERNAL
+    const VkDescriptorSetLayoutCreateInfo &rhs)
 {
     if (lhs.sType != rhs.sType ||
         lhs.flags != rhs.flags ||
@@ -1641,7 +1641,7 @@ extern bool operator==(
     return true;
 }
 
-extern VkSampler vk_sampler(GfxSampler desc) INTERNAL
+extern VkSampler vk_sampler(GfxSampler desc)
 {
     auto *it = map_find_emplace(&vk.samplers, desc, {});
 
@@ -1662,7 +1662,7 @@ extern VkSampler vk_sampler(GfxSampler desc) INTERNAL
     return *it;
 }
 
-extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc) INTERNAL
+extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc)
 {
     PANIC_IF(!desc.set_layout, "descriptor set layout is invalid");
 
@@ -1697,7 +1697,7 @@ extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc) INTERNAL
 }
 
 extern VkDescriptorSetLayout vk_descriptor_layout(
-    FixedArray<VkDescriptorSetLayoutBinding, MAX_DESCRIPTOR_SET_BINDINGS> *bindings) INTERNAL
+    FixedArray<VkDescriptorSetLayoutBinding, MAX_DESCRIPTOR_SET_BINDINGS> *bindings)
 {
     VkDescriptorSetLayoutCreateInfo dsl_info{
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
@@ -1727,7 +1727,7 @@ extern void vk_set_images(
     u32 descriptor_count,
     GfxVkTexture *textures,
     VkSampler *samplers,
-    VkImageLayout layout) INTERNAL
+    VkImageLayout layout)
 {
     SArena scratch = tl_scratch_arena();
     auto image_infos = array_create<VkDescriptorImageInfo>(descriptor_count, scratch);
@@ -1752,7 +1752,7 @@ extern void vk_set_images(
     vkUpdateDescriptorSets(vk.device, 1, &write, 0, nullptr);
 }
 
-extern VkDescriptorSet vk_create_descriptor_set(VkDescriptorSetLayout layout) INTERNAL
+extern VkDescriptorSet vk_create_descriptor_set(VkDescriptorSetLayout layout)
 {
     VkDescriptorSetAllocateInfo alloc_info{
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -1782,7 +1782,7 @@ extern VkBool32 vk_debug_proc(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
     const VkDebugUtilsMessengerCallbackDataEXT *data,
-    void* /*user_data*/) INTERNAL
+    void* /*user_data*/)
 {
     const char* sz_type = "unknown";
     switch (type) {
@@ -1818,7 +1818,7 @@ extern void vk_set_uniform(
     u32 binding,
     VkBuffer buffer,
     VkDeviceSize offset,
-    VkDeviceSize range) INTERNAL
+    VkDeviceSize range)
 {
     VkDescriptorBufferInfo buffer_info{
         .buffer = buffer,
@@ -1841,7 +1841,7 @@ extern void vk_set_uniform(
 
 
 
-extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params) INTERNAL
+extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params)
 {
     GfxVkBuffer *uniform = map_find_emplace(&vk.material_parameters, params, {});
     if (!uniform->handle) {
@@ -1856,7 +1856,7 @@ extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params) INTERNAL
 }
 
 
-extern VkDescriptorPool vk_descriptor_pool(u32 set_count /*=100*/) INTERNAL
+extern VkDescriptorPool vk_descriptor_pool(u32 set_count /*=100*/)
 {
     struct DescriptorPoolSizeRatio {
         VkDescriptorType type;
@@ -1890,10 +1890,10 @@ extern VkDescriptorPool vk_descriptor_pool(u32 set_count /*=100*/) INTERNAL
 }
 
 // defined in [win32/linux]_vk_window.cpp
-extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance) INTERNAL;
+extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance);
 
 
-GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count) EXPORT
+GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count)
 {
     PANIC_IF(index_count > indices.count,
         "[gfx] mesh index count exceeds index buffer length: %d > %d",
@@ -1922,7 +1922,7 @@ GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 inde
     };
 }
 
-GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
+GfxMesh gfx_cube(f32 width, f32 height, f32 depth)
 {
     GfxPrimitiveDesc desc{
         .type = GFX_CUBE,
@@ -2001,7 +2001,7 @@ GfxMesh gfx_cube(f32 width, f32 height, f32 depth) EXPORT
     return *mesh;
 }
 
-GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
+GfxMesh gfx_sphere(f32 radius, i32 detail)
 {
     GfxPrimitiveDesc desc{
         .type = GFX_SPHERE,
@@ -2054,7 +2054,7 @@ GfxMesh gfx_sphere(f32 radius, i32 detail) EXPORT
     return *mesh;
 }
 
-GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
+GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail)
 {
     GfxPrimitiveDesc desc{
         .type = GFX_CYLINDER,
@@ -2151,7 +2151,7 @@ GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail) EXPORT
     return *mesh;
 }
 
-GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness) EXPORT
+GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness)
 {
     GfxPrimitiveDesc desc{
         .type = GFX_TRI_PRISM,
@@ -2241,7 +2241,7 @@ GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness) EXPORT
     return *mesh;
 }
 
-GfxMesh gfx_ramp(f32 length, f32 height, f32 width) EXPORT
+GfxMesh gfx_ramp(f32 length, f32 height, f32 width)
 {
     GfxPrimitiveDesc desc{
         .type = GFX_RAMP,
@@ -2301,7 +2301,7 @@ GfxMesh gfx_ramp(f32 length, f32 height, f32 width) EXPORT
     return *mesh;
 }
 
-bool operator==(const GfxPrimitiveDesc &lhs, const GfxPrimitiveDesc &rhs) EXPORT
+bool operator==(const GfxPrimitiveDesc &lhs, const GfxPrimitiveDesc &rhs)
 {
     if (lhs.type != rhs.type) return false;
     switch (lhs.type) {

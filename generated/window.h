@@ -23,12 +23,15 @@ extern String string_from_enum(InputType type);
 extern String string_from_enum(KeyCode_ kc);
 extern String string_from_enum(MouseButton btn);
 extern void init_input_map_(InputMapId *dst, String name, std::initializer_list<InputDesc> descriptors);
+extern void reset_input_map(InputMapId map_id);
 extern void input_begin_frame();
 extern void set_input_map(InputMapId id);
 extern void push_input_layer(InputMapId layer);
 extern InputMapId get_input_map();
 extern bool input_map_active(InputMapId id);
 extern bool next_event(AppWindow *wnd, WindowEvent *event);
+extern bool translate_input_event(DynamicArray<WindowEvent> *queue, InputMapId map_id, WindowEvent event);
+extern bool translate_input_event(DynamicArray<WindowEvent> *queue, WindowEvent event);
 extern bool text_input_enabled();
 extern bool get_input_text(InputId id, TextEvent *dst, InputMapId map_id);
 extern bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id = INPUT_MAP_ANY);
@@ -46,13 +49,4 @@ extern u32 hash32(const InputDesc & desc, u32 seed = HASH32_SEED);
 
 #ifdef WINDOW_GENERATED_IMPL
 #define WINDOW_INTERNAL
-#endif
-
-#if defined(WINDOW_INTERNAL) && !defined(WINDOW_INTERNAL_ONCE)
-#define WINDOW_INTERNAL_ONCE
-
-static void reset_input_map(InputMapId map_id);
-static bool translate_input_event(DynamicArray<WindowEvent> *queue, InputMapId map_id, WindowEvent event);
-static bool translate_input_event(DynamicArray<WindowEvent> *queue, WindowEvent event);
-
 #endif

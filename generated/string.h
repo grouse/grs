@@ -44,7 +44,6 @@ extern void reset_string_builder(StringBuilder *sb);
 extern void append_string(StringBuilder *sb, String str);
 extern void append_stringf(StringBuilder *sb, const char *fmt, ...);
 extern bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2]);
-extern String read_memory(MemoryBuffer *buf, Allocator mem);
 extern bool operator!=(String lhs, String rhs);
 extern bool operator==(String lhs, String rhs);
 extern bool operator>(String lhs, String rhs);

@@ -4,7 +4,7 @@
 
 GfxDebugContext gfx_debug;
 
-void gfx_debug_begin_frame() EXPORT
+void gfx_debug_begin_frame()
 {
     gfx_debug.commands.count = 0;
 }
@@ -12,7 +12,7 @@ void gfx_debug_begin_frame() EXPORT
 void gfx_debug_draw_sphere(
     Vector3 position,
     f32 radius,
-    Vector3 color) EXPORT
+    Vector3 color)
 {
     array_add(&gfx_debug.commands, {
         .sphere = {
@@ -27,7 +27,7 @@ void gfx_debug_draw_sphere(
 void gfx_debug_draw_cube(
     Vector3 position,
     Vector3 extents,
-    Vector3 color) EXPORT
+    Vector3 color)
 {
     array_add(&gfx_debug.commands, {
         .cube = {
@@ -44,7 +44,7 @@ void gfx_debug_draw_line(
     Vector3 p1,
     f32 thickness,
     Vector3 color,
-    f32 duration) EXPORT
+    f32 duration)
 {
     array_add(&gfx_debug.commands, {
         .line = {

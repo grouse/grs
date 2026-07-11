@@ -8,7 +8,7 @@
 
 InputContext input;
 
-String string_from_enum(GamepadButton button) EXPORT
+String string_from_enum(GamepadButton button)
 {
     switch (button) {
     case PAD_F_UP:    return "PAD_F_UP";
@@ -28,7 +28,7 @@ String string_from_enum(GamepadButton button) EXPORT
     return "unknown";
 }
 
-String string_from_enum(GamepadAxis axis) EXPORT
+String string_from_enum(GamepadAxis axis)
 {
     switch (axis) {
     case PAD_TRIG0: return "PAD_TRIG0";
@@ -40,7 +40,7 @@ String string_from_enum(GamepadAxis axis) EXPORT
     return "unknown";
 }
 
-String string_from_enum(WindowEventType type) EXPORT
+String string_from_enum(WindowEventType type)
 {
     if (type >= WE_INPUT) return "WE_INPUT";
 
@@ -67,7 +67,7 @@ String string_from_enum(WindowEventType type) EXPORT
     return "unknown";
 }
 
-String string_from_enum(InputType type) EXPORT
+String string_from_enum(InputType type)
 {
     switch (type) {
     case EDGE_DOWN:  return "EDGE_DOWN";
@@ -85,7 +85,7 @@ String string_from_enum(InputType type) EXPORT
     return "unknown";
 }
 
-String string_from_enum(KeyCode_ kc) EXPORT
+String string_from_enum(KeyCode_ kc)
 {
     switch (kc) {
     case KC_LSUPER:    return "KC_LSUPER";
@@ -229,7 +229,7 @@ void init_input_map_(InputMapId *dst, String name, std::initializer_list<InputDe
     *dst = array_add(&input.maps, map);
 }
 
-void reset_input_map(InputMapId map_id) INTERNAL
+void reset_input_map(InputMapId map_id)
 {
     if (map_id < 0) return;
 
@@ -249,7 +249,7 @@ void reset_input_map(InputMapId map_id) INTERNAL
     }
 }
 
-void input_begin_frame() EXPORT
+void input_begin_frame()
 {
     if (auto *it = map_find(&input.mouse, EDGE_DOWN); it) *it = 0;
     if (auto *it = map_find(&input.mouse, EDGE_UP); it) *it = 0;
@@ -265,7 +265,7 @@ void input_begin_frame() EXPORT
 #endif
 }
 
-void set_input_map(InputMapId id) EXPORT
+void set_input_map(InputMapId id)
 {
     LOG_INFO("switching input map: [%d] %.*s", id, STRFMT(input.maps[id].name));
     reset_input_map(input.active_map);
@@ -273,18 +273,18 @@ void set_input_map(InputMapId id) EXPORT
     input.layers.count = 0;
 }
 
-void push_input_layer(InputMapId layer) EXPORT
+void push_input_layer(InputMapId layer)
 {
     PANIC_IF(layer < 0, "Invalid input layer id: %d", layer);
     array_add(&input.queued_layers, layer);
 }
 
-InputMapId get_input_map() EXPORT
+InputMapId get_input_map()
 {
     return input.active_map;
 }
 
-bool input_map_active(InputMapId id) EXPORT
+bool input_map_active(InputMapId id)
 {
     if (input.active_map == id) return true;
     for (auto it : input.layers) if (it == id) return true;
@@ -370,7 +370,7 @@ bool next_event(AppWindow *wnd, WindowEvent *event)
 bool translate_input_event(
     DynamicArray<WindowEvent> *queue,
     InputMapId map_id,
-    WindowEvent event) INTERNAL
+    WindowEvent event)
 {
     bool handled = false;
 
@@ -710,7 +710,7 @@ bool translate_input_event(
 
 bool translate_input_event(
     DynamicArray<WindowEvent> *queue,
-    WindowEvent event) INTERNAL
+    WindowEvent event)
 {
     bool handled = false;
     for (auto it : reverse(input.layers)) {
@@ -723,14 +723,14 @@ bool translate_input_event(
     return handled || translate_input_event(queue, input.active_map, event);
 }
 
-bool text_input_enabled() EXPORT
+bool text_input_enabled()
 {
     if (input.active_map != INPUT_MAP_INVALID && input.maps[input.active_map].by_type[TEXT][0].count) return true;
     for (auto it : input.layers) if (input.maps[it].by_type[TEXT][0].count) return true;
     return false;
 }
 
-bool get_input_text(InputId id, TextEvent *dst, InputMapId map_id) EXPORT
+bool get_input_text(InputId id, TextEvent *dst, InputMapId map_id)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (get_input_text(id, dst, it)) return true;
@@ -747,7 +747,7 @@ bool get_input_text(InputId id, TextEvent *dst, InputMapId map_id) EXPORT
     return true;
 }
 
-bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id /*= INPUT_MAP_ANY*/)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (get_input_axis(id, dst, it)) return true;
@@ -763,7 +763,7 @@ bool get_input_axis(InputId id, f32 dst[1], InputMapId map_id /*= INPUT_MAP_ANY*
     return true;
 }
 
-bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (get_input_axis2d(id, dst, it)) return true;
@@ -780,7 +780,7 @@ bool get_input_axis2d(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_AN
     return true;
 }
 
-bool get_input_cursor(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+bool get_input_cursor(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (get_input_cursor(id, dst, it)) return true;
@@ -797,7 +797,7 @@ bool get_input_cursor(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_AN
     return true;
 }
 
-bool has_input_cursor(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+bool has_input_cursor(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (has_input_cursor(id, it)) return true;
@@ -811,7 +811,7 @@ bool has_input_cursor(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
     return true;
 }
 
-bool get_input_cursor_delta(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+bool get_input_cursor_delta(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_MAP_ANY*/)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (get_input_cursor_delta(id, dst, it)) return true;
@@ -828,7 +828,7 @@ bool get_input_cursor_delta(InputId id, f32 dst[2], InputMapId map_id /*= INPUT_
     return true;
 }
 
-bool has_input_cursor_delta(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+bool has_input_cursor_delta(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (has_input_cursor_delta(id, it)) return true;
@@ -842,7 +842,7 @@ bool has_input_cursor_delta(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) E
     return true;
 }
 
-bool get_input_edge(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
+bool get_input_edge(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers)) if (get_input_edge(id, it)) return true;
@@ -857,7 +857,7 @@ bool get_input_edge(InputId id, InputMapId map_id /*= INPUT_MAP_ANY*/) EXPORT
     return (*value)-- > 0;
 }
 
-bool get_input_held(InputId id, InputMapId map_id) EXPORT
+bool get_input_held(InputId id, InputMapId map_id)
 {
     if (map_id == INPUT_MAP_ANY) {
         for (auto it : reverse(input.layers))
@@ -873,14 +873,14 @@ bool get_input_held(InputId id, InputMapId map_id) EXPORT
     return *value;
 }
 
-bool get_input_mouse(MouseButton btn, InputType type /*= EDGE_DOWN*/) EXPORT
+bool get_input_mouse(MouseButton btn, InputType type /*= EDGE_DOWN*/)
 {
     auto *it = map_find(&input.mouse, type);
     if (!it) return false;
     return (*it & btn) == btn || (btn == MB_ANY && *it);
 }
 
-u32 hash32(const InputDesc &desc, u32 seed /*= HASH32_SEED */) EXPORT
+u32 hash32(const InputDesc &desc, u32 seed /*= HASH32_SEED */)
 {
     h32s state = hash32_start(seed);
     hash32_update(&state, desc.id);

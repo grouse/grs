@@ -7,22 +7,22 @@
 #endif
 
 // -- Vector2
-Vector2 abs(Vector2 v) EXPORT
+Vector2 abs(Vector2 v)
 {
     return Vector2{ abs(v.x), abs(v.y) };
 }
 
-Vector2 vec2_max(Vector2 lhs, Vector2 rhs) EXPORT
+Vector2 vec2_max(Vector2 lhs, Vector2 rhs)
 {
     return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y) };
 }
 
-Vector2 vec2_clamp(Vector2 v, Vector2 min, Vector2 max) EXPORT
+Vector2 vec2_clamp(Vector2 v, Vector2 min, Vector2 max)
 {
     return { CLAMP(v.x, min.x, max.x), CLAMP(v.y, min.y, max.y) };
 }
 
-Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size) EXPORT
+Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size)
 {
     return {
         calc_center(tl.x, br.x, size.x),
@@ -30,7 +30,7 @@ Vector2 calc_center(Vector2 tl, Vector2 br, Vector2 size) EXPORT
     };
 }
 
-Vector2 lerp(Vector2 a, Vector2 b, f32 t) EXPORT
+Vector2 lerp(Vector2 a, Vector2 b, f32 t)
 {
     Vector2 r;
     r.x = lerp(a.x, b.x, t);
@@ -38,10 +38,10 @@ Vector2 lerp(Vector2 a, Vector2 b, f32 t) EXPORT
     return r;
 }
 
-f32 length(Vector2 v) EXPORT { return sqrt(v.x*v.x + v.y*v.y); }
-f32 length_sq(Vector2 v) EXPORT { return dot(v, v); }
+f32 length(Vector2 v) { return sqrt(v.x*v.x + v.y*v.y); }
+f32 length_sq(Vector2 v) { return dot(v, v); }
 
-Vector2 normalise(Vector2 v) EXPORT
+Vector2 normalise(Vector2 v)
 {
     f32 length = sqrt(v.x*v.x + v.y*v.y);
     Vector2 r;
@@ -50,8 +50,8 @@ Vector2 normalise(Vector2 v) EXPORT
     return r;
 }
 
-Vector2 tangent(Vector2 v) EXPORT { return { -v.y, v.x }; }
-Vector2 line_normal(Vector2 start, Vector2 end) EXPORT
+Vector2 tangent(Vector2 v) { return { -v.y, v.x }; }
+Vector2 line_normal(Vector2 start, Vector2 end)
 {
     Vector2 t = end - start;
     return normalise(tangent(t));
@@ -149,30 +149,30 @@ Vector2 operator/(Vector2 lhs, Vector2 rhs)
 bool operator==(const Vector2 &a, const Vector2 &b) { return a.x == b.x && a.y == b.y; }
 bool operator!=(const Vector2 &a, const Vector2 &b) { return a.x != b.x || a.y != b.y; }
 
-f32 dot(Vector2 lhs, Vector2 rhs) EXPORT { return lhs.x * rhs.x + lhs.y * rhs.y; }
+f32 dot(Vector2 lhs, Vector2 rhs) { return lhs.x * rhs.x + lhs.y * rhs.y; }
 
 
 // Vector3
-Vector3 abs(Vector3 v) EXPORT
+Vector3 abs(Vector3 v)
 {
     // TODO(jesper): cmath dependency
     return Vector3{ abs(v.x), abs(v.y), abs(v.z ) };
 }
 
-Vector3 vec3_max(Vector3 lhs, Vector3 rhs) EXPORT
+Vector3 vec3_max(Vector3 lhs, Vector3 rhs)
 {
     return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y), MAX(lhs.z, rhs.z) };
 }
 
-Vector3 vec3_min(Vector3 lhs, Vector3 rhs) EXPORT
+Vector3 vec3_min(Vector3 lhs, Vector3 rhs)
 {
     return { MIN(lhs.x, rhs.x), MIN(lhs.y, rhs.y), MIN(lhs.z, rhs.z) };
 }
 
-f32 length(Vector3 v) EXPORT { return sqrt(v.x*v.x + v.y*v.y + v.z*v.z); }
-f32 length_sq(Vector3 v) EXPORT { return dot(v, v); }
+f32 length(Vector3 v) { return sqrt(v.x*v.x + v.y*v.y + v.z*v.z); }
+f32 length_sq(Vector3 v) { return dot(v, v); }
 
-Vector3 lerp(Vector3 a, Vector3 b, f32 t) EXPORT
+Vector3 lerp(Vector3 a, Vector3 b, f32 t)
 {
     Vector3 r;
     r.x = lerp(a.x, b.x, t);
@@ -181,7 +181,7 @@ Vector3 lerp(Vector3 a, Vector3 b, f32 t) EXPORT
     return r;
 }
 
-Vector3 normalise(Vector3 v) EXPORT
+Vector3 normalise(Vector3 v)
 {
     f32 length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
     Vector3 r;
@@ -191,12 +191,12 @@ Vector3 normalise(Vector3 v) EXPORT
     return r;
 }
 
-Vector3 normalise_zero(Vector3 v) EXPORT
+Vector3 normalise_zero(Vector3 v)
 {
     return normalise_or(v, { 0, 0, 0 });
 }
 
-Vector3 normalise_or(Vector3 v, Vector3 fallback) EXPORT
+Vector3 normalise_or(Vector3 v, Vector3 fallback)
 {
     f32 length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
     if (length == 0) return fallback;
@@ -212,8 +212,8 @@ Vector3 normalise_or(Vector3 v, Vector3 fallback) EXPORT
 // the components of a that are parallel to b
 // project(a, b) = a∥b
 // project(a, b) = length(a)*cos(theta)
-Vector3 project(Vector3 a, Vector3 b) EXPORT { return b * (dot(a, b) / dot(b, b)); }
-Vector3 project_unit(Vector3 a, Vector3 b) EXPORT
+Vector3 project(Vector3 a, Vector3 b) { return b * (dot(a, b) / dot(b, b)); }
+Vector3 project_unit(Vector3 a, Vector3 b)
 {
     ASSERT_UNIT_LENGTH(b);
     return b * dot(a, b);
@@ -223,16 +223,16 @@ Vector3 project_unit(Vector3 a, Vector3 b) EXPORT
 // remove the components of a that are parallel to b, resulting in the components that are perpendicular
 // reject(a, b) = a⟂ b
 // reject(a, b) = length(a)*sin(theta)
-Vector3 reject(Vector3 a, Vector3 b)  EXPORT { return a - b * (dot(a, b) / dot(b, b)); }
-Vector3 reject_unit(Vector3 a, Vector3 b) EXPORT
+Vector3 reject(Vector3 a, Vector3 b)  { return a - b * (dot(a, b) / dot(b, b)); }
+Vector3 reject_unit(Vector3 a, Vector3 b)
 {
     ASSERT_UNIT_LENGTH(b);
     return a - b * dot(a,b);
 }
 
-Vector3 reflect(Vector3 v, Vector3 n) EXPORT { return v - 2.0f*dot(v, n)*n; }
+Vector3 reflect(Vector3 v, Vector3 n) { return v - 2.0f*dot(v, n)*n; }
 
-Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat) EXPORT
+Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat)
 {
     f32 cos_theta = MIN(dot(-v, n), 1.0f);
     Vector3 d_perp = etai_over_etat * (v + cos_theta*n);
@@ -241,7 +241,7 @@ Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat) EXPORT
 }
 
 // Gram-Schmidt process
-void orthogonalise(Vector3 *v0, Vector3 *v1, Vector3 *v2) EXPORT
+void orthogonalise(Vector3 *v0, Vector3 *v1, Vector3 *v2)
 {
     Vector3 u0 = *v0;
     Vector3 u1 = *v1 - project(*v1, u0);
@@ -253,7 +253,7 @@ void orthogonalise(Vector3 *v0, Vector3 *v1, Vector3 *v2) EXPORT
 }
 
 // Gram-Schmidt process
-void orthonormalize(Vector3 *v0, Vector3 *v1, Vector3 *v2) EXPORT
+void orthonormalize(Vector3 *v0, Vector3 *v1, Vector3 *v2)
 {
     Vector3 u0 = *v0;
     Vector3 u1 = *v1 - project(*v1, u0);
@@ -414,17 +414,17 @@ Vector3 operator/=(Vector3 &v, f32 s)
 bool operator==(const Vector3 &a, const Vector3 &b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
 bool operator!=(const Vector3 &a, const Vector3 &b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
 
-f32 dot(Vector3 a, Vector3 b) EXPORT
+f32 dot(Vector3 a, Vector3 b)
 {
     return a.x*b.x + a.y*b.y + a.z*b.z;
 }
 
-f32 triple_prod(Vector3 a, Vector3 b, Vector3 c) EXPORT
+f32 triple_prod(Vector3 a, Vector3 b, Vector3 c)
 {
     return dot(cross(a, b), c);
 }
 
-Vector3 cross(Vector3 a, Vector3 b) EXPORT
+Vector3 cross(Vector3 a, Vector3 b)
 {
     return {
         a.y*b.z - a.z*b.y,
@@ -433,7 +433,7 @@ Vector3 cross(Vector3 a, Vector3 b) EXPORT
     };
 }
 
-Vector3 calc_center(Vector3 *points, i32 point_count) EXPORT
+Vector3 calc_center(Vector3 *points, i32 point_count)
 {
     Vector3 min = vec3_MAX, max = -vec3_MAX;
     for (i32 i = 0; i < point_count; i++) {
@@ -447,10 +447,10 @@ Vector3 calc_center(Vector3 *points, i32 point_count) EXPORT
 
 
 // Vector4
-f32 length(Vector4 v) EXPORT { return sqrt(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w); }
-f32 length_sq(Vector4 v) EXPORT { return dot(v, v); }
+f32 length(Vector4 v) { return sqrt(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w); }
+f32 length_sq(Vector4 v) { return dot(v, v); }
 
-Vector4 lerp(Vector4 a, Vector4 b, f32 t) EXPORT
+Vector4 lerp(Vector4 a, Vector4 b, f32 t)
 {
     Vector4 r;
     r.x = lerp(a.x, b.x, t);
@@ -460,7 +460,7 @@ Vector4 lerp(Vector4 a, Vector4 b, f32 t) EXPORT
     return r;
 }
 
-Vector4 normalise(Vector4 v) EXPORT
+Vector4 normalise(Vector4 v)
 {
     f32 length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w);
     Vector4 r;
@@ -577,22 +577,22 @@ bool operator==(const Vector4 &a, const Vector4 &b) { return a.x == b.x && a.y =
 bool operator!=(const Vector4 &a, const Vector4 &b) { return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w; }
 
 
-f32 dot(Vector4 a, Vector4 b) EXPORT
+f32 dot(Vector4 a, Vector4 b)
 {
     return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
 }
 
-Vector4 vec4_max(Vector4 lhs, Vector4 rhs) EXPORT
+Vector4 vec4_max(Vector4 lhs, Vector4 rhs)
 {
     return { MAX(lhs.x, rhs.x), MAX(lhs.y, rhs.y), MAX(lhs.z, rhs.z), MAX(lhs.w, rhs.w) };
 }
 
-Vector4 vec4_min(Vector4 lhs, Vector4 rhs) EXPORT
+Vector4 vec4_min(Vector4 lhs, Vector4 rhs)
 {
     return { MIN(lhs.x, rhs.x), MIN(lhs.y, rhs.y), MIN(lhs.z, rhs.z), MIN(lhs.w, rhs.w) };
 }
 
-Vector4 calc_center(Vector4 *points, i32 point_count) EXPORT
+Vector4 calc_center(Vector4 *points, i32 point_count)
 {
     Vector4 min = vec4_MAX, max = -vec4_MAX;
     for (i32 i = 0; i < point_count; i++) {
@@ -606,10 +606,10 @@ Vector4 calc_center(Vector4 *points, i32 point_count) EXPORT
 
 
 // Quaternion
-f32 length(Quaternion q) EXPORT { return sqrt(dot(q.xyzw, q.xyzw)); }
-f32 length_sq(Quaternion q) EXPORT { return dot(q.xyzw, q.xyzw); }
+f32 length(Quaternion q) { return sqrt(dot(q.xyzw, q.xyzw)); }
+f32 length_sq(Quaternion q) { return dot(q.xyzw, q.xyzw); }
 
-Quaternion lerp(Quaternion p, Quaternion q, f32 t) EXPORT
+Quaternion lerp(Quaternion p, Quaternion q, f32 t)
 {
     Quaternion r;
     r.x = lerp(p.x, q.x, t);
@@ -619,24 +619,24 @@ Quaternion lerp(Quaternion p, Quaternion q, f32 t) EXPORT
     return r;
 }
 
-Quaternion quat_identity() EXPORT { return { 0, 0, 0, 1 }; }
+Quaternion quat_identity() { return { 0, 0, 0, 1 }; }
 
-Quaternion quat_angle_axis(f32 theta, Vector3 v) EXPORT
+Quaternion quat_angle_axis(f32 theta, Vector3 v)
 {
     f32 half_theta = theta/2;
     f32 s = sin(half_theta);
     return { v.x*s, v.y*s, v.z*s, cos(half_theta) };
 }
 
-Quaternion quat_axis_angle(Vector3 v, f32 theta) EXPORT { return quat_angle_axis(theta, v); }
+Quaternion quat_axis_angle(Vector3 v, f32 theta) { return quat_angle_axis(theta, v); }
 
-Quaternion quat_euler(f32 x_angle, f32 y_angle, f32 z_angle) EXPORT
+Quaternion quat_euler(f32 x_angle, f32 y_angle, f32 z_angle)
 {
     Quaternion q = quat_angle_axis(y_angle, { 0, 1, 0 }) * quat_angle_axis(x_angle, { 1, 0, 0 }) * quat_angle_axis(z_angle, { 0, 0, 1 });
     return normalise(q);
 }
 
-Quaternion quat_look_at(Vector3 forward, Vector3 up) EXPORT
+Quaternion quat_look_at(Vector3 forward, Vector3 up)
 {
     Matrix3 rot = mat3_identity();
     rot[2] = -normalise(forward);
@@ -645,9 +645,9 @@ Quaternion quat_look_at(Vector3 forward, Vector3 up) EXPORT
     return quat_from_mat3(rot);
 }
 
-Quaternion quat_from_mat4(Matrix4 M) EXPORT { return quat_from_mat3(mat3_truncate(M)); }
+Quaternion quat_from_mat4(Matrix4 M) { return quat_from_mat3(mat3_truncate(M)); }
 
-Quaternion quat_from_mat3(Matrix3 M) EXPORT
+Quaternion quat_from_mat3(Matrix3 M)
 {
     Quaternion q;
     if (f32 sum = M.m00 + M.m11 + M.m22; sum > 0) {
@@ -682,7 +682,7 @@ Quaternion quat_from_mat3(Matrix3 M) EXPORT
     return q;
 }
 
-Quaternion normalise(Quaternion q) EXPORT
+Quaternion normalise(Quaternion q)
 {
     f32 length = sqrt(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
     Quaternion r;
@@ -693,33 +693,33 @@ Quaternion normalise(Quaternion q) EXPORT
     return r;
 }
 
-Quaternion quat_conjugate(Quaternion q) EXPORT
+Quaternion quat_conjugate(Quaternion q)
 {
     return { .xyz = -q.xyz, q.w };
 }
 
-Quaternion quat_inverse(Quaternion q) EXPORT
+Quaternion quat_inverse(Quaternion q)
 {
     return quat_conjugate(q) / dot(q.xyzw, q.xyzw);
 }
 
-Vector3 quat_rotate(Quaternion q, Vector3 v) EXPORT
+Vector3 quat_rotate(Quaternion q, Vector3 v)
 {
     f32 b2 = dot(q.v, q.v);
     return v*(q.w*q.w - b2) + q.v*dot(v, q.v)*2 + cross(q.v, v)*q.w*2;
 }
 
-Quaternion operator+(Quaternion p, Quaternion q) EXPORT
+Quaternion operator+(Quaternion p, Quaternion q)
 {
     return { p.x+q.x, p.y+q.y, p.z+q.z, p.w+q.w };
 }
 
-Quaternion operator-(Quaternion p, Vector3 v) EXPORT
+Quaternion operator-(Quaternion p, Vector3 v)
 {
     return { .xyz = p.xyz - v, p.w };
 }
 
-Quaternion operator*(Quaternion q1, Quaternion q2) EXPORT
+Quaternion operator*(Quaternion q1, Quaternion q2)
 {
     Quaternion r;
     r.x = q1.w*q2.x + q1.x*q2.w + q1.y*q2.z - q1.z*q2.y;
@@ -729,29 +729,29 @@ Quaternion operator*(Quaternion q1, Quaternion q2) EXPORT
     return r;
 }
 
-Vector3 operator*(Quaternion q, Vector3 v) EXPORT
+Vector3 operator*(Quaternion q, Vector3 v)
 {
     Vector3 t = 2.0f * cross(q.xyz, v);
     return v + q.w*t + cross(q.xyz, t);
 }
 
-Vector3 operator*(Vector3 v, Quaternion q) EXPORT
+Vector3 operator*(Vector3 v, Quaternion q)
 {
     Vector3 t = 2.0f * cross(q.xyz, v);
     return v + q.w*t + cross(q.xyz, t);
 }
 
-Quaternion operator*(Quaternion q, f32 scalar) EXPORT
+Quaternion operator*(Quaternion q, f32 scalar)
 {
     return { .v = q.v * scalar, q.s * scalar };
 }
 
-Quaternion operator*(f32 scalar, Quaternion q) EXPORT
+Quaternion operator*(f32 scalar, Quaternion q)
 {
     return { .v = q.v * scalar, q.s * scalar };
 }
 
-Quaternion operator/(Quaternion q, f32 scalar) EXPORT
+Quaternion operator/(Quaternion q, f32 scalar)
 {
     return { .xyzw = q.xyzw / scalar };
 }
@@ -762,7 +762,7 @@ bool operator!=(const Quaternion &a, const Quaternion &b) { return a.x != b.x ||
 
 
 // Matrix3
-Matrix3 mat3_identity() EXPORT
+Matrix3 mat3_identity()
 {
     Matrix3 r{};
     r.columns[0].data[0] = 1.0f;
@@ -771,7 +771,7 @@ Matrix3 mat3_identity() EXPORT
     return r;
 }
 
-Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2) EXPORT
+Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2)
 {
     return { .columns = {
         { r0.x, r1.x, r2.x },
@@ -780,7 +780,7 @@ Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2) EXPORT
     }};
 }
 
-Matrix3 mat3_orthographic2(f32 min_x, f32 max_x, f32 min_y, f32 max_y) EXPORT
+Matrix3 mat3_orthographic2(f32 min_x, f32 max_x, f32 min_y, f32 max_y)
 {
     f32 w_inv = 1.0f / (max_x - min_x);
     f32 h_inv = 1.0f / (max_y - min_y);
@@ -792,7 +792,7 @@ Matrix3 mat3_orthographic2(f32 min_x, f32 max_x, f32 min_y, f32 max_y) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate3_x(f32 theta) EXPORT
+Matrix3 mat3_rotate3_x(f32 theta)
 {
     f32 cos_t = cos(theta);
     f32 sin_t = sin(theta);
@@ -804,7 +804,7 @@ Matrix3 mat3_rotate3_x(f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate3_y(f32 theta) EXPORT
+Matrix3 mat3_rotate3_y(f32 theta)
 {
     f32 cos_t = cos(theta);
     f32 sin_t = sin(theta);
@@ -816,7 +816,7 @@ Matrix3 mat3_rotate3_y(f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate3_z(f32 theta) EXPORT
+Matrix3 mat3_rotate3_z(f32 theta)
 {
     f32 cos_t = cos(theta);
     f32 sin_t = sin(theta);
@@ -828,7 +828,7 @@ Matrix3 mat3_rotate3_z(f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate3(Vector3 axis, f32 theta) EXPORT
+Matrix3 mat3_rotate3(Vector3 axis, f32 theta)
 {
     f32 cos_t = cos(theta);
     f32 sin_t = sin(theta);
@@ -849,7 +849,7 @@ Matrix3 mat3_rotate3(Vector3 axis, f32 theta) EXPORT
     }};
 }
 
-Matrix3 mat3_rotate3_quat(Quaternion q) EXPORT
+Matrix3 mat3_rotate3_quat(Quaternion q)
 {
     f32 xx = q.x*q.x;
     f32 yy = q.y*q.y;
@@ -869,14 +869,14 @@ Matrix3 mat3_rotate3_quat(Quaternion q) EXPORT
     }};
 }
 
-Matrix3 mat3_translate2(Vector2 v) EXPORT
+Matrix3 mat3_translate2(Vector2 v)
 {
     Matrix3 M = mat3_identity();
     M[2].xy = v;
     return M;
 }
 
-Matrix3 mat3_scale3(f32 scalar) EXPORT
+Matrix3 mat3_scale3(f32 scalar)
 {
     Matrix3 M{};
     M.m00 = scalar;
@@ -885,7 +885,7 @@ Matrix3 mat3_scale3(f32 scalar) EXPORT
     return M;
 }
 
-Matrix3 mat3_scale2(f32 scalar) EXPORT
+Matrix3 mat3_scale2(f32 scalar)
 {
     Matrix3 M{};
     M.m00 = scalar;
@@ -894,7 +894,7 @@ Matrix3 mat3_scale2(f32 scalar) EXPORT
     return M;
 }
 
-Matrix3 mat3_scale3_axis(Vector3 axis, f32 scalar) EXPORT
+Matrix3 mat3_scale3_axis(Vector3 axis, f32 scalar)
 {
     scalar -= 1.0f;
     f32 x = axis.x*scalar;
@@ -911,7 +911,7 @@ Matrix3 mat3_scale3_axis(Vector3 axis, f32 scalar) EXPORT
         { axaz,            ayaz,            z*axis.z + 1.0f });
 }
 
-Matrix3 mat3_skew3(f32 t, Vector3 a, Vector3 b) EXPORT
+Matrix3 mat3_skew3(f32 t, Vector3 a, Vector3 b)
 {
     t = tan(t);
     f32 x = a.x*t;
@@ -924,7 +924,7 @@ Matrix3 mat3_skew3(f32 t, Vector3 a, Vector3 b) EXPORT
         { z*b.x,        z*b.y,        z*b.z + 1.0f });
 }
 
-Matrix3 mat3_reflect(Vector3 a) EXPORT
+Matrix3 mat3_reflect(Vector3 a)
 {
     f32 x = -2.0f*a.x;
     f32 y = -2.0f*a.y;
@@ -940,20 +940,20 @@ Matrix3 mat3_reflect(Vector3 a) EXPORT
         { axaz,         ayaz,         z*a.z + 1.0f });
 }
 
-Matrix3 mat3_inv_transform2(Matrix3 projection, Vector2 position) EXPORT
+Matrix3 mat3_inv_transform2(Matrix3 projection, Vector2 position)
 {
     Matrix3 view = mat3_translate2(-position);
     return projection*view;
 }
 
-Matrix3 mat3_inv_transform2(Matrix3 projection, Vector2 position, f32 uni_scale) EXPORT
+Matrix3 mat3_inv_transform2(Matrix3 projection, Vector2 position, f32 uni_scale)
 {
     Matrix3 mview = mat3_translate2(-position);
     Matrix3 mscale = mat3_scale2(uni_scale);
     return projection*mview*mscale;
 }
 
-Matrix3 mat3_transpose(Matrix3 m) EXPORT
+Matrix3 mat3_transpose(Matrix3 m)
 {
     Matrix3 r;
     r[0][0] = m[0][0];
@@ -970,7 +970,7 @@ Matrix3 mat3_transpose(Matrix3 m) EXPORT
     return r;
 }
 
-Matrix3 mat3_inverse(Matrix3 M) EXPORT
+Matrix3 mat3_inverse(Matrix3 M)
 {
     Vector3 c0 = M[0], c1 = M[1], c2 = M[2];
     Vector3 r0 = cross(c1, c2);
@@ -985,7 +985,7 @@ Matrix3 mat3_inverse(Matrix3 M) EXPORT
     }};
 }
 
-Matrix3 mat3_truncate(Matrix4 M) EXPORT
+Matrix3 mat3_truncate(Matrix4 M)
 {
     Matrix3 r{};
     r[0] = M[0].xyz;
@@ -994,7 +994,7 @@ Matrix3 mat3_truncate(Matrix4 M) EXPORT
     return r;
 }
 
-f32 mat3_determinant(Matrix3 M) EXPORT
+f32 mat3_determinant(Matrix3 M)
 {
     return
         M.m00*M.m11*M.m22 - M.m12*M.m21 +
@@ -1022,7 +1022,7 @@ Matrix3 operator*(Matrix3 lhs, Matrix3 rhs)
 
 
 // Matrix4
-Matrix4 mat4_identity() EXPORT
+Matrix4 mat4_identity()
 {
     Matrix4 r{};
     r[0][0] = 1.0f;
@@ -1032,7 +1032,7 @@ Matrix4 mat4_identity() EXPORT
     return r;
 }
 
-Matrix4 mat4_transform2(const Matrix3 &m0) EXPORT
+Matrix4 mat4_transform2(const Matrix3 &m0)
 {
     Matrix4 M = mat4_identity();
     M[0].xy = m0[0].xy;
@@ -1041,7 +1041,7 @@ Matrix4 mat4_transform2(const Matrix3 &m0) EXPORT
     return M;
 }
 
-Matrix4 mat4_rows(Vector4 r0, Vector4 r1, Vector4 r2, Vector4 r3) EXPORT
+Matrix4 mat4_rows(Vector4 r0, Vector4 r1, Vector4 r2, Vector4 r3)
 {
     return { .columns = {
         { r0.x, r1.x, r2.x, r3.x },
@@ -1051,7 +1051,7 @@ Matrix4 mat4_rows(Vector4 r0, Vector4 r1, Vector4 r2, Vector4 r3) EXPORT
     }};
 }
 
-Matrix4 mat4_mat3_extend(Matrix3 m) EXPORT
+Matrix4 mat4_mat3_extend(Matrix3 m)
 {
     return { .columns = {
         { .xyz = m[0], 0 },
@@ -1061,7 +1061,7 @@ Matrix4 mat4_mat3_extend(Matrix3 m) EXPORT
     }};
 }
 
-Matrix4 mat4_rotate3_quat(Quaternion q) EXPORT
+Matrix4 mat4_rotate3_quat(Quaternion q)
 {
     f32 xx = q.x*q.x;
     f32 yy = q.y*q.y;
@@ -1082,24 +1082,24 @@ Matrix4 mat4_rotate3_quat(Quaternion q) EXPORT
     }};
 }
 
-Vector3 mat4_translate3(Matrix4 m, Vector3 p) EXPORT
+Vector3 mat4_translate3(Matrix4 m, Vector3 p)
 {
     return (m*Vector4{ .xyz = p, 1 }).xyz;
 }
 
-Vector3 mat4_scale3(Matrix4 m, Vector3 v) EXPORT
+Vector3 mat4_scale3(Matrix4 m, Vector3 v)
 {
     return (m*Vector4{ .xyz = v, 0 }).xyz;
 }
 
-Matrix4 mat4_translate3(Vector3 v) EXPORT
+Matrix4 mat4_translate3(Vector3 v)
 {
     Matrix4 r = mat4_identity();
     r[3] = { .xyz = v, 1 };
     return r;
 }
 
-Matrix4 mat4_scale3(Vector3 v) EXPORT
+Matrix4 mat4_scale3(Vector3 v)
 {
     Matrix4 r = mat4_identity();
     r[0][0] = v.x;
@@ -1108,7 +1108,7 @@ Matrix4 mat4_scale3(Vector3 v) EXPORT
     return r;
 }
 
-Matrix4 mat4_transform3(Quaternion rotation, Vector3 position) EXPORT
+Matrix4 mat4_transform3(Quaternion rotation, Vector3 position)
 {
     Matrix4 T = mat4_translate3(position);
     Matrix4 R = mat4_rotate3_quat(rotation);
@@ -1118,7 +1118,7 @@ Matrix4 mat4_transform3(Quaternion rotation, Vector3 position) EXPORT
 Matrix4 mat4_transform3(
     Quaternion rotation,
     Vector3 position,
-    Vector3 scale) EXPORT
+    Vector3 scale)
 {
     Matrix4 T = mat4_translate3(position);
     Matrix4 R = mat4_rotate3_quat(rotation);
@@ -1130,7 +1130,7 @@ void mat4_trs_decompose(
     Matrix4 trs,
     Vector3 *out_pos,
     Quaternion *out_rot,
-    Vector3 *out_scale) EXPORT
+    Vector3 *out_scale)
 {
     Vector3 pos = trs[3].xyz;
     trs[3] = { 0, 0, 0, 1 };
@@ -1148,7 +1148,7 @@ void mat4_trs_decompose(
     if (out_rot) *out_rot = rot;
 }
 
-Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z) EXPORT
+Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_z, f32 far_z)
 {
     // right-handed orthographic projection
     // zero-to-one depth range
@@ -1165,7 +1165,7 @@ Matrix4 mat4_orthographic3(f32 min_x, f32 max_x, f32 min_y, f32 max_y, f32 near_
     }};
 }
 
-Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
+Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z)
 {
     // zero-to-one depth range
     f32 tan_half_fov = tan(fov/2);
@@ -1180,7 +1180,7 @@ Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
     }};
 }
 
-Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/) EXPORT
+Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/)
 {
     // zero-to-infinite depth range
     f32 tan_half_fov = tan(fov/2);
@@ -1195,7 +1195,7 @@ Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-
     }};
 }
 
-Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
+Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z)
 {
     // one-to-zero depth range
     f32 tan_half_fov = tan(fov/2);
@@ -1210,7 +1210,7 @@ Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z) EXPORT
     }};
 }
 
-Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/) EXPORT
+Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*=1e-5*/)
 {
     // one-to-infinite depth range
     f32 tan_half_fov = tan(fov/2);
@@ -1224,7 +1224,7 @@ Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*
     }};
 }
 
-Matrix4 mat4_inv_transform3(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
+Matrix4 mat4_inv_transform3(Vector3 eye, Vector3 forward, Vector3 up)
 {
     Vector3 Z = normalise(forward);
     Vector3 X = normalise(cross(Z, up));
@@ -1238,7 +1238,7 @@ Matrix4 mat4_inv_transform3(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
     return M;
 }
 
-Matrix4 mat4_look_at(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
+Matrix4 mat4_look_at(Vector3 eye, Vector3 forward, Vector3 up)
 {
     Vector3 Z = normalise(forward);
     Vector3 X = normalise(cross(Z, up));
@@ -1252,7 +1252,7 @@ Matrix4 mat4_look_at(Vector3 eye, Vector3 forward, Vector3 up) EXPORT
     return M;
 }
 
-Matrix4 mat4_transpose(Matrix4 m0) EXPORT
+Matrix4 mat4_transpose(Matrix4 m0)
 {
     Matrix4 M;
     M[0][0] = m0[0][0];
@@ -1277,7 +1277,7 @@ Matrix4 mat4_transpose(Matrix4 m0) EXPORT
     return M;
 }
 
-Matrix4 mat4_inverse(Matrix4 M) EXPORT
+Matrix4 mat4_inverse(Matrix4 M)
 {
     Vector3 a = M[0].xyz, b = M[1].xyz, c = M[2].xyz, d = M[3].xyz;
     f32     x = M.m30,    y = M.m31,    z = M.m32,    w = M.m33;
@@ -1306,7 +1306,7 @@ Matrix4 mat4_inverse(Matrix4 M) EXPORT
     }};
 }
 
-Matrix4 mat34_inverse(Matrix4 M) EXPORT
+Matrix4 mat34_inverse(Matrix4 M)
 {
     Vector3 a = M[0].xyz, b = M[1].xyz, c = M[2].xyz, d = M[3].xyz;
 
@@ -1331,7 +1331,7 @@ Matrix4 mat34_inverse(Matrix4 M) EXPORT
     }};
 }
 
-Matrix4 operator*(Matrix4 A, Matrix4 B) EXPORT
+Matrix4 operator*(Matrix4 A, Matrix4 B)
 {
     Matrix4 M{};
     M.m00 = A.m00*B.m00 + A.m01*B.m10 + A.m02*B.m20 + A.m03*B.m30;
@@ -1356,7 +1356,7 @@ Matrix4 operator*(Matrix4 A, Matrix4 B) EXPORT
     return M;
 }
 
-Matrix4 operator*=(Matrix4 &A, Matrix4 B) EXPORT
+Matrix4 operator*=(Matrix4 &A, Matrix4 B)
 {
     Matrix4 M{};
     M.m00 = A.m00*B.m00 + A.m01*B.m10 + A.m02*B.m20 + A.m03*B.m30;
@@ -1383,7 +1383,7 @@ Matrix4 operator*=(Matrix4 &A, Matrix4 B) EXPORT
     return M;
 }
 
-Matrix4 operator*(Matrix4 M, f32 s) EXPORT
+Matrix4 operator*(Matrix4 M, f32 s)
 {
     Matrix4 r;
     r[0] = M[0] * s;
@@ -1398,7 +1398,7 @@ Matrix4 operator*(Matrix4 M, f32 s) EXPORT
 bool ray_intersect_capsule(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 cap_p0, Vector3 cap_p1, f32 cap_r,
-    f32 *tr) EXPORT
+    f32 *tr)
 {
     Vector3 ldir = cap_p1-cap_p0;
     Vector3 p = cap_p0-ray_o;
@@ -1451,7 +1451,7 @@ bool ray_intersect_capsule(
 bool ray_intersect_sphere(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 p, f32 radius,
-    f32 *tr) EXPORT
+    f32 *tr)
 {
     Vector3 m = ray_o - p;
     f32 b = dot(m, ray_d);
@@ -1476,7 +1476,7 @@ bool ray_intersect_sphere(
 bool ray_intersect_triangle(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 p0, Vector3 p1, Vector3 p2,
-    f32 *tr) EXPORT
+    f32 *tr)
 {
     Vector3 e1 = p1 - p0;
     Vector3 e2 = p2 - p0;
@@ -1507,7 +1507,7 @@ bool ray_intersect_triangle(
 bool ray_intersect_quad(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3,
-    f32 *tr) EXPORT
+    f32 *tr)
 {
     if (ray_intersect_triangle(ray_o, ray_d, p0, p1, p2, tr)) return true;
     if (ray_intersect_triangle(ray_o, ray_d, p2, p3, p0, tr)) return true;
@@ -1517,7 +1517,7 @@ bool ray_intersect_quad(
 bool ray_intersect_plane(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 plane_n, f32 plane_d,
-    f32 *tr) EXPORT
+    f32 *tr)
 {
     f32 d = dot(ray_d, plane_n);
     if (abs(d) < f32_EPSILON) {
@@ -1532,7 +1532,7 @@ bool ray_intersect_plane(
 bool ray_intersect_aabb(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 aabb_min, Vector3 aabb_max,
-    f32 *tr) EXPORT
+    f32 *tr)
 {
     f32 t_min = -f32_MAX;
     f32 t_max =  f32_MAX;
@@ -1565,7 +1565,7 @@ bool ray_intersect_obb(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 obb_center, Vector3 obb_half_extents,
     Matrix3 obb_axes,
-    f32 *tr) EXPORT
+    f32 *tr)
 {
     Vector3 delta = obb_center - ray_o;
 
@@ -1598,7 +1598,7 @@ bool ray_intersect_obb(
 bool nearest_ray_vs_line(
     Vector3 ray_o, Vector3 ray_d,
     Vector3 line_o, Vector3 line_d,
-    f32 *t, f32 *u) EXPORT
+    f32 *t, f32 *u)
 {
     Vector3 v = ray_o - line_o;
     f32 q = dot(ray_d, line_d);
@@ -1619,7 +1619,7 @@ bool nearest_ray_vs_line(
     }
 }
 
-bool point_in_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size, f32 epsilon) EXPORT
+bool point_in_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size, f32 epsilon)
 {
     return
         p.x <= aabb_pos.x + aabb_half_size.x + epsilon &&
@@ -1628,13 +1628,13 @@ bool point_in_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size, f32 epsi
         p.y >= aabb_pos.y - aabb_half_size.y - epsilon;
 }
 
-bool point_in_circle(Vector2 p, Vector2 c, f32 radius_sq) EXPORT
+bool point_in_circle(Vector2 p, Vector2 c, f32 radius_sq)
 {
     Vector2 pc = p - c;
     return dot(pc, pc) <= radius_sq;
 }
 
-Vector2 point_clamp_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size) EXPORT
+Vector2 point_clamp_aabb(Vector2 p, Vector2 aabb_pos, Vector2 aabb_half_size)
 {
     Vector2 r;
     r.x = CLAMP(
@@ -1654,7 +1654,7 @@ Vector2 point_clamp_aabb_circle(
     Vector2 aabb_pos,
     Vector2 aabb_half_size,
     Vector2 c_p,
-    f32 c_r) EXPORT
+    f32 c_r)
 {
     Vector2 r = point_clamp_aabb(p, aabb_pos, aabb_half_size);
     r = c_p + c_r * normalise(r - c_p);
@@ -1663,7 +1663,7 @@ Vector2 point_clamp_aabb_circle(
     return r;
 }
 
-bool point_in_triangle(Vector2 p, Vector2 p0, Vector2 p1, Vector2 p2) EXPORT
+bool point_in_triangle(Vector2 p, Vector2 p0, Vector2 p1, Vector2 p2)
 {
     f32 area = 0.5f * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
     f32 sign = area < 0.0f ? -1.0f: 1.0f;
@@ -1672,7 +1672,7 @@ bool point_in_triangle(Vector2 p, Vector2 p0, Vector2 p1, Vector2 p2) EXPORT
     return s > 0.0f && t > 0.0f && (s + t) < 2.0f * area * sign;
 }
 
-bool point_in_rect(Vector2 p, Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3) EXPORT
+bool point_in_rect(Vector2 p, Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
 {
     f32 left = MIN4(p0.x, p1.x, p2.x, p3.x);
     f32 right = MAX4(p0.x, p1.x, p2.x, p3.x);
@@ -1683,7 +1683,7 @@ bool point_in_rect(Vector2 p, Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3) EX
     return true;
 }
 
-bool point_in_rect(Vector2 p, Vector2 center, Vector2 size) EXPORT
+bool point_in_rect(Vector2 p, Vector2 center, Vector2 size)
 {
     Vector2 hs = 0.5f*size;
     Vector2 tl = center - hs;
@@ -1693,7 +1693,7 @@ bool point_in_rect(Vector2 p, Vector2 center, Vector2 size) EXPORT
     return point_in_rect(p, tl, tr, br, bl);
 }
 
-bool point_in_rect(Vector2 p, Rect r) EXPORT
+bool point_in_rect(Vector2 p, Rect r)
 {
     return
         p.x >= r.tl.x && p.x <= r.br.x &&
@@ -1704,7 +1704,7 @@ Contact aabb_intersect_aabb(
     Vector2 pos_a,
     Vector2 extents_a,
     Vector2 pos_b,
-    Vector2 extents_b) EXPORT
+    Vector2 extents_b)
 {
     Vector2 dv = pos_b - pos_a;
     Vector2 pv = extents_b + extents_a - abs(dv);
@@ -1733,7 +1733,7 @@ Contact aabb_intersect_line(
     Vector2 pos_a,
     Vector2 extents_a,
     Vector2 l_p0,
-    Vector2 l_p1) EXPORT
+    Vector2 l_p1)
 {
     FixedArray<Line2, 4> aabb_lines; aabb_lines.count = 4;
     calc_aabb_lines(aabb_lines.data, pos_a, extents_a);
@@ -1764,7 +1764,7 @@ Contact aabb_intersect_line(
     return contact ;
 }
 
-bool line_intersect_line(Line2 l0, Line2 l1, Vector2 *intersect_point) EXPORT
+bool line_intersect_line(Line2 l0, Line2 l1, Vector2 *intersect_point)
 {
     return line_intersect_line(l0.p0, l0.p1, l1.p0, l1.p1, intersect_point);
 }
@@ -1772,7 +1772,7 @@ bool line_intersect_line(Line2 l0, Line2 l1, Vector2 *intersect_point) EXPORT
 bool line_intersect_line(
     Vector2 p0, Vector2 p1,
     Vector2 p2, Vector2 p3,
-    Vector2 *intersect_point) EXPORT
+    Vector2 *intersect_point)
 {
     Vector2 s1 = p1 - p0;
     Vector2 s2 = p3 - p2;
@@ -1799,7 +1799,7 @@ bool line_intersect_aabb(
     Vector2 pos,
     Vector2 half_size,
     Vector2 *out_intersect_point,
-    Vector2 *out_normal) EXPORT
+    Vector2 *out_normal)
 {
     f32 min_length_sq = f32_MAX;
     Vector2 intersect_point;
@@ -1840,20 +1840,20 @@ bool line_intersect_aabb(
     return false;
 }
 
-f32 dist_point_vs_line(Vector3 q, Vector3 p, Vector3 v) EXPORT
+f32 dist_point_vs_line(Vector3 q, Vector3 p, Vector3 v)
 {
     Vector3 a = cross(q-p, v);
     return sqrt(dot(a, a) / dot(v, v));
 }
 
-f32 dist_point_vs_line_unit(Vector3 q, Vector3 p, Vector3 v) EXPORT
+f32 dist_point_vs_line_unit(Vector3 q, Vector3 p, Vector3 v)
 {
     ASSERT_UNIT_LENGTH(v);
     Vector3 a = cross(q-p, v);
     return sqrt(dot(a, a));
 }
 
-f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2) EXPORT
+f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2)
 {
     Vector3 dp = p2-p1;
     f32 v12 = dot(v1, v1);
@@ -1875,7 +1875,7 @@ f32 dist_line_vs_line(Vector3 p1, Vector3 v1, Vector3 p2, Vector3 v2) EXPORT
     return sqrt(dot(a, a) / v12);
 }
 
-void calc_aabb_lines(Line2 lines[4], Vector2 pos, Vector2 extents) EXPORT
+void calc_aabb_lines(Line2 lines[4], Vector2 pos, Vector2 extents)
 {
     lines[0] = { { pos.x + extents.x, pos.y - extents.y }, { pos.x - extents.x, pos.y - extents.y } };
     lines[1] = { { pos.x - extents.x, pos.y - extents.y }, { pos.x - extents.x, pos.y + extents.y } };
@@ -1887,7 +1887,7 @@ bool aabb_intersect_circle(
     Vector2 aabb_p,
     Vector2 aabb_half_size,
     Vector2 circle_p,
-    f32 circle_r) EXPORT
+    f32 circle_r)
 {
     Vector2 closest = point_clamp_aabb(circle_p, aabb_p, aabb_half_size);
     return length_sq(closest - circle_p) < circle_r*circle_r;
@@ -1900,7 +1900,7 @@ bool aabb_intersect_aabb(
     Vector2 pos_b,
     Vector2 extents_b,
     Vector2 *out_delta,
-    Vector2 *out_normal) EXPORT
+    Vector2 *out_normal)
 {
     Vector2 dv = pos_b - pos_a;
     Vector2 pv = extents_b + extents_a - abs(dv);
@@ -1926,7 +1926,7 @@ bool aabb_intersect_line(
     Vector2 l_p0,
     Vector2 l_p1,
     Vector2 *out_intersect_point,
-    Vector2 *out_normal) EXPORT
+    Vector2 *out_normal)
 {
     FixedArray<Line2, 4> aabb_lines; aabb_lines.count = 4;
     calc_aabb_lines(aabb_lines.data, pos, extents);
@@ -1952,7 +1952,7 @@ bool swept_aabb_intersect_line(
     Vector2 l_p0,
     Vector2 l_p1,
     Vector2 *out_intersect_point,
-    Vector2 *out_normal) EXPORT
+    Vector2 *out_normal)
 {
     if (l_p0.y > l_p1.y) SWAP(l_p0, l_p1);
 
@@ -2050,7 +2050,7 @@ bool aabb_intersect_swept_aabb(
     Vector2 half_size_b,
     Vector2 delta_b,
     Vector2 *out_intersect_point,
-    Vector2 *out_normal) EXPORT
+    Vector2 *out_normal)
 {
     Vector2 half_size = half_size_a + half_size_b;
 
@@ -2102,13 +2102,13 @@ bool aabb_intersect_swept_aabb(
 }
 
 
-f32 calc_center(f32 min, f32 max, f32 size) EXPORT
+f32 calc_center(f32 min, f32 max, f32 size)
 {
     return min + 0.5f*(max-min - size);
 }
 
 
-f32 round_to(f32 value, f32 multiple) EXPORT
+f32 round_to(f32 value, f32 multiple)
 {
     f32 hm = 0.5f*multiple;
     f32 sign = value < 0.0f ? -1.0f : 1.0f;
@@ -2116,12 +2116,12 @@ f32 round_to(f32 value, f32 multiple) EXPORT
     return sign*((abs_value+hm) - fmodf(abs_value+hm, multiple));
 }
 
-Vector2 round_to(Vector2 v, f32 multiple) EXPORT
+Vector2 round_to(Vector2 v, f32 multiple)
 {
     return { round_to(v.x, multiple), round_to(v.y, multiple) };
 }
 
-XORShift128 make_rand(u64 entropy) EXPORT
+XORShift128 make_rand(u64 entropy)
 {
     XORShift128 series;
     series.state[0] = (u32)(entropy & 0xFFFFFFFF);
@@ -2136,7 +2136,7 @@ XORShift128 make_rand(u64 entropy) EXPORT
     return series;
 }
 
-u32 rand_u32(XORShift128 *series) EXPORT
+u32 rand_u32(XORShift128 *series)
 {
     u32 t = series->state[3];
     u32 s = series->state[0];
@@ -2150,24 +2150,24 @@ u32 rand_u32(XORShift128 *series) EXPORT
     return series->state[0];
 }
 
-i32 rand_i32(XORShift128 *series, i32 min, i32 max) EXPORT
+i32 rand_i32(XORShift128 *series, i32 min, i32 max)
 {
     u32 r = rand_u32(series);
     return min + (r % (max - min + 1));
 }
 
-f32 rand_f32(XORShift128 *series) EXPORT
+f32 rand_f32(XORShift128 *series)
 {
     u32 r = rand_u32(series);
     return (f32)(r >> 1) / (f32)(u32_MAX >> 1);
 }
 
-f32 rand_f32(XORShift128 *series, f32 min, f32 max) EXPORT
+f32 rand_f32(XORShift128 *series, f32 min, f32 max)
 {
     return min + (max-min)*rand_f32(series);
 }
 
-Vector3 rand_sphere(XORShift128 *series) EXPORT
+Vector3 rand_sphere(XORShift128 *series)
 {
     Vector3 v;
     for (;;) {
@@ -2178,7 +2178,7 @@ Vector3 rand_sphere(XORShift128 *series) EXPORT
     }
 }
 
-Vector3 rand_color3(XORShift128 *series) EXPORT
+Vector3 rand_color3(XORShift128 *series)
 {
     Vector3 v;
     v.x = rand_f32(series);
@@ -2187,7 +2187,7 @@ Vector3 rand_color3(XORShift128 *series) EXPORT
     return v;
 }
 
-Vector3 rand_vec3(XORShift128 *series, Vector3 min, Vector3 max) EXPORT
+Vector3 rand_vec3(XORShift128 *series, Vector3 min, Vector3 max)
 {
     Vector3 v;
     v.x = rand_f32(series, min.x, max.x);
@@ -2196,7 +2196,7 @@ Vector3 rand_vec3(XORShift128 *series, Vector3 min, Vector3 max) EXPORT
     return v;
 }
 
-Vector2 rand_vec2(XORShift128 *series, Vector2 min, Vector2 max) EXPORT
+Vector2 rand_vec2(XORShift128 *series, Vector2 min, Vector2 max)
 {
     Vector2 v;
     v.x = rand_f32(series, min.x, max.x);
@@ -2204,14 +2204,14 @@ Vector2 rand_vec2(XORShift128 *series, Vector2 min, Vector2 max) EXPORT
     return v;
 }
 
-Vector3 rand_hemisphere(Vector3 normal, XORShift128 *series) EXPORT
+Vector3 rand_hemisphere(Vector3 normal, XORShift128 *series)
 {
     Vector3 s = rand_sphere(series);
     if (dot(s, normal) > 0.0f) return s;
     return -s;
 }
 
-Vector3 rand_cone(XORShift128 *series, Vector3 axis, f32 theta) EXPORT
+Vector3 rand_cone(XORShift128 *series, Vector3 axis, f32 theta)
 {
     f32 lsq = length_sq(axis);
     if (lsq == 0.0f || theta >= 2*f32_PI) return rand_sphere(series);
@@ -2230,7 +2230,7 @@ Vector3 rand_cone(XORShift128 *series, Vector3 axis, f32 theta) EXPORT
     return ws_dir;
 }
 
-Vector3 rand_disc(XORShift128 *series) EXPORT
+Vector3 rand_disc(XORShift128 *series)
 {
     for (;;) {
         Vector3 v;
@@ -2279,29 +2279,29 @@ f32 reflectance(f32 cosine, f32 ref_idx)
     return r0 + (1.0f-r0)*pow((1.0f-cosine), 5);
 }
 
-f32 radf(f32 theta) EXPORT
+f32 radf(f32 theta)
 {
     return theta * f32_PI / 180.0f;
 }
 
-f32 degf(f32 rad) EXPORT
+f32 degf(f32 rad)
 {
     return rad * 180.0f / f32_PI;
 }
 
-bool almost_equal(f32 a, f32 b, f32 epsilon /*=1e-6f*/) EXPORT
+bool almost_equal(f32 a, f32 b, f32 epsilon /*=1e-6f*/)
 {
     return abs(a-b) < epsilon;
 }
 
-bool almost_equal(Vector3 a, Vector3 b, f32 epsilon /*=1e-6f*/) EXPORT
+bool almost_equal(Vector3 a, Vector3 b, f32 epsilon /*=1e-6f*/)
 {
     return almost_equal(a.x, b.x, epsilon) &&
         almost_equal(a.y, b.y, epsilon) &&
         almost_equal(a.z, b.z, epsilon);
 }
 
-bool almost_equal(Quaternion q1, Quaternion q2, f32 epsilon /*=1e-6f*/) EXPORT
+bool almost_equal(Quaternion q1, Quaternion q2, f32 epsilon /*=1e-6f*/)
 {
     return almost_equal(q1.x, q2.x, epsilon) &&
         almost_equal(q1.y, q2.y, epsilon) &&
@@ -2309,7 +2309,7 @@ bool almost_equal(Quaternion q1, Quaternion q2, f32 epsilon /*=1e-6f*/) EXPORT
         almost_equal(q1.w, q2.w, epsilon);
 }
 
-bool almost_equal(Matrix3 A, Matrix3 B, f32 epsilon /*=1e-6f*/) EXPORT
+bool almost_equal(Matrix3 A, Matrix3 B, f32 epsilon /*=1e-6f*/)
 {
     for (i32 i = 0; i < ARRAY_COUNT(A.data); i++) {
         if (!almost_equal(A.data[i], B.data[i], epsilon)) return false;
@@ -2319,7 +2319,7 @@ bool almost_equal(Matrix3 A, Matrix3 B, f32 epsilon /*=1e-6f*/) EXPORT
     return true;
 }
 
-bool almost_equal(Matrix4 A, Matrix4 B, f32 epsilon) EXPORT
+bool almost_equal(Matrix4 A, Matrix4 B, f32 epsilon)
 {
     for (i32 i = 0; i < ARRAY_COUNT(A.data); i++) {
         if (!almost_equal(A.data[i], B.data[i], epsilon)) return false;
@@ -2330,7 +2330,7 @@ bool almost_equal(Matrix4 A, Matrix4 B, f32 epsilon) EXPORT
 
 
 
-f32 angle_between(Vector3 v0, Vector3 v1) EXPORT
+f32 angle_between(Vector3 v0, Vector3 v1)
 {
     f32 denom = length(v0) * length(v1);
     f32 theta = acos(dot(v0, v1) / denom);
@@ -2406,7 +2406,7 @@ f32 rgb_from_hue(f32 p, f32 q, f32 t)
     return p;
 }
 
-Vector3 rgb_from_hsl(f32 h, f32 s, f32 l) EXPORT
+Vector3 rgb_from_hsl(f32 h, f32 s, f32 l)
 {
     Vector3 rgb;
 
@@ -2424,7 +2424,7 @@ Vector3 rgb_from_hsl(f32 h, f32 s, f32 l) EXPORT
     return rgb;
 }
 
-Vector3 rgb_from_hsv(f32 h, f32 s, f32 v) EXPORT
+Vector3 rgb_from_hsv(f32 h, f32 s, f32 v)
 {
     f32 hs = h*6.0f;
     i32 hsi = i32(hs);
@@ -2446,9 +2446,9 @@ Vector3 rgb_from_hsv(f32 h, f32 s, f32 v) EXPORT
     return {};
 }
 
-Vector3 rgb_from_hsv(Vector3 hsv) EXPORT { return rgb_from_hsv(hsv.x, hsv.y, hsv.z); }
+Vector3 rgb_from_hsv(Vector3 hsv) { return rgb_from_hsv(hsv.x, hsv.y, hsv.z); }
 
-Vector3 hsv_from_rgb(Vector3 rgb) EXPORT
+Vector3 hsv_from_rgb(Vector3 rgb)
 {
     Vector3 hsv;
     f32 maxc = MAX3(rgb.r, rgb.g, rgb.b);
@@ -2476,7 +2476,7 @@ Vector3 hsv_from_rgb(Vector3 rgb) EXPORT
 }
 
 
-Vector3 rgb_unpack(u32 argb) EXPORT
+Vector3 rgb_unpack(u32 argb)
 {
     Vector3 rgb;
     rgb.r = ((argb >> 16) & 0xFF) / 255.0f;
@@ -2485,7 +2485,7 @@ Vector3 rgb_unpack(u32 argb) EXPORT
     return rgb;
 }
 
-Vector4 argb_unpack(u32 argb) EXPORT
+Vector4 argb_unpack(u32 argb)
 {
     Vector4 v;
     v.r = ((argb >> 16) & 0xFF) / 255.0f;
@@ -2495,7 +2495,7 @@ Vector4 argb_unpack(u32 argb) EXPORT
     return v;
 }
 
-f32 linear_from_sRGB(f32 s) EXPORT
+f32 linear_from_sRGB(f32 s)
 {
     if (s <= 0.04045f) {
         return s / 12.92f;
@@ -2504,7 +2504,7 @@ f32 linear_from_sRGB(f32 s) EXPORT
     }
 }
 
-Vector3 linear_from_sRGB(Vector3 sRGB) EXPORT
+Vector3 linear_from_sRGB(Vector3 sRGB)
 {
     Vector3 l;
     l.r = linear_from_sRGB(sRGB.r);
@@ -2513,7 +2513,7 @@ Vector3 linear_from_sRGB(Vector3 sRGB) EXPORT
     return l;
 }
 
-Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
+Vector4 linear_from_sRGB(Vector4 sRGB)
 {
     Vector4 l;
     l.r = linear_from_sRGB(sRGB.r);
@@ -2523,7 +2523,7 @@ Vector4 linear_from_sRGB(Vector4 sRGB) EXPORT
     return l;
 }
 
-Vector3 move_towards(Vector3 from, Vector3 to, Vector3 delta) EXPORT
+Vector3 move_towards(Vector3 from, Vector3 to, Vector3 delta)
 {
     Vector3 dir = to - from;
     f32 len = length_sq(dir);
@@ -2534,7 +2534,7 @@ Vector3 move_towards(Vector3 from, Vector3 to, Vector3 delta) EXPORT
     }
 }
 
-Vector3 move_towards(Vector3 from, Vector3 to, f32 delta) EXPORT
+Vector3 move_towards(Vector3 from, Vector3 to, f32 delta)
 {
     Vector3 dir = to - from;
     f32 len = length_sq(dir);

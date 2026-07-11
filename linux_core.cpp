@@ -49,7 +49,7 @@ f32 app_time_s()
     return (f32)delta.tv_sec + (f32)delta.tv_nsec/1000000000;
 }
 
-i32 current_process_id() EXPORT
+i32 current_process_id()
 {
     return getpid();
 }

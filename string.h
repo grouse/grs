@@ -132,7 +132,7 @@ i32 utf8_from_utf16(u8 *dst, i32 capacity, const wchar_t *src, i32 length);
 String string_from_utf16(const wchar_t *in_str, i32 length, Allocator mem);
 #endif // defined(WIN32)
 
-inline String read_memory(MemoryBuffer *buf, Allocator mem) EXPORT
+inline String read_memory(MemoryBuffer *buf, Allocator mem)
 {
     i32 length = read_memory<i32>(buf);
     if (length > 0) {

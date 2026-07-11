@@ -1,6 +1,6 @@
 #include "lexer.h"
 
-Token next_token(Lexer *lexer, u32 flags) EXPORT
+Token next_token(Lexer *lexer, u32 flags)
 {
     Token &t = lexer->t;
 
@@ -106,26 +106,26 @@ Token next_token(Lexer *lexer, u32 flags) EXPORT
     return t;
 }
 
-Token next_nth_token(Lexer *lexer, i32 n, u32 flags) EXPORT
+Token next_nth_token(Lexer *lexer, i32 n, u32 flags)
 {
     while (n-- > 0) next_token(lexer, flags);
     return lexer->t;
 }
 
-Token peek_token(Lexer *lexer, u32 flags) EXPORT
+Token peek_token(Lexer *lexer, u32 flags)
 {
     Lexer copy = *lexer;
     return next_token(&copy, flags);
 }
 
-Token peek_nth_token(Lexer *lexer, i32 n, u32 flags) EXPORT
+Token peek_nth_token(Lexer *lexer, i32 n, u32 flags)
 {
     Lexer copy = *lexer;
     while (n-- > 0) next_token(&copy, flags);
     return copy.t;
 }
 
-Token eat_until(Lexer *lexer, TokenType terminator, u32 flags) EXPORT
+Token eat_until(Lexer *lexer, TokenType terminator, u32 flags)
 {
     Token t;
     do t = next_token(lexer, flags);
@@ -133,7 +133,7 @@ Token eat_until(Lexer *lexer, TokenType terminator, u32 flags) EXPORT
     return t;
 }
 
-bool require_next_token(Lexer *lexer, TokenType type, Token *t /*= nullptr */) EXPORT
+bool require_next_token(Lexer *lexer, TokenType type, Token *t /*= nullptr */)
 {
     next_token(lexer);
     if (t) *t = lexer->t;
@@ -145,7 +145,7 @@ bool require_next_token(Lexer *lexer, TokenType type, Token *t /*= nullptr */) E
 
 }
 
-bool require_next_token(Lexer *lexer, char c, Token *t /*= nullptr */) EXPORT
+bool require_next_token(Lexer *lexer, char c, Token *t /*= nullptr */)
 {
     next_token(lexer);
     if (t) *t = lexer->t;
@@ -155,7 +155,7 @@ bool require_next_token(Lexer *lexer, char c, Token *t /*= nullptr */) EXPORT
     return false;
 }
 
-bool require_next_identifier(Lexer *lexer, String identifier, Token *t /*= nullptr */) EXPORT
+bool require_next_identifier(Lexer *lexer, String identifier, Token *t /*= nullptr */)
 {
     next_token(lexer);
     if (t) *t = lexer->t;
@@ -165,7 +165,7 @@ bool require_next_identifier(Lexer *lexer, String identifier, Token *t /*= nullp
     return false;
 }
 
-bool optional_token(Lexer *lexer, TokenType type, Token *t /*= nullptr */) EXPORT
+bool optional_token(Lexer *lexer, TokenType type, Token *t /*= nullptr */)
 {
     Token lh = peek_token(lexer);
     if (lh.type != type && (lh.type != TOKEN_INTEGER || type != TOKEN_NUMBER)) return false;
@@ -175,7 +175,7 @@ bool optional_token(Lexer *lexer, TokenType type, Token *t /*= nullptr */) EXPOR
     return true;
 }
 
-bool optional_token(Lexer *lexer, char c, Token *t /*= nullptr */) EXPORT
+bool optional_token(Lexer *lexer, char c, Token *t /*= nullptr */)
 {
     Token lh = peek_token(lexer);
     if (lh.type != (TokenType)c) return false;
@@ -196,12 +196,12 @@ bool optional_identifier(Lexer *lexer, String str, Token *t /*= nullptr */)
     return false;
 }
 
-bool is_identifier(Token t, String str) EXPORT
+bool is_identifier(Token t, String str)
 {
     return t.type == TOKEN_IDENTIFIER && t.str == str;
 }
 
-bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version) EXPORT
+bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version)
 {
     if (!require_next_token(lexer, '#')) return false;
     if (!require_next_identifier(lexer, "version")) return false;
@@ -219,7 +219,7 @@ bool parse_version_decl(Lexer *lexer, i32 *version_out, i32 max_version) EXPORT
     return true;
 }
 
-bool parse_float(Lexer *lexer, f32 *value, i32 n /*= 1*/) EXPORT
+bool parse_float(Lexer *lexer, f32 *value, i32 n /*= 1*/)
 {
     for (i32 i = 0; i < n; i++) {
         if (!require_next_token(lexer, TOKEN_NUMBER)) return false;
@@ -231,7 +231,7 @@ bool parse_float(Lexer *lexer, f32 *value, i32 n /*= 1*/) EXPORT
     return true;
 }
 
-bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/) EXPORT
+bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/)
 {
     for (i32 i = 0; i < n; i++) {
         if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
@@ -243,7 +243,7 @@ bool parse_int(Lexer *lexer, i32 *value, i32 n /*= 1*/) EXPORT
     return true;
 }
 
-bool parse_u32(Lexer *lexer, u32 *value, i32 n /*= 1*/) EXPORT
+bool parse_u32(Lexer *lexer, u32 *value, i32 n /*= 1*/)
 {
     for (i32 i = 0; i < n; i++) {
         if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
@@ -255,7 +255,7 @@ bool parse_u32(Lexer *lexer, u32 *value, i32 n /*= 1*/) EXPORT
     return true;
 }
 
-bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 1*/) EXPORT
+bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 1*/)
 {
     for (i32 i = 0; i < n; i++) {
         if (!require_next_token(lexer, TOKEN_IDENTIFIER)) return false;
@@ -271,7 +271,7 @@ bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 1*/) EXPORT
     return true;
 }
 
-bool parse_string(Lexer *lexer, String *str) EXPORT
+bool parse_string(Lexer *lexer, String *str)
 {
     *str = String{};
 
@@ -293,7 +293,7 @@ bool parse_string(Lexer *lexer, String *str) EXPORT
     return true;
 }
 
-bool parse_string(Lexer *lexer, String *str, Allocator mem) EXPORT
+bool parse_string(Lexer *lexer, String *str, Allocator mem)
 {
     String s;
     if (!parse_string(lexer, &s)) return false;
