@@ -258,12 +258,22 @@ bool parse_u32(Lexer *lexer, u32 *value, i32 n /*= 1*/)
 bool parse_bool(Lexer *lexer, bool *value, i32 n /*= 1*/)
 {
     for (i32 i = 0; i < n; i++) {
-        if (!require_next_token(lexer, TOKEN_IDENTIFIER)) return false;
-
-        if (lexer->t == "true") value[i] = true;
-        else if (lexer->t == "false") value[i] = false;
-        else {
-            PARSE_ERROR(lexer, "parsing boolean; expected 'true' or 'false', got '%.*s'", STRFMT(lexer->t.str));
+        if (optional_token(lexer, TOKEN_IDENTIFIER)) {
+            if (lexer->t == "true") value[i] = true;
+            else if (lexer->t == "false") value[i] = false;
+            else {
+                PARSE_ERROR(lexer, "parsing boolean; expected 'true' or 'false', got '%.*s'", STRFMT(lexer->t.str));
+                return false;
+            }
+        } else if (require_next_token(lexer, TOKEN_INTEGER)) {
+            u32 ival;
+            if (!u32_from_string(lexer->t.str, &ival)) {
+                PARSE_ERROR(lexer, "parsing boolean; expected 'true', 'false' or integer, got '%.*s'", STRFMT(lexer->t.str));
+                return false;
+            }
+            value[i] = ival != 0 ? true : false;
+        } else {
+            PARSE_ERROR(lexer, "parsing boolean; expected 'true', 'false' or integer, got '%.*s'", STRFMT(lexer->t.str));
             return false;
         }
     }
