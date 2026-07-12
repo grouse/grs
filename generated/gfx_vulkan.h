@@ -2,28 +2,28 @@
 #define GFX_VULKAN_GENERATED_H
 
 extern void hash32_update(h32s *state, const GfxTextureAssetDesc & it);
-extern u32 hash32(const GfxTextureAssetDesc & it, u32 seed);
+extern h32 hash32(const GfxTextureAssetDesc & it, h32 seed);
 extern void hash32_update(h32s *state, const GfxTextureAssetDesc & it);
 extern void hash32_update(h32s *state, const GfxVkBuffer & it);
-extern u32 hash32(const GfxVkBuffer & it, u32 seed);
+extern h32 hash32(const GfxVkBuffer & it, h32 seed);
 extern void hash32_update(h32s *state, const GfxVkBuffer & it);
 extern void hash32_update(h32s *state, const GfxVkTexture & it);
-extern u32 hash32(const GfxVkTexture & it, u32 seed);
+extern h32 hash32(const GfxVkTexture & it, h32 seed);
 extern void hash32_update(h32s *state, const GfxVkTexture & it);
 extern void hash32_update(h32s *state, const GfxVkDescriptorDesc & desc);
-extern u32 hash32(const GfxVkDescriptorDesc & desc, u32 seed);
+extern h32 hash32(const GfxVkDescriptorDesc & desc, h32 seed);
 extern void hash32_update(h32s *state, const GfxVkDescriptorDesc & desc);
 extern void hash32_update(h32s *state, const GfxVkDescriptorSetDesc & desc);
-extern u32 hash32(const GfxVkDescriptorSetDesc & desc, u32 seed);
+extern h32 hash32(const GfxVkDescriptorSetDesc & desc, h32 seed);
 extern void hash32_update(h32s *state, const GfxVkDescriptorSetDesc & desc);
 extern void hash32_update(h32s *state, const VkDescriptorSetLayoutCreateInfo & info);
-extern u32 hash32(const VkDescriptorSetLayoutCreateInfo & info, u32 seed);
+extern h32 hash32(const VkDescriptorSetLayoutCreateInfo & info, h32 seed);
 extern void hash32_update(h32s *state, const VkDescriptorSetLayoutCreateInfo & info);
 extern void hash32_update(h32s *state, const GfxPrimitiveDesc & desc);
-extern u32 hash32(const GfxPrimitiveDesc & desc, u32 seed);
+extern h32 hash32(const GfxPrimitiveDesc & desc, h32 seed);
 extern void hash32_update(h32s *state, const GfxPrimitiveDesc & desc);
 extern void hash32_update(h32s *state, const GfxVkMaterial & mat);
-extern u32 hash32(const GfxVkMaterial & mat, u32 seed);
+extern h32 hash32(const GfxVkMaterial & mat, h32 seed);
 extern void hash32_update(h32s *state, const GfxVkMaterial & mat);
 extern bool vk_image_format_supported(VkFormat format, VkImageCreateInfo image_info);
 extern void vk_imm_begin();
