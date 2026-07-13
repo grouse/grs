@@ -394,6 +394,8 @@ void linux_input_event(DynamicArray<WindowEvent> *stream, AppWindow *wnd, XEvent
 			key_state[event.key.keycode] = 1;
 
 			if (text_input_enabled() &&
+			    !(event.key.modifiers & MF_CTRL) &&
+			    !(event.key.modifiers & MF_ALT) &&
 				event.key.keycode != KC_BACKSPACE &&
 				event.key.keycode != KC_ESC &&
 				event.key.keycode != KC_DELETE &&
