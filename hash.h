@@ -95,9 +95,7 @@ void hash32_update(h32s *state, const T& value)
 template<ByteHashable T>
 h32 hash32(const T& value, h32 seed = HASH32_SEED)
 {
-    h32s state = hash32_start(seed);
-    hash32_update(&state, value);
-    return hash32_digest(&state);
+    return hash32(&value, sizeof value, seed);
 }
 
 
@@ -133,9 +131,7 @@ void hash64_update(h64s *state, const T& value)
 template<ByteHashable T>
 h64 hash64(const T& value, h64 seed = HASH64_SEED)
 {
-    h64s state = hash64_start(seed);
-    hash64_update(&state, value);
-    return hash64_digest(&state);
+    return hash64(&value, sizeof value, seed);
 }
 
 
@@ -171,9 +167,7 @@ void hash128_update(h128s *state, const T& value)
 template<ByteHashable T>
 h128 hash128(const T& value, h64 seed = HASH64_SEED)
 {
-    h128s state = hash128_start(seed);
-    hash128_update(&state, value);
-    return hash128_digest(&state);
+    return hash128(&value, sizeof value, seed);
 }
 
 HASH32_DECL(String, state, str) { hash32_update(state, str.data, str.length); }
