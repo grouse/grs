@@ -240,11 +240,14 @@ struct Rect {
         return size;
     }
 
+    constexpr f32 size_x() const { return br.x - tl.x; }
     constexpr f32 size_x(f32 x)
     {
         br.x = tl.x + x;
         return x;
     }
+
+    constexpr f32 size_y() const { return br.y - tl.y; }
     constexpr f32 size_y(f32 y)
     {
         br.y = tl.y + y;
