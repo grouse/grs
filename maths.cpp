@@ -265,6 +265,7 @@ void orthonormalize(Vector3 *v0, Vector3 *v1, Vector3 *v2)
 }
 
 Vector3 operator-(Vector3 v) { return { -v.x, -v.y, -v.z }; }
+Vector3 operator+(Vector3 v) { return v; }
 
 Vector3 operator+(Vector3 lhs, Vector3 rhs)
 {

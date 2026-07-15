@@ -148,6 +148,7 @@ extern Vector3 refract(Vector3 v, Vector3 n, f32 etai_over_etat);
 extern void orthogonalise(Vector3 *v0, Vector3 *v1, Vector3 *v2);
 extern void orthonormalize(Vector3 *v0, Vector3 *v1, Vector3 *v2);
 extern Vector3 operator-(Vector3 v);
+extern Vector3 operator+(Vector3 v);
 extern Vector3 operator+(Vector3 lhs, Vector3 rhs);
 extern Vector3 operator+(Vector3 v, f32 scalar);
 extern Vector3 operator+=(Vector3 & lhs, f32 scalar);
