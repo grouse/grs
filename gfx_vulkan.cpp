@@ -1841,7 +1841,7 @@ extern void vk_set_uniform(
 
 
 
-extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params)
+extern GfxVkBuffer vk_material_parameters(GfxMaterialParametersGPU params)
 {
     GfxVkBuffer *uniform = map_find_emplace(&vk.material_parameters, params, {});
     if (!uniform->handle) {

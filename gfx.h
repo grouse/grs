@@ -75,8 +75,7 @@ struct GfxTextureAsset {
     GfxTextureFormat format;
 };
 
-struct GfxMaterialParameters {
-    META(ColorRgb)
+struct GfxMaterialParametersGPU {
     Vector4 albedo_factor                      = {1, 1, 1, 1};
     Vector4 metallic_roughness_factor          = {1, 1, 0, 0 };
     Vector4 albedo_uv_offset_scale             = { 0, 0, 1, 1 };
@@ -89,7 +88,7 @@ struct GfxMaterialParameters {
     f32     alpha_cutoff              = 0.0f;
     f32     normal_scale              = 1.0f;
 
-    bool operator==(const GfxMaterialParameters &other) const = default;
+    bool operator==(const GfxMaterialParametersGPU &other) const = default;
 };
 
 enum GfxSampleWrap {
@@ -135,10 +134,28 @@ struct GfxMaterialTextureDesc {
 struct GfxMaterial {
     String debug_name;
     GfxPipelineIdx pipeline;
+
     GfxMaterialTextureDesc albedo;
-    GfxMaterialTextureDesc metallic_roughness;
+    META(ColorRgb)
+    Vector4 albedo_factor = {1, 1, 1, 1};
+    Vector2 albedo_offset;
+    Vector2 albedo_scale = { 1, 1 };
+    f32 albedo_rotation;
+
     GfxMaterialTextureDesc normal;
-    GfxMaterialParameters parameters;
+    f32 normal_factor = 1.0f;
+    Vector2 normal_offset;
+    Vector2 normal_scale = { 1, 1 };
+    f32 normal_rotation;
+
+    GfxMaterialTextureDesc metallic_roughness;
+    f32 metallic_factor = 1.0f;
+    f32 roughness_factor = 1.0f;
+    Vector2 metallic_roughness_offset;
+    Vector2 metallic_roughness_scale = { 1, 1 };
+    float metallic_roughness_rotation;
+
+    f32 alpha_cutoff = 0.0f;
     bool double_sided;
 
     bool operator==(const GfxMaterial &other) const = default;

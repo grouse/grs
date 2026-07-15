@@ -388,7 +388,7 @@ extern struct GfxVkContext {
     DynamicArray<AssetHandle> material_assets;
     DynamicMap<GfxVkMaterial, i32> material_map;
     DynamicMap<AssetHandle,   i32> material_asset_map;
-    DynamicMap<GfxMaterialParameters, GfxVkBuffer> material_parameters;
+    DynamicMap<GfxMaterialParametersGPU, GfxVkBuffer> material_parameters;
 
     DynamicArray<GfxVkShader> shaders;
     DynamicMap<GfxShader, DynamicArray<GfxPipelineIdx>> shaders_used_by;

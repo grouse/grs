@@ -100,7 +100,7 @@ const char* sz_from_enum(GfxTextureFormat format)
     return "unknown";
 }
 
-u32 hash32(const GfxMaterialParameters &it, u32 seed /*= HASH32_SEED*/)
+u32 hash32(const GfxMaterialParametersGPU &it, u32 seed /*= HASH32_SEED*/)
 {
     h32s state = hash32_start(seed);
     hash32_update(&state, &it.albedo_factor, sizeof it.albedo_factor);

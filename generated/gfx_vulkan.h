@@ -92,7 +92,7 @@ extern void vk_set_images(VkDescriptorSet set, u32 binding, u32 descriptor_count
 extern VkDescriptorSet vk_create_descriptor_set(VkDescriptorSetLayout layout);
 extern VkBool32 vk_debug_proc(VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT *data, void *);
 extern void vk_set_uniform(VkDescriptorSet set, u32 binding, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range);
-extern GfxVkBuffer vk_material_parameters(GfxMaterialParameters params);
+extern GfxVkBuffer vk_material_parameters(GfxMaterialParametersGPU params);
 extern VkDescriptorPool vk_descriptor_pool(u32 set_count =100);
 extern VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance);
 extern GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 index_count);
