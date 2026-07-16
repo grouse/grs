@@ -199,7 +199,8 @@ struct GfxVkDescriptorSetDesc {
 };
 
 enum GfxVkDynamicStateFlags : u32 {
-    GFX_VK_CULL_MODE = (1 << 0)
+    GFX_VK_CULL_MODE  = 1 << 0,
+    GFX_VK_DEPTH_BIAS = 1 << 1,
 };
 
 struct GfxVkPipelineDesc {
