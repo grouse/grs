@@ -447,6 +447,13 @@ void array_sort(Array<T> arr, Compare compare = {})
 }
 
 template<typename T>
+T array_max(T curr, Array<T> arr)
+{
+    for (auto it : arr) if (it > curr) curr = it;
+    return curr;
+}
+
+template<typename T>
 i32 array_count_if(Array<T> arr, bool (*predicate)(T &e))
 {
     i32 count = 0;
