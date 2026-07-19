@@ -1184,7 +1184,7 @@ void append_data(StringBuilder *sb, void *data, i32 size)
 
 void append_char(StringBuilder *sb, char c)
 {
-    append_data(sb, &c, c);
+    append_data(sb, &c, 1);
 }
 
 void append_string(StringBuilder *sb, String str)
