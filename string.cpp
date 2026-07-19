@@ -1143,16 +1143,17 @@ String create_string(StringBuilder *sb, Allocator mem)
 char* sz_string(StringBuilder *sb, Allocator mem)
 {
     i32 length = 0;
-    for (auto it = sb->current; it; it = it->next) {
+    for (auto it = &sb->head; it; it = it->next) {
         if (it->written == 0) break;
         length += it->written;
     }
 
     char *str = ALLOC_ARR(mem, char, length+1);
     char *ptr = str;
-    for (auto it = sb->current; it; it = it->next) {
+    for (auto it = &sb->head; it; it = it->next) {
         if (it->written == 0) break;
         memcpy(ptr, it->data, it->written);
+        ptr += it->written;
     }
 
     str[length] = '\0';
@@ -1197,10 +1198,14 @@ void append_stringf(StringBuilder *sb, const char *fmt, ...)
     va_start(args, fmt);
 
     i32 available = sizeof sb->current->data - sb->current->written;
-    i32 length = vsnprintf(sb->current->data + sb->current->written, available-1, fmt, args);
+    i32 length = available > 0
+        ? vsnprintf(sb->current->data + sb->current->written, available, fmt, args)
+        : vsnprintf(nullptr, 0, fmt, args);
     va_end(args);
 
-    if (length > available-1) {
+    if (length < 0) return;
+
+    if (length >= available) {
         SArena scratch = tl_scratch_arena(sb->alloc);
         char *buffer = ALLOC_ARR(scratch, char, length+1);
 
