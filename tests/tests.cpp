@@ -8,6 +8,7 @@
 #include "generated/tests/array.h"
 #include "generated/tests/map.h"
 #include "generated/tests/memory.h"
+#include "generated/tests/string.h"
 
 int main(Array<String> args)
 {
@@ -20,6 +21,7 @@ int main(Array<String> args)
     RUN_TESTS(MAP__tests,    &stats);
     RUN_TESTS(ARRAY__tests,  &stats);
     RUN_TESTS(MEMORY__tests, &stats);
+    RUN_TESTS(STRING__tests, &stats);
 
     test_print_summary(&stats);
     return stats.failed;

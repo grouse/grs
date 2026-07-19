@@ -1,0 +1,4 @@
+
+#ifdef STRING_GENERATED_IMPL
+#define STRING_INTERNAL
+#endif
