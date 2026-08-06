@@ -1701,6 +1701,7 @@ extern VkDescriptorSetLayout vk_descriptor_layout(
 {
     VkDescriptorSetLayoutCreateInfo dsl_info{
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .flags        = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT,
         .bindingCount = (u32)bindings->count,
         .pBindings    = bindings->data,
     };
