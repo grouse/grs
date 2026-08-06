@@ -1858,31 +1858,27 @@ extern GfxVkBuffer vk_material_parameters(GfxMaterialParametersGPU params)
 }
 
 
-extern VkDescriptorPool vk_descriptor_pool(u32 set_count /*=100*/)
+VkDescriptorPool vk_descriptor_pool()
 {
     struct DescriptorPoolSizeRatio {
         VkDescriptorType type;
         f32 ratio;
     };
 
-    DescriptorPoolSizeRatio ratios[] = {
-        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         2.0f },
-        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4.0f },
+    // TODO(jesper): revisit this function and what the correct API is supposed to be
+    // We're currently pretty much relying on a single descriptor pool for the entire program. Technically we can run out of space and allocate a new one, but we assume all descriptor pools are equal and have the same requirements. This means we're currentely allocating space for 5k textures because we're allocating space for a 4096 size texture table
+    VkDescriptorPoolSize sizes[] = {
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         200  },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5000 },
     };
-
-    FixedArray<VkDescriptorPoolSize, ARRAY_COUNT(ratios)> sizes{};
-    for (auto it : ratios)  {
-        array_add(&sizes, { it.type, u32(it.ratio * set_count) });
-    }
 
     VkDescriptorPoolCreateInfo pool_info{
         VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets       = set_count,
-        .poolSizeCount = u32(sizes.count),
-        .pPoolSizes    = sizes.data,
+        .flags         = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
+        .maxSets       = 5000,
+        .poolSizeCount = ARRAY_COUNT(sizes),
+        .pPoolSizes    = sizes,
     };
-
-    LOG_INFO("[vulkan] creating descriptor pool with %u sets", set_count);
 
     VkDescriptorPool pool;
     VK_CHECK(vkCreateDescriptorPool(vk.device, &pool_info, nullptr, &pool));
