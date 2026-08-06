@@ -75,22 +75,6 @@ struct GfxTextureAsset {
     GfxTextureFormat format;
 };
 
-struct GfxMaterialParametersGPU {
-    Vector4 albedo_factor                      = {1, 1, 1, 1};
-    Vector4 metallic_roughness_factor          = {1, 1, 0, 0 };
-    Vector4 albedo_uv_offset_scale             = { 0, 0, 1, 1 };
-    Vector4 metallic_roughness_uv_offset_scale = { 0, 0, 1, 1 };
-    Vector4 normal_uv_offset_scale             = { 0, 0, 1, 1 };
-    float albedo_rotation;
-    float metallic_roughness_rotation;
-    float normal_rotation;
-
-    f32     alpha_cutoff              = 0.0f;
-    f32     normal_scale              = 1.0f;
-
-    bool operator==(const GfxMaterialParametersGPU &other) const = default;
-};
-
 enum GfxSampleWrap {
     GFX_WRAP_REPEAT = 0,
     GFX_WRAP_MIRROR,

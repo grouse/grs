@@ -1843,21 +1843,6 @@ extern void vk_set_uniform(
 
 
 
-extern GfxVkBuffer vk_material_parameters(GfxMaterialParametersGPU params)
-{
-    GfxVkBuffer *uniform = map_find_emplace(&vk.material_parameters, params, {});
-    if (!uniform->handle) {
-        *uniform = vk_create_buffer(
-            &params, sizeof params,
-            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            VMA_MEMORY_USAGE_CPU_TO_GPU,
-            VMA_ALLOCATION_CREATE_MAPPED_BIT);
-    }
-
-    return *uniform;
-}
-
-
 VkDescriptorPool vk_descriptor_pool()
 {
     struct DescriptorPoolSizeRatio {
