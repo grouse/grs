@@ -204,8 +204,7 @@ enum GfxVkDynamicStateFlags : u32 {
 };
 
 struct GfxVkPipelineDesc {
-    String debug_label;
-
+    String label;
     FixedArray<VkFormat, MAX_COLOR_ATTACHMENTS> color;
 
     struct {
@@ -215,17 +214,17 @@ struct GfxVkPipelineDesc {
         VkCompareOp compare_op = VK_COMPARE_OP_GREATER_OR_EQUAL;
     } depth;
 
-    FixedArray<GfxVkShader, MAX_SHADER_STAGES> stages;
-    FixedArray<GfxVkVertexBindingDesc, MAX_VERTEX_INPUT_BINDINGS> inputs;
-    FixedArray<GfxVkPushConstantDesc, MAX_PUSH_CONSTANTS> push_constants;
-    FixedArray<GfxVkDescriptorSetLayoutDesc, MAX_DESCRIPTOR_SETS> descriptor_sets;
-    GfxVkDynamicStateFlags dynamic_states;
-    VkPipelineColorBlendAttachmentState blend;
-    VkPolygonMode polygon_mode = VK_POLYGON_MODE_FILL;
-    VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    FixedArray<GfxVkShader,                  MAX_SHADER_STAGES>         stages;
+    FixedArray<GfxVkVertexBindingDesc,       MAX_VERTEX_INPUT_BINDINGS> inputs;
+    FixedArray<GfxVkPushConstantDesc,        MAX_PUSH_CONSTANTS>        constants;
+    FixedArray<GfxVkDescriptorSetLayoutDesc, MAX_DESCRIPTOR_SETS>       sets;
 
-    VkCullModeFlags cull_mode = VK_CULL_MODE_NONE;
-    VkFrontFace front_face = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    GfxVkDynamicStateFlags              dynamic_states;
+    VkPipelineColorBlendAttachmentState blend;
+    VkPolygonMode                       polygon_mode = VK_POLYGON_MODE_FILL;
+    VkPrimitiveTopology                 topology     = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    VkCullModeFlags                     cull_mode    = VK_CULL_MODE_NONE;
+    VkFrontFace                         front_face   = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 };
 
 struct GfxVkFrame {
@@ -389,7 +388,6 @@ extern struct GfxVkContext {
     DynamicArray<AssetHandle> material_assets;
     DynamicMap<GfxVkMaterial, i32> material_map;
     DynamicMap<AssetHandle,   i32> material_asset_map;
-    DynamicMap<GfxMaterialParametersGPU, GfxVkBuffer> material_parameters;
 
     DynamicArray<GfxVkShader> shaders;
     DynamicMap<GfxShader, DynamicArray<GfxPipelineIdx>> shaders_used_by;
