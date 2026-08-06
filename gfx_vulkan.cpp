@@ -1678,12 +1678,12 @@ extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc)
             switch (it.type) {
             case GFX_TEXTURE:
                 vk_set_images(
-                    *set, it.binding, 1, &it.texture.texture, &it.texture.sampler,
+                    *set, it.binding, 0, 1, &it.texture.texture, &it.texture.sampler,
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                 break;
             case GFX_TEXTURE_ARRAY:
                 vk_set_images(
-                    *set, it.binding, it.texture_array.count, it.texture_array.textures, it.texture_array.samplers,
+                    *set, it.binding, 0, it.texture_array.count, it.texture_array.textures, it.texture_array.samplers,
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                 break;
             case GFX_UNIFORM:
@@ -1724,6 +1724,7 @@ extern VkDescriptorSetLayout vk_descriptor_layout(
 extern void vk_set_images(
     VkDescriptorSet set,
     u32 binding,
+    u32 first_descriptor,
     u32 descriptor_count,
     GfxVkTexture *textures,
     VkSampler *samplers,
@@ -1743,6 +1744,7 @@ extern void vk_set_images(
         VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
         .dstSet          = set,
         .dstBinding      = binding,
+        .dstArrayElement = first_descriptor,
         .descriptorCount = descriptor_count,
         .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
         .pImageInfo      = image_infos.data,
