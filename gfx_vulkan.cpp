@@ -2289,10 +2289,11 @@ bool operator==(const GfxPrimitiveDesc &lhs, const GfxPrimitiveDesc &rhs)
 {
     if (lhs.type != rhs.type) return false;
     switch (lhs.type) {
-    case GFX_SPHERE: return lhs.sphere == rhs.sphere;
-    case GFX_CUBE: return lhs.cube == rhs.cube;
-    case GFX_CYLINDER: return lhs.cylinder == rhs.cylinder;
-    case GFX_RAMP: return lhs.ramp == rhs.ramp;
+    case GFX_SPHERE:    return lhs.sphere == rhs.sphere;
+    case GFX_CUBE:      return lhs.cube == rhs.cube;
+    case GFX_CYLINDER:  return lhs.cylinder == rhs.cylinder;
+    case GFX_RAMP:      return lhs.ramp == rhs.ramp;
+    case GFX_TRI_PRISM: return lhs.tri_prism == rhs.tri_prism;
     }
 
     return false;
