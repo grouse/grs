@@ -1664,11 +1664,11 @@ extern VkSampler vk_sampler(GfxSampler desc)
 
 extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc)
 {
-    PANIC_IF(!desc.set_layout, "descriptor set layout is invalid");
+    PANIC_IF(!desc.layout, "descriptor set layout is invalid");
 
     auto *set = map_find_emplace(&vk.descriptor_sets, desc, {});
     if (!*set) {
-        *set = vk_create_descriptor_set(desc.set_layout);
+        *set = vk_create_descriptor_set(desc.layout);
 
         u32 binding = 0;
         for (auto it : desc.bindings) {

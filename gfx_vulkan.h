@@ -191,8 +191,7 @@ struct GfxVkDescriptorDesc {
 using GfxVkDescriptorSetLayoutDesc = FixedArray<GfxDescriptorLayoutBindingDesc, MAX_DESCRIPTOR_SET_BINDINGS>;
 
 struct GfxVkDescriptorSetDesc {
-    VkPipelineLayout pipeline_layout;
-    VkDescriptorSetLayout set_layout;
+    VkDescriptorSetLayout layout;
     FixedArray<GfxVkDescriptorDesc, MAX_DESCRIPTOR_SET_BINDINGS> bindings;
 
     bool operator==(const GfxVkDescriptorSetDesc &other) const = default;
@@ -449,8 +448,7 @@ HASH32_DECL(GfxVkDescriptorDesc, state, desc)
 
 HASH32_DECL(GfxVkDescriptorSetDesc, state, desc)
 {
-    hash32_update(state, u64(desc.pipeline_layout));
-    hash32_update(state, u64(desc.set_layout));
+    hash32_update(state, u64(desc.layout));
     for (auto it : desc.bindings) hash32_update(state, it);
 }
 
