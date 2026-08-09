@@ -364,7 +364,11 @@ void create_filewatch(String folder, DynamicArray<FileEvent> *events, Mutex *eve
         .events_mutex = events_mutex,
         .events = events,
     };
-    PANIC_IF(fwd->fd == -1, "failed initialising inotify: '%s'", strerror(errno));
+
+    if (fwd->fd == -1) {
+        LOG_ERROR("failed initialising inotify: '%s'", strerror(errno));
+        return;
+    }
 
     array_create(&fwd->folders, folders.count, mem_dynamic);
     array_create(&fwd->fds, folders.count, mem_dynamic);
@@ -375,7 +379,10 @@ void create_filewatch(String folder, DynamicArray<FileEvent> *events, Mutex *eve
 			fwd->fd,
 			sz_string(folders[i], scratch),
 			IN_CLOSE_WRITE|IN_CREATE|IN_DELETE|IN_DELETE_SELF|IN_MOVE);
-        PANIC_IF(fwd->fds[i] == -1, "failed adding watch: '%s'", strerror(errno));
+
+		if (fwd->fds[i] == -1) {
+		    LOG_ERROR("failed adding watch for folder '%.*s': '%s'", STRFMT(folders[i]), strerror(errno));
+        }
     }
 
     create_thread([](void *data) -> i32
