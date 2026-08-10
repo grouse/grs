@@ -344,7 +344,8 @@ extern struct GfxVkContext {
         u32 graphics_family_index;
         u32 present_family_index;
 
-        VkPhysicalDeviceDescriptorHeapFeaturesEXT features_descriptor_heap = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT };
+        VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR features_unified_layouts = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR };
+        VkPhysicalDeviceDescriptorHeapFeaturesEXT features_descriptor_heap = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT, .pNext = &features_unified_layouts };
         VkPhysicalDeviceVulkan13Features features13 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES, .pNext = &features_descriptor_heap };
         VkPhysicalDeviceVulkan12Features features12 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &features13 };
         VkPhysicalDeviceVulkan11Features features11 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES, .pNext = &features12 };
