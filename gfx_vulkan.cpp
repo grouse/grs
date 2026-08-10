@@ -315,7 +315,7 @@ extern void vk_copy_buffer_to_image(
         .imageExtent = { width, height, 1 },
     };
 
-    vkCmdCopyBufferToImage(cmd, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
+    vkCmdCopyBufferToImage(cmd, buffer, image, VK_IMAGE_LAYOUT_GENERAL, 1, &copy);
 }
 
 
@@ -529,7 +529,7 @@ extern GfxTexture vk_create_texture(
         VK_IMAGE_USAGE_SAMPLED_BIT|VK_IMAGE_USAGE_TRANSFER_DST_BIT);
     GfxVkTexture texture = vk.textures[texture_idx];
 
-    VK_IMM vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    VK_IMM vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
     return texture_idx;
 }
@@ -563,9 +563,9 @@ extern GfxTexture vk_create_texture(
     GfxVkTexture texture = vk.textures[texture_idx];
 
     VK_IMM {
-        vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
         vk_copy_buffer_to_image(vk.imm.cmd, staging, texture.image, width, height);
-        vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL);
     }
 
     vk_destroy_buffer(staging);
@@ -1479,7 +1479,7 @@ void gfx_begin_pass(const GfxVkRenderPassDesc& desc)
         color_attachments[color_count] = VkRenderingAttachmentInfo {
             VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
             .imageView   = desc.color[color_count].res.view,
-            .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
             .loadOp      = vk_load_op(desc.color[color_count].load_op),
             .storeOp     = vk_store_op(desc.color[color_count].store_op),
             .clearValue.color.float32 = {
@@ -1497,7 +1497,7 @@ void gfx_begin_pass(const GfxVkRenderPassDesc& desc)
 
     if (desc.depth.res) {
         depth_attachment.imageView   = desc.depth.res.view;
-        depth_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depth_attachment.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
         depth_attachment.loadOp      = vk_load_op(desc.depth.load_op);
         depth_attachment.storeOp     = vk_store_op(desc.depth.store_op);
         depth_attachment.clearValue.depthStencil = {
@@ -1679,12 +1679,12 @@ extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc)
             case GFX_TEXTURE:
                 vk_set_images(
                     *set, it.binding, 0, 1, &it.texture.texture, &it.texture.sampler,
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                    VK_IMAGE_LAYOUT_GENERAL);
                 break;
             case GFX_TEXTURE_ARRAY:
                 vk_set_images(
                     *set, it.binding, 0, it.texture_array.count, it.texture_array.textures, it.texture_array.samplers,
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                    VK_IMAGE_LAYOUT_GENERAL);
                 break;
             case GFX_UNIFORM:
                 vk_set_uniform(*set, it.binding, it.uniform, 0, it.uniform.size);
