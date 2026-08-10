@@ -2298,3 +2298,13 @@ bool operator==(const GfxPrimitiveDesc &lhs, const GfxPrimitiveDesc &rhs)
 
     return false;
 }
+
+void vk_push_constants(VkCommandBuffer cmd, const void *data, i32 size)
+{
+    VkPushDataInfoEXT info{
+        .sType = VK_STRUCTURE_TYPE_PUSH_DATA_INFO_EXT,
+        .offset = 0, .data = { .address = data, .size = size_t(size) }
+    };
+
+    vkCmdPushDataEXT(cmd, &info);
+}

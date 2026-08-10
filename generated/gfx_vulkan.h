@@ -101,6 +101,7 @@ extern GfxMesh gfx_cylinder(f32 radius, f32 height, i32 detail);
 extern GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness);
 extern GfxMesh gfx_ramp(f32 length, f32 height, f32 width);
 extern bool operator==(const GfxPrimitiveDesc & lhs, const GfxPrimitiveDesc & rhs);
+extern void vk_push_constants(VkCommandBuffer cmd, const void *data, i32 size);
 
 #endif // GFX_VULKAN_GENERATED_H
 

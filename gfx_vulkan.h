@@ -510,6 +510,12 @@ HASH32_DECL(GfxVkMaterial, state, mat)
     hash32_update(state, mat.cull_mode);
 }
 
+template<typename Constants>
+void vk_push_constants(VkCommandBuffer cmd, const Constants *data)
+{
+    vk_push_constants(cmd, data, sizeof *data);
+}
+
 
 #include "generated/gfx_vulkan.h"
 
