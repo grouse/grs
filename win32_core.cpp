@@ -7,8 +7,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-extern void stdio_sink(const char *path, u32 line, LogType type, const char *msg);
-extern void win32_debugger_sink(const char *path, u32 line, LogType type, const char *msg);
+extern void stdio_sink(void *sink_data, const char *path, u32 line, LogType type, const char *msg);
+extern void win32_debugger_sink(void *sink_data, const char *path, u32 line, LogType type, const char *msg);
+
 FixedArray<LogSink, 10> log_sinks{ 
     { stdio_sink }, 
     { win32_debugger_sink } 
@@ -19,7 +20,7 @@ bool debugger_attached()
     return IsDebuggerPresent();
 }
 
-void win32_debugger_sink(const char *path, u32 line, LogType type, const char *msg)
+void win32_debugger_sink(void *sink_data, const char *path, u32 line, LogType type, const char *msg)
 {
     char buffer[2048];
 
