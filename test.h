@@ -339,7 +339,7 @@ static bool test_panic_handler(const char *file, int line, const char *sz_cond, 
     return false;
 }
 
-static void test_log_sink(const char *src, u32 line, LogType type, const char *msg)
+static void test_log_sink(void *sink_data, const char *src, u32 line, LogType type, const char *msg)
 {
     if (type == LOG_TYPE_INFO) return;  // suppress info noise during tests
 
@@ -396,7 +396,7 @@ int run_tests(TestSuite *tests, int count, TestStats *stats)
 
     auto prev_sinks = log_sinks;
     log_sinks.count = 0;
-    array_add(&log_sinks, test_log_sink);
+    array_add(&log_sinks, { test_log_sink });
 
     run_tests_(tests, count, stats);
 
