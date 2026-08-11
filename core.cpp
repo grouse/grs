@@ -51,20 +51,20 @@ bool default_panic_handler(
 jl_panic_handler_proc jl_panic_handler = default_panic_handler;
 
 
-bool add_log_sink(sink_proc_t sink)
+bool add_log_sink(sink_proc_t sink, void *user_data)
 {
     if (log_sinks.count == log_sinks.capacity()) {
         LOG_ERROR("maximum number of log sinks exceeded");
         return false;
     }
 
-    array_add(&log_sinks, sink);
+    array_add(&log_sinks, LogSink{ sink, user_data });
     return true;
 }
 
-static FILE *file_log;
-void file_log_sink(const char *path, u32 line, LogType type, const char *msg)
+void file_log_sink(void *sink_data, const char *path, u32 line, LogType type, const char *msg)
 {
+    FILE *file_log = (FILE*)sink_data;
     if (!file_log) return;
 
     String filename = filename_of_sz(path);
@@ -73,20 +73,11 @@ void file_log_sink(const char *path, u32 line, LogType type, const char *msg)
     fflush(file_log);
 }
 
-static void close_file_log_sink()
-{
-    if (!file_log) return;
-
-    fclose(file_log);
-    file_log = nullptr;
-}
-
 bool init_file_log_sink(const char *sz_app_name, const char *sz_filename)
 {
     String app_name = string(sz_app_name);
     String filename = string(sz_filename);
 
-    if (file_log) return true;
     if (!app_name) return false;
 
     SArena scratch = tl_scratch_arena();
@@ -108,26 +99,24 @@ bool init_file_log_sink(const char *sz_app_name, const char *sz_filename)
     close_file(file);
 
     char *sz_log_path = sz_string(log_path, scratch);
-    file_log = fopen(sz_log_path, "a");
+    FILE *file_log = fopen(sz_log_path, "a");
     if (!file_log) {
         LOG_ERROR("unable to initialize file log: failed opening '%s': %s", sz_log_path, strerror(errno));
         return false;
     }
 
-    if (!add_log_sink(file_log_sink)) {
+    if (!add_log_sink(file_log_sink, file_log)) {
         LOG_ERROR("unable to initialize file log: failed adding log sink");
-        close_file_log_sink();
         return false;
     }
 
-    atexit(close_file_log_sink);
     LOG_INFO("writing log to %s", sz_log_path);
     return true;
 }
 
 void log(const char *file, u32 line, LogType type, const char *msg)
 {
-    for (auto sink : log_sinks) sink(file, line, type, msg);
+    for (auto sink : log_sinks) sink.proc(sink.data, file, line, type, msg);
 }
 
 
@@ -147,7 +136,7 @@ void logv(const char *path, u32 line, LogType type, const char *fmt, va_list arg
     log(path, line, type, buffer);
 }
 
-void stdio_sink(const char *path, u32 line, LogType type, const char *msg)
+void stdio_sink(void *sink_data, const char *path, u32 line, LogType type, const char *msg)
 {
     FILE *out = stdout;
     switch (type) {

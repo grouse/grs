@@ -260,11 +260,18 @@ inline const char* sz_from_enum(LogType type)
     return "";
 }
 
-typedef void (*sink_proc_t)(const char *src, u32 line, LogType type, const char *msg);
+typedef void (*sink_proc_t)(void *sink_data, const char *src, u32 line, LogType type, const char *msg);
+
+struct LogSink {
+    sink_proc_t proc;
+    void *data;
+};
+
+
 void log(const char *file, u32 line, LogType type, const char *msg);
 void logf(const char *file, u32 line, LogType type, const char *fmt, ...);
 void logv(const char *file, u32 line, LogType type, const char *fmt, va_list args) ;
-bool add_log_sink(sink_proc_t sink);
+bool add_log_sink(sink_proc_t sink, void *sink_data);
 bool init_file_log_sink(const char *app_name, const char *filename = nullptr);
 
 template<typename T>

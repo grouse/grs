@@ -14,8 +14,8 @@
 
 String jl_exe_path;
 
-extern void stdio_sink(const char *path, u32 line, LogType type, const char *msg);
-FixedArray<sink_proc_t, 10> log_sinks{ stdio_sink };
+extern void stdio_sink(void *sink_data, const char *path, u32 line, LogType type, const char *msg);
+FixedArray<LogSink, 10> log_sinks{ { stdio_sink, nullptr } };
 
 
 bool debugger_attached()

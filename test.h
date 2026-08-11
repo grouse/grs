@@ -227,7 +227,7 @@ void report_fail(const char *file, int line, const char *sz_cond, const char *fm
 #include "string.h"
 #include "array.h"
 
-extern FixedArray<sink_proc_t, 10> log_sinks;
+extern FixedArray<LogSink, 10> log_sinks;
 
 static i32 test_print_results(TestResult *from, TestResult *to = nullptr)
 {
@@ -419,7 +419,7 @@ int run_tests(TestSuite *tests, int count, TestStats *stats)
 
 static bool itest_defer_log = false;
 
-static void itest_log_sink(const char *src, u32 line, LogType type, const char *msg)
+static void itest_log_sink(void *sink_data, const char *src, u32 line, LogType type, const char *msg)
 {
     if (test_current && type <= LOG_TYPE_ERROR) {
         report_fail(src, (int)line, sz_from_enum(type), "%s", msg);
@@ -463,7 +463,7 @@ int run_integration_tests_(TestSuite *tests, int count)
 {
     auto prev_sinks = log_sinks;
     log_sinks.count = 0;
-    array_add(&log_sinks, itest_log_sink);
+    array_add(&log_sinks, LogSink{ itest_log_sink, nullptr });
 
     auto prev_assert = jl_assert_handler;
     auto prev_panic  = jl_panic_handler;

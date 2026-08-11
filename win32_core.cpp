@@ -9,7 +9,10 @@
 
 extern void stdio_sink(const char *path, u32 line, LogType type, const char *msg);
 extern void win32_debugger_sink(const char *path, u32 line, LogType type, const char *msg);
-FixedArray<sink_proc_t, 10> log_sinks{ stdio_sink, win32_debugger_sink };
+FixedArray<LogSink, 10> log_sinks{ 
+    { stdio_sink }, 
+    { win32_debugger_sink } 
+};
 
 bool debugger_attached()
 {
