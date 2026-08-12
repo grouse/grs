@@ -33,6 +33,8 @@ constexpr i32 MAX_DYNAMIC_STATES          = 8;
 
 #define VK_IMM SCOPE_VEXPR(vk_imm_begin(), vk_imm_end())
 
+#define VK_PUSH_DEVICE_FEATURE(tail, feature) do { tail->pNext = feature; tail = (VkPhysicalDeviceFeatures2*)feature; } while(0)
+
 
 struct SpvCompilationResult {
     shaderc_compilation_status status;
@@ -343,13 +345,6 @@ extern struct GfxVkContext {
         VkPhysicalDevice handle;
         u32 graphics_family_index;
         u32 present_family_index;
-
-        VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR features_unified_layouts = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR };
-        VkPhysicalDeviceDescriptorHeapFeaturesEXT features_descriptor_heap = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT, .pNext = &features_unified_layouts };
-        VkPhysicalDeviceVulkan13Features features13 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES, .pNext = &features_descriptor_heap };
-        VkPhysicalDeviceVulkan12Features features12 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &features13 };
-        VkPhysicalDeviceVulkan11Features features11 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES, .pNext = &features12 };
-        VkPhysicalDeviceFeatures2 features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &features11 };
     } physical_device;
 
     struct {
