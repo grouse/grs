@@ -17,6 +17,7 @@ using std::pow;
 using std::lerp;
 using std::floor;
 using std::ceil;
+using std::isnan;
 
 #ifndef M_BOUNDS_CHECK
 #define M_BOUNDS_CHECK(i, min, max) do { ASSERT(i <= max); ASSERT(i >= min); } while(0)
@@ -136,6 +137,8 @@ struct Vector3 {
 };
 M_VECTOR_OPS(Vector3);
 
+inline bool3 isnan(const Vector3 &v) { return { isnan(v.x), isnan(v.y), isnan(v.z) }; }
+
 struct Vector4 {
     union {
         struct { f32 x, y, z, w; };
@@ -163,6 +166,8 @@ struct Vector4 {
     M_SUBSCRIPT_OPS(f32, data);
 };
 M_VECTOR_OPS(Vector4);
+
+inline bool4 isnan(const Vector4 &v) { return { isnan(v.x), isnan(v.y), isnan(v.z), isnan(v.w) }; }
 
 struct Matrix3 {
     union {
@@ -217,6 +222,8 @@ struct Quaternion {
 M_CMP_OPS(Quaternion);
 M_ADD_OPS(Quaternion, Quaternion, Quaternion);
 M_DIV_OPS(Quaternion, Quaternion, f32);
+
+inline bool4 isnan(const Quaternion &q) { return { isnan(q.x), isnan(q.y), isnan(q.z), isnan(q.w) }; }
 
 struct Rect {
     union {
