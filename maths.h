@@ -77,6 +77,13 @@ using std::ceil;
     M_MUL_OPS(V, T, V);\
     M_DIV_OPS(T, T, T)
 
+struct bool3 { bool x, y, z; };
+struct bool4 { bool x, y, z, w; };
+
+inline bool any_of(const bool3 &b) { return b.x || b.y || b.z; }
+inline bool any_of(const bool4 &b) { return b.x || b.y || b.z || b.w; }
+inline bool all_of(const bool3 &b) { return b.x && b.y && b.z; }
+inline bool all_of(const bool4 &b) { return b.x && b.y && b.z && b.w; }
 
 struct Vector2 {
     union {
