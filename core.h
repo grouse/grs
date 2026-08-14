@@ -103,6 +103,9 @@ typedef u64 uptr;
 constexpr f64 f64_PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164062;
 constexpr f32 f32_PI = (f32)f64_PI;
 
+template<typename T>
+constexpr T signof(T v) { return v < T(0) ? T(-1) : T(1); }
+
 #define f32_MIN __FLT_MIN__
 #define f32_MAX 3.402823466e+38F
 #define f32_EPSILON __FLT_EPSILON__
@@ -117,7 +120,6 @@ constexpr f32 f32_PI = (f32)f64_PI;
 
 #define jl_all(val, bits) (((val) & (bits)) == bits)
 #define jl_any(val, bits) ((val) & (bits))
-
 
 
 static_assert(sizeof(u64) == 8, "u64 sizeof mismatch");
