@@ -354,6 +354,13 @@ i32 array_find_index(Array<T> arr, T value)
     return -1;
 }
 
+template<typename T, typename Predicate>
+i32 array_find_index_if(Array<T> arr, Predicate pred)
+{
+    for (i32 i = 0; i < arr.count; i++) if (pred(arr[i])) return i;
+    return -1;
+}
+
 template<typename T, typename E>
 i32 array_find_index(Array<T> arr, E value)
 {
