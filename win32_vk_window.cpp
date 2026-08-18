@@ -48,10 +48,8 @@ AppWindow* create_window(WindowCreateDesc desc)
 
     ShowWindow(wnd->hwnd, SW_SHOW);
 
-    if (!cursors[MC_NORMAL]) {
-        cursors[MC_NORMAL] = LoadCursorA(NULL, IDC_ARROW);
-        cursors[MC_SIZE_NW_SE] = LoadCursorA(NULL, IDC_SIZENWSE);
-    }
+    extern void win32_init_cursors();
+    win32_init_cursors();
 
     return wnd;
 }

@@ -547,7 +547,10 @@ void init_sdl3()
 static const char* Xcursor_name(MouseCursor cursor)
 {
     switch (cursor) {
-    case MC_NORMAL: return "default";
+    case MC_NORMAL:    return "default";
+
+    case MC_SIZE_HORI: return "ew-resize";
+    case MC_SIZE_VERT: return "ns-resize";
 
     case MC_SIZE_SE_NW:
     case MC_SIZE_NW_SE:
@@ -556,6 +559,10 @@ static const char* Xcursor_name(MouseCursor cursor)
     case MC_SIZE_SW_NE:
     case MC_SIZE_NE_SW:
         return "nesw-resize";
+    
+    case MC_HIDDEN:
+    case MC_MAX:
+        return "none";
     }
 
     return nullptr;
@@ -574,6 +581,8 @@ static void init_cursors(Window wnd)
         }
 
         if (!cursors[MC_NORMAL]) cursors[MC_NORMAL] = XCreateFontCursor(x11.dsp, XC_left_ptr);
+        if (!cursors[MC_SIZE_HORI]) cursors[MC_SIZE_HORI] = XCreateFontCursor(x11.dsp, XC_sb_h_double_arrow);
+        if (!cursors[MC_SIZE_VERT]) cursors[MC_SIZE_VERT] = XCreateFontCursor(x11.dsp, XC_sb_v_double_arrow);
         if (!cursors[MC_SIZE_NW_SE]) cursors[MC_SIZE_NW_SE] = XCreateFontCursor(x11.dsp, XC_bottom_right_corner);
         if (!cursors[MC_SIZE_SE_NW]) cursors[MC_SIZE_SE_NW] = XCreateFontCursor(x11.dsp, XC_top_left_corner);
         if (!cursors[MC_SIZE_SW_NE]) cursors[MC_SIZE_SW_NE] = XCreateFontCursor(x11.dsp, XC_top_right_corner);

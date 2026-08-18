@@ -890,6 +890,21 @@ void present_window(AppWindow *wnd)
     current_cursor = MC_NORMAL;
 }
 
+void win32_init_cursors()
+{
+    if (!cursors[MC_NORMAL]) {
+        cursors[MC_NORMAL] = LoadCursorA(NULL, IDC_ARROW);
+
+        cursors[MC_SIZE_HORI]  = LoadCursorA(NULL, IDC_SIZEWE);
+        cursors[MC_SIZE_VERT]  = LoadCursorA(NULL, IDC_SIZENS);
+
+        cursors[MC_SIZE_NW_SE] = LoadCursorA(NULL, IDC_SIZENWSE);
+        cursors[MC_SIZE_SE_NW] = LoadCursorA(NULL, IDC_SIZENWSE);
+        cursors[MC_SIZE_NE_SW] = LoadCursorA(NULL, IDC_SIZENESW);
+        cursors[MC_SIZE_SW_NE] = LoadCursorA(NULL, IDC_SIZENESW);
+    }
+}
+
 HWND win32_window_handle(AppWindow *wnd)
 {
     return wnd->hwnd;
