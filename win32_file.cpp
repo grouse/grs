@@ -112,28 +112,28 @@ HANDLE win32_open_file(char *sz_path, u32 creation_mode, u32 access_mode)
     SArena scratch = tl_scratch_arena();
 
     char *sz_dir = sz_directory_of_sz(sz_path, scratch);
-    if (int result = SHCreateDirectoryExA(NULL, sz_dir, NULL);
-        result != ERROR_SUCCESS && result != ERROR_ALREADY_EXISTS)
-    {
-        LOG_ERROR("failed creating folder: %s, code: %d, msg: '%s'", sz_dir, result, win32_system_error_message(result));
+    if (sz_dir && *sz_dir) {
+        if (int result = SHCreateDirectoryExA(NULL, sz_dir, NULL);
+            result != ERROR_SUCCESS && result != ERROR_ALREADY_EXISTS)
+        {
+            LOG_ERROR("failed creating folder: %s, code: %d, msg: '%s'", sz_dir, result, win32_system_error_message(result));
+        }
     }
 
     HANDLE file = CreateFileA(
         sz_path,
         access_mode,
-        0,
+        FILE_SHARE_ALL,
         nullptr,
         creation_mode,
         FILE_ATTRIBUTE_NORMAL,
         nullptr);
 
-    if (file == INVALID_HANDLE_VALUE &&
-        (creation_mode == CREATE_ALWAYS ||
-         creation_mode == CREATE_NEW))
-    {
+    if (file == INVALID_HANDLE_VALUE) {
         DWORD code = GetLastError();
-        LOG_ERROR("failed creating file: '%s', code: %d, msg: '%s'", sz_path, code, win32_system_error_message(code));
-        return INVALID_HANDLE_VALUE;
+        if (code != ERROR_FILE_NOT_FOUND || (creation_mode != CREATE_ALWAYS && creation_mode != CREATE_NEW)) {
+            LOG_ERROR("failed creating file: '%s', code: %d, msg: '%s'", sz_path, code, win32_system_error_message(code));
+        }
     }
 
     return file;
@@ -466,7 +466,7 @@ FileHandle open_file(String path, u32 mode)
     SArena scratch = tl_scratch_arena();
     char *sz_path = sz_string(path, scratch);
 
-    u32 creation_mode = 0;
+    u32 creation_mode = OPEN_EXISTING;
     if (mode & FILE_OPEN_CREATE) creation_mode = CREATE_NEW;
     else if (mode & FILE_OPEN_TRUNCATE) creation_mode = CREATE_ALWAYS;
 
@@ -573,4 +573,7 @@ String local_user_log_dir(Allocator mem)
     {
         return string(app_data, mem);
     }
+
+    LOG_ERROR("unable to find local user log dir, falling back to current working dir");
+    return {};
 }

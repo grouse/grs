@@ -76,15 +76,7 @@ const char* string_from_file_attribute(DWORD dwFileAttribute)
 char* win32_system_error_message(DWORD error)
 {
     static char buffer[2048];
-    FormatMessageA(
-        FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL,
-        error,
-        0,
-        buffer,
-        sizeof buffer,
-        NULL);
-
+    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buffer, sizeof buffer, NULL);
     return buffer;
 }
 
