@@ -2451,7 +2451,6 @@ Vector3 rgb_from_hsv(Vector3 hsv) { return rgb_from_hsv(hsv.x, hsv.y, hsv.z); }
 
 Vector3 hsv_from_rgb(Vector3 rgb)
 {
-    Vector3 hsv;
     f32 maxc = MAX3(rgb.r, rgb.g, rgb.b);
     f32 minc = MIN3(rgb.r, rgb.g, rgb.b);
     f32 delta = maxc-minc;
