@@ -133,9 +133,6 @@ extern bool parse_cmd_argument(String *args, i32 count, String name, i32 values[
 extern bool parse_cmd_argument(String *args, i32 count, String name, f32 values[2]);
 extern Array<String> split_lines(String str, Allocator mem);
 extern void string_replace(String *str, char c, char with);
-extern i32 utf8_from_utf16(u8 *dst, i32 capacity, const char16_t *src, i32 length);
-extern String string_from_utf16(const char16_t *in_str, i32 length, Allocator mem);
-extern i32 utf8_length(const char16_t *str, i32 utf16_len);
 extern char16_t *wsz_string(String str, Allocator mem);
 
 #endif // STRING_GENERATED_H

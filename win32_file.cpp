@@ -518,7 +518,7 @@ String get_exe_folder(Allocator mem)
         }
     }
 
-    String s = string_from_utf16(sw, length, mem);
+    String s = string_from_utf16((u16*)sw, length, mem);
     return s;
 }
 
@@ -538,16 +538,16 @@ String get_working_dir(Allocator mem)
         length = GetCurrentDirectoryW(req_size, sw);
     }
 
-    String s = string_from_utf16(sw, length, mem);
+    String s = string_from_utf16((u16*)sw, length, mem);
     return s;
 }
 
 void set_working_dir(String path)
 {
     SArena scratch = tl_scratch_arena();
-    wchar_t *wsz_path = wsz_string(path, scratch);
+    char16_t *wsz_path = wsz_string(path, scratch);
 
-    if (!SetCurrentDirectoryW(wsz_path)) {
+    if (!SetCurrentDirectoryW((wchar_t*)wsz_path)) {
         LOG_ERROR("unable to change working dir to '%S': (%d) %s", wsz_path, WIN32_ERR_STR);
     }
 }

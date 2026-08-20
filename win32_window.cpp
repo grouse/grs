@@ -980,5 +980,5 @@ String select_folder_dialog(Allocator mem)
         dst_count += 10;
     }
 
-    return string_from_utf16(dst, wcslen(dst), mem);
+    return string_from_utf16((u16*)dst, wcslen(dst), mem);
 }

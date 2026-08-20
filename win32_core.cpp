@@ -96,7 +96,7 @@ Array<String> win32_commandline_args(Allocator mem)
 
     i32 total_utf8_length = 0;
     for (i32 i = 1; i < argv; i++) {
-        total_utf8_length += utf8_length(argc[i], wcslen(argc[i]));
+        total_utf8_length += utf8_length((u16*)argc[i], wcslen(argc[i]));
     }
 
     char *args_mem = ALLOC_ARR(mem, char, total_utf8_length);
@@ -106,7 +106,7 @@ Array<String> win32_commandline_args(Allocator mem)
         i32 l = wcslen(argc[i]);
 
         args[i-1].data = p;
-        args[i-1].length = utf8_from_utf16((u8*)p, l, argc[i], l);
+        args[i-1].length = utf8_from_utf16((u8*)p, l, (u16*)argc[i], l);
         p += l;
     }
 

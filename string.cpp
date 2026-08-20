@@ -1368,21 +1368,6 @@ void string_replace(String *str, char c, char with)
     }
 }
 
-i32 utf8_from_utf16(u8 *dst, i32 capacity, const char16_t *src, i32 length)
-{
-    return utf8_from_utf16(dst, capacity, (const u16*)src, length);
-}
-
-String string_from_utf16(const char16_t *in_str, i32 length, Allocator mem)
-{
-    return string_from_utf16((const u16*)in_str, length, mem);
-}
-
-i32 utf8_length(const char16_t *str, i32 utf16_len)
-{
-    return utf8_length((const u16*)str, utf16_len);
-}
-
 char16_t* wsz_string(String str, Allocator mem)
 {
     i32 wl = utf16_length(str);

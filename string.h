@@ -125,13 +125,6 @@ void append_stringf(StringBuilder *sb, const char *fmt, ...);
 
 bool parse_cmd_argument(String *args, i32 count, String name, i32 values[2]);
 
-#if defined(_WIN32)
-wchar_t* wsz_string(String str, Allocator mem);
-i32 utf8_length(const wchar_t *str, i32 utf16_len);
-i32 utf8_from_utf16(u8 *dst, i32 capacity, const wchar_t *src, i32 length);
-String string_from_utf16(const wchar_t *in_str, i32 length, Allocator mem);
-#endif // defined(WIN32)
-
 inline String read_memory(MemoryBuffer *buf, Allocator mem)
 {
     i32 length = read_memory<i32>(buf);
