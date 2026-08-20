@@ -1352,10 +1352,10 @@ Array<String> split_lines(String str, Allocator mem)
     for (i32 i = 0, s = 0, l = 0; i < str.length; i++) {
         if (str[i] == '\n' || str[i] == '\r') {
             lines[l++] = slice(str, s, i);
-            s = ++i;
+            if (str[i] == '\n' && str[i+1] == '\r') s = ++i; 
+            if (str[i] == '\r' && str[i+1] == '\n') s = ++i;
+            s = i+1;
         }
-        if (str[i] == '\n' && str[i+1] == '\r') s = ++i; 
-        if (str[i] == '\r' && str[i+1] == '\n') s = ++i;
     }
 
     return lines;
