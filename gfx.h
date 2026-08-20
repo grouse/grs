@@ -75,18 +75,18 @@ struct GfxTextureAsset {
     GfxTextureFormat format;
 };
 
-enum GfxSampleWrap {
+enum GfxSampleWrap : u32 {
     GFX_WRAP_REPEAT = 0,
     GFX_WRAP_MIRROR,
     GFX_WRAP_CLAMP,
 };
 
-enum GfxSampleFilter {
+enum GfxSampleFilter : u32 {
     GFX_FILTER_NEAREST = 0,
     GFX_FILTER_LINEAR,
 };
 
-enum GfxSampleBorderColor {
+enum GfxSampleBorderColor : u32 {
     GFX_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK = 0,
     GFX_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
 };
