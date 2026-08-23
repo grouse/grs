@@ -1620,7 +1620,7 @@ extern VkDescriptorSet vk_descriptor_set(GfxVkDescriptorSetDesc desc)
                     VK_IMAGE_LAYOUT_GENERAL);
                 break;
             case GFX_UNIFORM:
-                vk_set_uniform(*set, it.binding, it.uniform, 0, it.uniform.size);
+                vk_set_uniform(*set, it.binding, it.uniform, it.uniform.offset, it.uniform.size);
                 break;
             }
         }

@@ -51,15 +51,19 @@ struct GfxVkBuffer {
 
     VmaAllocation allocation;
 
+    i32 offset;
     i32 size;
 
+    explicit operator bool() { return handle != VK_NULL_HANDLE; }
     operator VkBuffer() { return handle; }
     bool operator==(const GfxVkBuffer &other) const
     {
-        return handle == other.handle && allocation == other.allocation && size == other.size;
+        return 
+            handle == other.handle && 
+            allocation == other.allocation && 
+            size == other.size && 
+            offset == other.offset;
     }
-
-
 };
 
 struct GfxVkTexture {
@@ -417,6 +421,7 @@ HASH32_DECL(GfxVkBuffer, state, it)
 {
     hash32_update(state, u64(it.handle));
     hash32_update(state, it.size);
+    hash32_update(state, it.offset);
 }
 
 HASH32_DECL(GfxVkTexture, state, it)
