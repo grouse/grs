@@ -515,6 +515,8 @@ extern GfxTexture vk_create_texture(
     i32 idx = array_add(&vk.textures, texture);
     i32 didx = array_add(&vk.texture_descs, { image_info, view_info });
     PANIC_IF(idx != didx, "[gfx] mismatch in textures and texture descs");
+
+    array_add(&vk.uninitialised_textures, texture);
     return GfxTexture(idx);
 }
 

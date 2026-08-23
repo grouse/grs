@@ -375,6 +375,8 @@ extern struct GfxVkContext {
     DynamicArray<GfxVkTextureDesc>    texture_descs;
     DynamicMap<GfxTextureAssetDesc, GfxTexture>  texture_asset_map;
 
+    DynamicArray<GfxVkTexture> uninitialised_textures;
+
     DynamicMap<GfxSampler, VkSampler> samplers;
 
     DynamicArray<GfxVkBuffer> buffers;
