@@ -321,75 +321,45 @@ extern void vk_copy_buffer_to_image(
 
 GfxBuffer gfx_create_buffer(i32 size)
 {
-    GfxVkBuffer buffer = vk_create_buffer(
-        size,
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-        VMA_MEMORY_USAGE_GPU_ONLY,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
-
+    GfxVkBuffer buffer = vk_create_buffer(size, VMA_ALLOCATION_CREATE_MAPPED_BIT);
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
 GfxBuffer gfx_create_buffer(void *data, i32 size)
 {
-    GfxVkBuffer buffer = vk_create_buffer(
-        size,
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-        VMA_MEMORY_USAGE_GPU_ONLY,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
-
-    GfxVkBuffer staging = vk_create_buffer(
-        size,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VMA_MEMORY_USAGE_CPU_TO_GPU,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
-
+    // TODO(jesper): replace with linear frame allocator
+    GfxVkBuffer staging = vk_create_buffer(size, VMA_ALLOCATION_CREATE_MAPPED_BIT);
     memcpy(staging.host, data, size);
+    defer { vk_destroy_buffer(staging); };
+
+    GfxVkBuffer buffer = vk_create_buffer(size);
 
     VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
-    vk_destroy_buffer(staging);
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
 GfxBuffer gfx_create_vertex_buffer(void *data, i32 size)
 {
-    GfxVkBuffer buffer = vk_create_buffer(
-        size,
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT_KHR,
-        VMA_MEMORY_USAGE_GPU_ONLY,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
-
-    GfxVkBuffer staging = vk_create_buffer(
-        size,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VMA_MEMORY_USAGE_CPU_TO_GPU,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
-
+    // TODO(jesper): replace with linear frame allocator
+    GfxVkBuffer staging = vk_create_buffer(size, VMA_ALLOCATION_CREATE_MAPPED_BIT);
     memcpy(staging.host, data, size);
+    defer { vk_destroy_buffer(staging); };
 
+    GfxVkBuffer buffer  = vk_create_buffer(size);
     VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
-    vk_destroy_buffer(staging);
+
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
 GfxBuffer gfx_create_index_buffer(void *data, i32 size)
 {
-    GfxVkBuffer buffer = vk_create_buffer(
-        size,
-        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-        VMA_MEMORY_USAGE_GPU_ONLY,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
-
-    GfxVkBuffer staging = vk_create_buffer(
-        size,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VMA_MEMORY_USAGE_CPU_TO_GPU,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
-
+    // TODO(jesper): replace with linear frame allocator
+    GfxVkBuffer staging = vk_create_buffer(size, VMA_ALLOCATION_CREATE_MAPPED_BIT);
     memcpy(staging.host, data, size);
+    defer { vk_destroy_buffer(staging); };
 
+    GfxVkBuffer buffer = vk_create_buffer(size);
     VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
-    vk_destroy_buffer(staging);
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
@@ -536,24 +506,16 @@ extern GfxTexture vk_create_texture(
     VkComponentMapping swizzle,
     u32 width, u32 height)
 {
-    GfxTexture texture_idx = vk_create_texture(format, swizzle, width, height);
-    if (texture_idx == GfxTexture_INVALID) return GfxTexture_INVALID;
 
     u32 block_size = vk_block_size(format);
-    auto staging = vk_create_buffer(
-        width*height*block_size,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VMA_MEMORY_USAGE_CPU_TO_GPU,
-        VMA_ALLOCATION_CREATE_MAPPED_BIT);
 
-    if (!staging) {
-        LOG_ERROR("[gfx][vk] unable to create staging buffer for texture");
-        return GfxTexture_INVALID;
-    }
-
-
+    // TODO(jesper): replace with linear frame allocator
+    auto staging = vk_create_buffer(width*height*block_size, VMA_ALLOCATION_CREATE_MAPPED_BIT);
     memcpy(staging.host, pixels, width*height*block_size);
+    defer { vk_destroy_buffer(staging); };
 
+    GfxTexture texture_idx = vk_create_texture(format, swizzle, width, height);
+    if (texture_idx == GfxTexture_INVALID) return GfxTexture_INVALID;
     GfxVkTexture texture = vk.textures[texture_idx];
 
     VK_IMM {
@@ -562,7 +524,6 @@ extern GfxTexture vk_create_texture(
         vk_transition_image(vk.imm.cmd, texture, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL);
     }
 
-    vk_destroy_buffer(staging);
     return texture_idx;
 }
 
@@ -642,13 +603,17 @@ extern VkDeviceAddress vk_get_buffer_address(VkBuffer buffer)
     return vkGetBufferDeviceAddress(vk.device, &address_info);
 }
 
-extern GfxVkBuffer vk_create_buffer(
-    i32 size,
-    VkBufferUsageFlags usage,
-    VmaMemoryUsage mem_usage,
-    VmaAllocationCreateFlags flags)
+GfxVkBuffer vk_create_buffer(i32 size, VmaAllocationCreateFlags flags /*= 0*/)
 {
     if (!size) return {};
+
+    constexpr VkBufferUsageFlags usage =
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+        VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+
 
     VkBufferCreateInfo buffer_info{
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -658,7 +623,7 @@ extern GfxVkBuffer vk_create_buffer(
 
     VmaAllocationCreateInfo alloc_info{
         .flags = flags,
-        .usage = mem_usage,
+        .usage = VMA_MEMORY_USAGE_UNKNOWN,
     };
 
     if (flags & VMA_ALLOCATION_CREATE_MAPPED_BIT) {
@@ -686,13 +651,10 @@ extern GfxVkBuffer vk_create_buffer(
     return buffer;
 }
 
-extern GfxVkBuffer vk_create_buffer(
-    void *data, i32 size,
-    VkBufferUsageFlags usage,
-    VmaMemoryUsage mem_usage,
-    VmaAllocationCreateFlagBits flags)
+extern GfxVkBuffer vk_create_buffer(void *data, i32 size, VmaAllocationCreateFlagBits flags)
 {
-    GfxVkBuffer buffer = vk_create_buffer(size, usage, mem_usage, flags);
+    PANIC_IF(!(flags & VMA_ALLOCATION_CREATE_MAPPED_BIT), "[vk] buffer must be mapped to copy data");
+    GfxVkBuffer buffer = vk_create_buffer(size, flags);
     memcpy(buffer.host, data, size);
     return buffer;
 }
@@ -2304,3 +2266,4 @@ void vk_push_constants(VkCommandBuffer cmd, const void *data, i32 size)
 
     vkCmdPushDataEXT(cmd, &info);
 }
+
