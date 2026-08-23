@@ -243,9 +243,8 @@ struct GfxVkFrame {
 
     struct {
         GfxVkBuffer buffer;
-        VkDeviceAddress address;
         i32 offset;
-    } vertices;
+    } mem;
 
     VkFence fence;
     VkSemaphore image_available;

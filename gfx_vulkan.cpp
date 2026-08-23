@@ -264,7 +264,7 @@ void gfx_wait_for_frame()
     vk.current_frame = (vk.current_frame + 1) % vk.frames.count;
 
     auto *frame = &vk.frames[vk.current_frame];
-    frame->vertices.offset = 0;
+    frame->mem.offset = 0;
 
     VK_CHECK(vkWaitForFences(vk.device, 1, &frame->fence, VK_TRUE, UINT64_MAX));
 
@@ -2240,5 +2240,27 @@ void vk_push_constants(VkCommandBuffer cmd, const void *data, i32 size)
     };
 
     vkCmdPushDataEXT(cmd, &info);
+}
+
+void* gfx_frame_alloc_push(const void *data, i32 size, i32 alignment /*= 64*/)
+{
+    auto *frame = &vk.frames[vk.current_frame];
+    return gfx_alloc_push(frame, data, size, alignment);
+}
+
+void* gfx_alloc(GfxVkFrame *frame, i32 size, i32 alignment /*= 64*/)
+{
+    u32 aligned = (frame->mem.offset + alignment-1) & ~(alignment-1);
+    if (aligned+size > frame->mem.buffer.size) return nullptr;
+    frame->mem.offset = aligned+size;
+
+    return (u8*)frame->mem.buffer.host + aligned;
+}
+
+void* gfx_alloc_push(GfxVkFrame *frame, const void *data, i32 size, i32 alignment /*= 64*/)
+{
+    void *ptr = gfx_alloc(frame, size, alignment);
+    if (ptr) memcpy(ptr, data, size);
+    return ptr;
 }
 
