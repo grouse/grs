@@ -669,6 +669,10 @@ extern GfxVkBuffer vk_create_buffer(
         .usage = mem_usage,
     };
 
+    if (flags & VMA_ALLOCATION_CREATE_MAPPED_BIT) {
+        alloc_info.requiredFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+    }
+
     GfxVkBuffer buffer{ .size = size };
     VK_CHECK(vmaCreateBuffer(vk.allocator, &buffer_info, &alloc_info, &buffer.handle, &buffer.allocation, &buffer.allocation_info));
 
