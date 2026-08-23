@@ -2242,25 +2242,31 @@ void vk_push_constants(VkCommandBuffer cmd, const void *data, i32 size)
     vkCmdPushDataEXT(cmd, &info);
 }
 
-void* gfx_frame_alloc_push(const void *data, i32 size, i32 alignment /*= 64*/)
+void gfx_frame_alloc_push(const void *data, i32 size, i32 alignment /*= 256*/)
 {
     auto *frame = &vk.frames[vk.current_frame];
-    return gfx_alloc_push(frame, data, size, alignment);
+    gfx_alloc_push(frame, data, size, alignment);
 }
 
-void* gfx_alloc(GfxVkFrame *frame, i32 size, i32 alignment /*= 64*/)
+// alignment: very sloppy default of 256 which represents the maximum minimum memory alignment in any report on vulkan.gpuinfo.org
+GfxVkBuffer gfx_alloc(GfxVkFrame *frame, i32 size, i32 alignment /*= 256*/)
 {
     u32 aligned = (frame->mem.offset + alignment-1) & ~(alignment-1);
-    if (aligned+size > frame->mem.buffer.size) return nullptr;
+    if (aligned+size > frame->mem.buffer.size) return {};
     frame->mem.offset = aligned+size;
 
-    return (u8*)frame->mem.buffer.host + aligned;
+    GfxVkBuffer ptr = frame->mem.buffer;
+    ptr.host   = (u8*)frame->mem.buffer.host + aligned;
+    ptr.gpu    = frame->mem.buffer.gpu + aligned;
+    ptr.offset = aligned;
+    ptr.size   = size;
+    return ptr;
 }
 
-void* gfx_alloc_push(GfxVkFrame *frame, const void *data, i32 size, i32 alignment /*= 64*/)
+GfxVkBuffer gfx_alloc_push(GfxVkFrame *frame, const void *data, i32 size, i32 alignment /*= 256*/)
 {
-    void *ptr = gfx_alloc(frame, size, alignment);
-    if (ptr) memcpy(ptr, data, size);
+    GfxVkBuffer ptr = gfx_alloc(frame, size, alignment);
+    if (ptr) memcpy(ptr.host, data, size);
     return ptr;
 }
 

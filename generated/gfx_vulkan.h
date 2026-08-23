@@ -99,9 +99,9 @@ extern GfxMesh gfx_tri_prism(f32 width, f32 height, f32 thickness);
 extern GfxMesh gfx_ramp(f32 length, f32 height, f32 width);
 extern bool operator==(const GfxPrimitiveDesc & lhs, const GfxPrimitiveDesc & rhs);
 extern void vk_push_constants(VkCommandBuffer cmd, const void *data, i32 size);
-extern void *gfx_frame_alloc_push(const void *data, i32 size, i32 alignment = 64);
-extern void *gfx_alloc(GfxVkFrame *frame, i32 size, i32 alignment = 64);
-extern void *gfx_alloc_push(GfxVkFrame *frame, const void *data, i32 size, i32 alignment = 64);
+extern void gfx_frame_alloc_push(const void *data, i32 size, i32 alignment = 256);
+extern GfxVkBuffer gfx_alloc(GfxVkFrame *frame, i32 size, i32 alignment = 256);
+extern GfxVkBuffer gfx_alloc_push(GfxVkFrame *frame, const void *data, i32 size, i32 alignment = 256);
 
 #endif // GFX_VULKAN_GENERATED_H
 
