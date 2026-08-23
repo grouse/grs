@@ -338,31 +338,6 @@ GfxBuffer gfx_create_buffer(void *data, i32 size)
     return (GfxBuffer)array_add(&vk.buffers, buffer);
 }
 
-GfxBuffer gfx_create_vertex_buffer(void *data, i32 size)
-{
-    // TODO(jesper): replace with linear frame allocator
-    GfxVkBuffer staging = vk_create_buffer(size, VMA_ALLOCATION_CREATE_MAPPED_BIT);
-    memcpy(staging.host, data, size);
-    defer { vk_destroy_buffer(staging); };
-
-    GfxVkBuffer buffer  = vk_create_buffer(size);
-    VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
-
-    return (GfxBuffer)array_add(&vk.buffers, buffer);
-}
-
-GfxBuffer gfx_create_index_buffer(void *data, i32 size)
-{
-    // TODO(jesper): replace with linear frame allocator
-    GfxVkBuffer staging = vk_create_buffer(size, VMA_ALLOCATION_CREATE_MAPPED_BIT);
-    memcpy(staging.host, data, size);
-    defer { vk_destroy_buffer(staging); };
-
-    GfxVkBuffer buffer = vk_create_buffer(size);
-    VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
-    return (GfxBuffer)array_add(&vk.buffers, buffer);
-}
-
 GfxTexture gfx_load_texture(String path, bool sRGB /*= true*/) 
 {
     AssetHandle handle = find_asset_handle(path);
@@ -1857,8 +1832,8 @@ GfxMesh gfx_create_mesh(Array<MeshVertex> vertices, Array<u32> indices, i32 inde
     }
 
     return GfxMesh{
-        .vertex_buffer = gfx_create_vertex_buffer(vertices.data, vertices.count*sizeof vertices[0]),
-        .index_buffer  = gfx_create_index_buffer(indices.data, indices.count*sizeof indices[0]),
+        .vertex_buffer = gfx_create_buffer(vertices.data, vertices.count*sizeof vertices[0]),
+        .index_buffer  = gfx_create_buffer(indices.data, indices.count*sizeof indices[0]),
         .index_count   = index_count,
         .bounds = { min, max }
     };
