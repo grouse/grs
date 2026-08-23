@@ -77,7 +77,6 @@ extern const char *sz_from_enum(VkImageType type);
 extern const char *sz_from_enum(VkImageViewType type);
 extern void gfx_begin_pass(const GfxVkRenderPassDesc & desc);
 extern void gfx_end_pass();
-extern void vk_update_uniform_buffer(GfxVkBuffer buffer, void *data, i32 size);
 extern VkAttachmentLoadOp vk_load_op(GfxLoadOp op);
 extern VkAttachmentStoreOp vk_store_op(GfxStoreOp op);
 extern const char *sz_from_enum(GfxLoadOp op);

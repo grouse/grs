@@ -344,9 +344,7 @@ GfxBuffer gfx_create_buffer(void *data, i32 size)
         VMA_MEMORY_USAGE_CPU_TO_GPU,
         VMA_ALLOCATION_CREATE_MAPPED_BIT);
 
-    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
-    memcpy(staging.allocation_info.pMappedData, data, size);
-    vmaUnmapMemory(vk.allocator, staging.allocation);
+    memcpy(staging.host, data, size);
 
     VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
     vk_destroy_buffer(staging);
@@ -367,9 +365,7 @@ GfxBuffer gfx_create_vertex_buffer(void *data, i32 size)
         VMA_MEMORY_USAGE_CPU_TO_GPU,
         VMA_ALLOCATION_CREATE_MAPPED_BIT);
 
-    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
-    memcpy(staging.allocation_info.pMappedData, data, size);
-    vmaUnmapMemory(vk.allocator, staging.allocation);
+    memcpy(staging.host, data, size);
 
     VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
     vk_destroy_buffer(staging);
@@ -390,9 +386,7 @@ GfxBuffer gfx_create_index_buffer(void *data, i32 size)
         VMA_MEMORY_USAGE_CPU_TO_GPU,
         VMA_ALLOCATION_CREATE_MAPPED_BIT);
 
-    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
-    memcpy(staging.allocation_info.pMappedData, data, size);
-    vmaUnmapMemory(vk.allocator, staging.allocation);
+    memcpy(staging.host, data, size);
 
     VK_IMM vk_copy_buffer(vk.imm.cmd, buffer, staging, size);
     vk_destroy_buffer(staging);
@@ -558,9 +552,7 @@ extern GfxTexture vk_create_texture(
     }
 
 
-    vmaMapMemory(vk.allocator, staging.allocation, &staging.allocation_info.pMappedData);
-    memcpy(staging.allocation_info.pMappedData, pixels, width*height*block_size);
-    vmaUnmapMemory(vk.allocator, staging.allocation);
+    memcpy(staging.host, pixels, width*height*block_size);
 
     GfxVkTexture texture = vk.textures[texture_idx];
 
@@ -673,8 +665,9 @@ extern GfxVkBuffer vk_create_buffer(
         alloc_info.requiredFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     }
 
+    VmaAllocationInfo allocation_info{};
     GfxVkBuffer buffer{ .size = size };
-    VK_CHECK(vmaCreateBuffer(vk.allocator, &buffer_info, &alloc_info, &buffer.handle, &buffer.allocation, &buffer.allocation_info));
+    VK_CHECK(vmaCreateBuffer(vk.allocator, &buffer_info, &alloc_info, &buffer.handle, &buffer.allocation, &allocation_info));
 
 
     if (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) {
@@ -684,6 +677,10 @@ extern GfxVkBuffer vk_create_buffer(
         };
 
         buffer.gpu = vkGetBufferDeviceAddress(vk.device, &address_info);
+    }
+
+    if (flags & VMA_ALLOCATION_CREATE_MAPPED_BIT) {
+        vmaMapMemory(vk.allocator, buffer.allocation, &buffer.host);
     }
 
     return buffer;
@@ -696,14 +693,13 @@ extern GfxVkBuffer vk_create_buffer(
     VmaAllocationCreateFlagBits flags)
 {
     GfxVkBuffer buffer = vk_create_buffer(size, usage, mem_usage, flags);
-    vmaMapMemory(vk.allocator, buffer.allocation, &buffer.allocation_info.pMappedData);
-    memcpy(buffer.allocation_info.pMappedData, data, size);
-    vmaUnmapMemory(vk.allocator, buffer.allocation);
+    memcpy(buffer.host, data, size);
     return buffer;
 }
 
 extern void vk_destroy_buffer(GfxVkBuffer buffer)
 {
+    if (buffer.host) vmaUnmapMemory(vk.allocator, buffer.allocation);
     vmaDestroyBuffer(vk.allocator, buffer.handle, buffer.allocation);
 }
 
@@ -1548,13 +1544,6 @@ void gfx_end_pass()
 
     vkCmdEndRendering(cmd);
     if (vkCmdEndDebugUtilsLabelEXT) vkCmdEndDebugUtilsLabelEXT(cmd);
-}
-
-extern void vk_update_uniform_buffer(GfxVkBuffer buffer, void *data, i32 size)
-{
-    vmaMapMemory(vk.allocator, buffer.allocation, &buffer.allocation_info.pMappedData);
-    memcpy(buffer.allocation_info.pMappedData, data, size);
-    vmaUnmapMemory(vk.allocator, buffer.allocation);
 }
 
 VkAttachmentLoadOp vk_load_op(GfxLoadOp op)

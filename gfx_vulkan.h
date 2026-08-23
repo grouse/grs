@@ -45,9 +45,11 @@ struct SpvCompilationResult {
 
 struct GfxVkBuffer {
     VkBuffer handle;
+
     VkDeviceAddress gpu;
+    void *host;
+
     VmaAllocation allocation;
-    VmaAllocationInfo allocation_info;
 
     i32 size;
 
@@ -56,6 +58,8 @@ struct GfxVkBuffer {
     {
         return handle == other.handle && allocation == other.allocation && size == other.size;
     }
+
+
 };
 
 struct GfxVkTexture {
