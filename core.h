@@ -140,6 +140,8 @@ static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 #define defer auto defer_( __LINE__ ) = DeferDummy(std::source_location::current()) + [&](const std::source_location &_loc)
 #define transmute(T, value) (*(T*)&(value))
 
+#define jl_align(addr, alignment) (((addr) + (alignment) - 1) & ~((alignment) - 1))
+
 #define CAT_(a, b) a ## b
 #define CAT(a, b) CAT_(a, b)
 #define CAT3(a, b, c) CAT(CAT(a, b), c)
