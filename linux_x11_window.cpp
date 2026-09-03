@@ -617,12 +617,74 @@ static void init_clipboard()
     }
 }
 
-#ifdef GFX_OPENGL
-#include "linux_glx_window.cpp"
-#endif
+#if defined(GFX_NULL)
+AppWindow* create_window(WindowCreateDesc desc)
+{
+    AppWindow *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
+    wnd->client_resolution = { (f32)desc.width, (f32)desc.height };
 
-#ifdef GFX_VULKAN
-#include "linux_xvk_window.cpp"
+    if (desc.flags & WINDOW_HEADLESS) {
+        wnd->headless = true;
+        return wnd;
+    }
+
+    init_x11();
+    init_sdl3();
+
+    SArena scratch = tl_scratch_arena();
+    Window parent = XDefaultRootWindow(x11.dsp);
+    XSetWindowAttributes swa{};
+
+    wnd->handle = XCreateWindow(
+        x11.dsp, parent,
+        0, 0,
+        desc.width, desc.height,
+        0,
+        CopyFromParent,
+        InputOutput,
+        CopyFromParent,
+        CWOverrideRedirect | CWBackPixmap | CWBorderPixel | CWColormap,
+        &swa);
+
+    PANIC_IF(!wnd->handle, "XCreateWindow failed");
+    LOG_INFO("created wnd: %p", wnd);
+
+    XStoreName(x11.dsp, wnd->handle, sz_string(desc.title, scratch));
+    XSelectInput(
+        x11.dsp, wnd->handle,
+        KeyPressMask | KeyReleaseMask |
+        StructureNotifyMask |
+        FocusChangeMask |
+        PointerMotionMask | ButtonPressMask |
+        LeaveWindowMask | EnterWindowMask |
+        ButtonReleaseMask | EnterWindowMask);
+    XMapWindow(x11.dsp, wnd->handle);
+
+    wnd->im = XOpenIM(x11.dsp, NULL, NULL, NULL);
+    wnd->ic = XCreateIC(wnd->im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, wnd->handle, NULL);
+
+    Atom protocols[] = { x11.WM_DELETE_WINDOW };
+    XSetWMProtocols(x11.dsp, wnd->handle, protocols, ARRAY_COUNT(protocols));
+
+    init_cursors(wnd->handle);
+    init_clipboard();
+    return wnd;
+}
+
+void present_window(AppWindow *wnd)
+{
+    if (wnd->headless) return;
+
+    extern MouseCursor current_cursor;
+    XDefineCursor(x11.dsp, wnd->handle, cursors[current_cursor]);
+    current_cursor = MC_NORMAL;
+}
+#elif defined(GFX_VULKAN)
+#include "linux_x11_vk_window.cpp"
+#elif defined(GFX_OPENGL)
+#include "linux_x11_glx_window.cpp"
+#else
+#error "undefined render backend"
 #endif
 
 bool window_is_headless(AppWindow *wnd)

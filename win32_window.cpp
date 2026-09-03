@@ -854,15 +854,52 @@ LRESULT win32_window_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     return result;
 }
 
-#ifdef GFX_OPENGL
-#include "win32_wgl_window.cpp"
-#endif
+#if defined(GFX_NULL)
+AppWindow* create_window(WindowCreateDesc desc)
+{
+    auto *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
+    wnd->resolution = { (f32)desc.width, (f32)desc.height };
 
-#ifdef GFX_VULKAN
+    if (desc.flags & WINDOW_HEADLESS) {
+        wnd->headless = true;
+        return wnd;
+    }
+
+    SArena scratch = tl_scratch_arena();
+    HINSTANCE hInstance = GetModuleHandleA(NULL);
+
+    defer { map_set(&windows, (u64)wnd->hwnd, wnd); };
+
+    WNDCLASSA wc{
+        .lpfnWndProc = &win32_window_proc,
+        .hInstance = hInstance,
+        .hCursor = LoadCursorA(NULL, IDC_ARROW),
+        .lpszClassName = sz_string(desc.title, scratch),
+    };
+    RegisterClassA(&wc);
+
+    wnd->hwnd = CreateWindowExA(
+        0,
+        wc.lpszClassName,
+        sz_string(desc.title, scratch),
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        desc.width, desc.height,
+        NULL, NULL,
+        hInstance,
+        NULL);
+    PANIC_IF(wnd->hwnd == NULL, "unable to create window: (%d) %s", WIN32_ERR_STR);
+
+    ShowWindow(wnd->hwnd, SW_SHOW);
+    extern void win32_init_cursors();
+    win32_init_cursors();
+    return wnd;
+}
+#elif defined(GFX_VULKAN)
 #include "win32_vk_window.cpp"
-#endif
-
-#if !defined(GFX_OPENGL) && !defined(GFX_VULKAN)
+#elif defined(GFX_OPENGL)
+#include "win32_wgl_window.cpp"
+#else
 #error "undefined render backend"
 #endif
 
@@ -885,7 +922,9 @@ void present_window(AppWindow *wnd)
 {
     if (wnd->headless) return;
 
+#ifdef GFX_OPENGL
     SwapBuffers(wnd->hdc);
+#endif
     if (current_cursor != MC_NORMAL) SetCursor(cursors[current_cursor]);
     current_cursor = MC_NORMAL;
 }

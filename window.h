@@ -263,9 +263,7 @@ enum {
 };
 
 enum WindowFlags : u32 {
-    WINDOW_OPENGL   = 1 << 0,
-    WINDOW_VULKAN   = 1 << 1,
-    WINDOW_HEADLESS = 1 << 2,
+    WINDOW_HEADLESS = 1 << 0,
 };
 
 struct AppWindow;
@@ -298,7 +296,7 @@ struct GamepadButtonEvent {
 struct WindowCreateDesc {
     String title;
     i32 width, height;
-    u32 flags = WINDOW_OPENGL;
+    u32 flags = 0;
 };
 
 struct IKey {

@@ -3,8 +3,6 @@
 AppWindow* create_window(WindowCreateDesc desc)
 {
     init_x11();
-    PANIC_IF(!(desc.flags & WINDOW_OPENGL), "unsupported render backend");
-
     SArena scratch = tl_scratch_arena();
     AppWindow *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
 

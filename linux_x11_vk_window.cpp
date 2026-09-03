@@ -31,8 +31,6 @@ VkSurfaceKHR vk_create_surface(AppWindow *wnd, VkInstance instance)
 
 AppWindow* create_window(WindowCreateDesc desc)
 {
-    PANIC_IF(!(desc.flags & WINDOW_VULKAN), "unsupported render backend");
-
     AppWindow *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
     wnd->client_resolution = { (f32)desc.width, (f32)desc.height };
 

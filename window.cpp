@@ -195,7 +195,7 @@ String string_from_enum(MouseButton btn)
 #if defined(_WIN32)
 #include "win32_window.cpp"
 #elif defined(__linux__)
-#include "linux_window.cpp"
+#include "linux_x11_window.cpp"
 #else
 #error "unsupported platform"
 #endif

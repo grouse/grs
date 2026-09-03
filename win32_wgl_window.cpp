@@ -6,8 +6,6 @@
 
 AppWindow* create_window(WindowCreateDesc desc)
 {
-    PANIC_IF(!(desc.flags & WINDOW_OPENGL), "invalid render backend");
-
     SArena scratch = tl_scratch_arena();
     HINSTANCE hInstance = GetModuleHandleA(NULL);
 

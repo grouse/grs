@@ -6,8 +6,6 @@
 
 AppWindow* create_window(WindowCreateDesc desc)
 {
-    PANIC_IF(!(desc.flags & WINDOW_VULKAN), "invalid render backend");
-
     auto *wnd = ALLOC_T(mem_dynamic, AppWindow) {};
     wnd->resolution = { (f32)desc.width, (f32)desc.height };
 
