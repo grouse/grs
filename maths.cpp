@@ -612,12 +612,43 @@ f32 length_sq(Quaternion q) { return dot(q.xyzw, q.xyzw); }
 
 Quaternion lerp(Quaternion p, Quaternion q, f32 t)
 {
+    return normalise(ulerp(p, q, t));
+}
+
+Quaternion ulerp(Quaternion p, Quaternion q, f32 t)
+{
     Quaternion r;
     r.x = lerp(p.x, q.x, t);
     r.y = lerp(p.y, q.y, t);
     r.z = lerp(p.z, q.z, t);
     r.w = lerp(p.w, q.w, t);
     return r;
+}
+
+Quaternion slerp(Quaternion p, Quaternion q, f32 t)
+{
+    f32 cos_theta = dot(p.xyzw, q.xyzw);
+    if (cos_theta < 0) {
+        q = -q;
+        cos_theta = -cos_theta;
+    }
+
+    if (cos_theta > 0.9995f) {
+        return lerp(p, q, t);
+    } else {
+        f32 theta = acos(cos_theta);
+        f32 sin_theta = sin(theta);
+
+        f32 w1 = sin((1-t)*theta) / sin_theta;
+        f32 w2 = sin(t*theta) / sin_theta;
+
+        Quaternion r;
+        r.x = w1*p.x + w2*q.x;
+        r.y = w1*p.y + w2*q.y;
+        r.z = w1*p.z + w2*q.z;
+        r.w = w1*p.w + w2*q.w;
+        return normalise(r);
+    }
 }
 
 Quaternion quat_identity() { return { 0, 0, 0, 1 }; }
