@@ -53,6 +53,7 @@ typedef XXH3_state_t h128s;
 
 template<typename T>
 concept ByteHashable = 
+    !std::is_pointer_v<T> && 
     std::is_trivially_copyable_v<T> &&
     std::has_unique_object_representations_v<T>;
 
