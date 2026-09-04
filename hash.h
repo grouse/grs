@@ -2,12 +2,14 @@
 #define HASH_H
 
 #include "core.h"
+#include "memory.h"
 #include "string.h"
 
 #define XXH_INLINE_ALL
 #include "xxHash/xxhash.h"
 
 #include <type_traits>
+#include <inttypes.h>
 
 typedef XXH32_hash_t h32;
 typedef XXH64_hash_t h64;
@@ -179,5 +181,10 @@ HASH128_DECL(String, state, str) { hash128_update(state, str.data, str.length); 
 HASH32_DECL(f32, state, value) { hash32_update(state, &value, sizeof value); }
 HASH64_DECL(f32, state, value) { hash64_update(state, &value, sizeof value); }
 HASH128_DECL(f32, state, value) { hash128_update(state, &value, sizeof value); }
+
+inline String hash128_encode_hex(h128 hash, Allocator mem)
+{
+    return stringf(mem, "%016" PRIx64 "%016" PRIx64, hash.high64, hash.low64);
+}
 
 #endif // HASH_H
