@@ -67,6 +67,8 @@ bool operator==(String lhs, String rhs);
 bool operator>(String lhs, String rhs);
 bool operator<(String lhs, String rhs);
 
+inline bool operator==(String lhs, const char* rhs) { return lhs == string(rhs); }
+
 bool starts_with(String lhs, String rhs);
 bool starts_with(const char *lhs, const char *rhs);
 bool ends_with(String lhs, String rhs);
