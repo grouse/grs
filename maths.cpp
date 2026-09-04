@@ -760,6 +760,8 @@ Quaternion operator/(Quaternion q, f32 scalar)
 bool operator==(const Quaternion &a, const Quaternion &b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
 bool operator!=(const Quaternion &a, const Quaternion &b) { return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w; }
 
+Quaternion operator-(Quaternion q) { return { -q.x, -q.y, -q.z, -q.w }; }
+Quaternion operator+(Quaternion q) { return q; };
 
 
 // Matrix3

@@ -209,6 +209,8 @@ extern Quaternion operator*(f32 scalar, Quaternion q);
 extern Quaternion operator/(Quaternion q, f32 scalar);
 extern bool operator==(const Quaternion & a, const Quaternion & b);
 extern bool operator!=(const Quaternion & a, const Quaternion & b);
+extern Quaternion operator-(Quaternion q);
+extern Quaternion operator+(Quaternion q);
 extern Matrix3 mat3_identity();
 extern Matrix3 mat3_rows(Vector3 r0, Vector3 r1, Vector3 r2);
 extern Matrix3 mat3_orthographic2(f32 min_x, f32 max_x, f32 min_y, f32 max_y);

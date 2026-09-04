@@ -222,6 +222,7 @@ struct Quaternion {
 M_CMP_OPS(Quaternion);
 M_ADD_OPS(Quaternion, Quaternion, Quaternion);
 M_DIV_OPS(Quaternion, Quaternion, f32);
+M_UNARY_OPS(Quaternion);
 
 inline bool4 isnan(const Quaternion &q) { return { isnan(q.x), isnan(q.y), isnan(q.z), isnan(q.w) }; }
 
