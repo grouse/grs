@@ -891,26 +891,16 @@ String directory_of(String path)
 {
     for (i32 i = path.length-1; i >= 0; i--) {
         if (path.data[i] == '/' || path.data[i] == '\\') {
-            return slice(path, 0, i);
+            return slice(path, 0, i+1);
         }
     }
 
-    return "";
+    return {};
 }
 
 char* sz_directory_of_sz(const char *path, Allocator mem)
 {
-    const char *last = path;
-    for (const char *ptr = path; *ptr; ptr++) {
-        if (*ptr == '/' || *ptr == '\\') last = ptr;
-    }
-
-    i32 length = i32(last - path);
-    char *dir = ALLOC_ARR(mem, char, length+1);
-    memcpy(dir, path, length);
-    dir[length] = '\0';
-
-    return dir;
+    return sz_string(directory_of(string(path)), mem);
 }
 
 
