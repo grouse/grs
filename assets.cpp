@@ -25,8 +25,9 @@ struct {
 void init_assets()
 {
     SArena scratch = tl_scratch_arena();
-    String exe_folder = get_exe_folder(scratch);
-    String folders[] = { "./", exe_folder, join_path(exe_folder, "assets", scratch) };
+    String exe_dir = get_exe_folder(scratch);
+    String cwd = get_working_dir(scratch);
+    String folders[] = { join_path(exe_dir, "assets", scratch), join_path(cwd, "assets", scratch) };
     register_asset_folders({ folders, ARRAY_COUNT(folders) });
 }
 
@@ -61,6 +62,11 @@ void register_asset_folders(Array<String> folders)
         LOG_INFO("adding asset folder: %.*s", STRFMT(path));
         array_add(&assets.folders, duplicate_string(path, mem_dynamic));
     }
+}
+
+Array<String> get_asset_folders()
+{
+    return assets.folders;
 }
 
 void register_asset_procs(const AssetTypesDesc &desc)
