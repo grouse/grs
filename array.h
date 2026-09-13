@@ -376,6 +376,14 @@ T* array_find(Array<T> arr, E value)
     return nullptr;
 }
 
+template<typename T, typename Predicate>
+T* array_find_if(Array<T> arr, Predicate pred)
+{
+    for (i32 i = 0; i < arr.count; i++) if (pred(arr[i])) return &arr[i];
+    return nullptr;
+}
+
+
 template<typename T, typename E>
 bool array_contains(Array<T> arr, E value)
 {
