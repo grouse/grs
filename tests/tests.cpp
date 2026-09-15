@@ -4,11 +4,11 @@
 #include "core/array.h"
 #include "core/string.h"
 
-#include "generated/tests/maths.h"
-#include "generated/tests/array.h"
-#include "generated/tests/map.h"
-#include "generated/tests/memory.h"
-#include "generated/tests/string.h"
+#include "generated/maths.h"
+#include "generated/array.h"
+#include "generated/map.h"
+#include "generated/memory.h"
+#include "generated/string.h"
 
 int main(Array<String> args)
 {

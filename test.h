@@ -29,6 +29,8 @@ struct TestSuite {
 
     bool passed = true;
     TestResult *result = nullptr;
+    bool reported_subtests = false;
+    TestResult *last_reported_result = nullptr;
 };
 
 // NOTE: exposed so tests can inspect error counts mid-run
@@ -45,23 +47,14 @@ void report_fail(const char *file, int line, const char *sz_cond, const char *ms
 #define INTEGRATION_TEST_PROC(name) \
     void name() __attribute__((annotate("integration_test")))
 
-int run_integration_tests_(TestSuite *tests, int count);
-
-#define run_integration_tests(MODULE) \
-    run_integration_tests_(MODULE##__integration_tests, ARRAY_COUNT(MODULE##__integration_tests))
-
-#define run_integration_test(proc) do { \
-    TestSuite t_ = { #proc, proc, nullptr, 0, true }; \
-    run_integration_tests_(&t_, 1); \
-} while (0)
-
 struct TestStats {
     i32 total;
     i32 passed;
     i32 failed;
 };
 
-void test_report_subtest(const char *name, TestResult *before, TestResult *after, TestStats *stats);
+void test_begin_subtests();
+void test_report_subtest(const char *name, TestResult *before, TestResult *after, TestStats *stats = nullptr);
 void test_print_summary(TestStats *stats);
 void test_clear_results();
 
@@ -171,7 +164,7 @@ extern int run_tests(TestSuite *tests, int count, TestStats *stats);
 
 #endif // DO_TESTS && !TEST_H_DECL
 
-#if defined(TEST_H_IMPL) || defined(INTEGRATION_TEST_H_IMPL)
+#ifdef TEST_H_IMPL
 
 #include <setjmp.h>
 #include <signal.h>
@@ -184,6 +177,7 @@ extern int run_tests(TestSuite *tests, int count, TestStats *stats);
 jmp_buf test_jmp_[2];  int test_jmp_i = 0;
 volatile sig_atomic_t test_in_progress = 0;
 TestSuite *test_current = nullptr;
+static const char *test_current_scope = nullptr;
 
 void test_sig_handler(int sig) {
     if (test_in_progress) {
@@ -282,13 +276,30 @@ static void test_free_results(TestResult *res)
     }
 }
 
+void test_begin_subtests()
+{
+    if (!test_current || test_current->reported_subtests) return;
+
+    if (test_current_scope) {
+        printf("/%s/%s\n", test_current_scope, test_current->name);
+    } else {
+        printf("/%s\n", test_current->name);
+    }
+    test_current->reported_subtests = true;
+}
+
 void test_report_subtest(const char *name, TestResult *before, TestResult *after, TestStats *stats)
 {
-    stats->total++;
+    test_begin_subtests();
+
     bool had_errors = after != before;
     test_print_status(name, !had_errors, after, before, 2, 78);
-    if (had_errors) stats->failed++;
-    else stats->passed++;
+    if (had_errors && test_current) test_current->last_reported_result = after;
+    if (stats) {
+        stats->total++;
+        if (had_errors) stats->failed++;
+        else stats->passed++;
+    }
 }
 
 void test_clear_results()
@@ -306,7 +317,7 @@ void test_print_summary(TestStats *stats)
 }
 
 
-#endif // TEST_H_IMPL || INTEGRATION_TEST_H_IMPL
+#endif // TEST_H_IMPL
 
 #ifdef TEST_H_IMPL
 #undef TEST_H_IMPL
@@ -351,19 +362,33 @@ static void test_log_sink(void *sink_data, const char *src, u32 line, LogType ty
     }
 }
 
-static void run_tests_(TestSuite *tests, int count, TestStats *stats, int depth = 0)
+static void run_tests_(
+    TestSuite *tests,
+    int count,
+    TestStats *stats,
+    int depth = 0,
+    const char *scope = nullptr,
+    bool *scope_printed = nullptr)
 {
     for (int i = 0; i < count; i++) {
-        test_current = &tests[i];
-        tests[i].passed = true;
-
         if (tests[i].children && tests[i].child_count) {
-            printf("/%s\n", tests[i].name);
-            run_tests_(tests[i].children, tests[i].child_count, stats, depth+1);
+            bool child_scope_printed = false;
+            run_tests_(
+                tests[i].children,
+                tests[i].child_count,
+                stats,
+                depth + 1,
+                tests[i].name,
+                &child_scope_printed);
         }
 
         if (!tests[i].proc) continue;
 
+        test_current = &tests[i];
+        test_current_scope = scope;
+        tests[i].passed = true;
+        tests[i].reported_subtests = false;
+        tests[i].last_reported_result = nullptr;
         stats->total++;
 
         test_in_progress = 1;
@@ -375,15 +400,30 @@ static void run_tests_(TestSuite *tests, int count, TestStats *stats, int depth 
         }
         test_in_progress = 0;
 
-        int indent = depth * 2;
-        test_print_status(tests[i].name, tests[i].passed, tests[i].result, nullptr, indent, 80 - indent);
+        if (!tests[i].reported_subtests) {
+            if (scope && scope_printed && !*scope_printed) {
+                printf("/%s\n", scope);
+                *scope_printed = true;
+            }
+
+            int indent = depth * 2;
+            test_print_status(tests[i].name, tests[i].passed, tests[i].result, nullptr, indent, 80 - indent);
+        } else if (tests[i].result != tests[i].last_reported_result) {
+            test_print_status("(test)", false, tests[i].result, tests[i].last_reported_result, 2, 78);
+        }
         if (tests[i].passed) stats->passed++;
         else stats->failed++;
+
+        test_free_results(tests[i].result);
+        tests[i].result = nullptr;
     }
 }
 
 int run_tests(TestSuite *tests, int count, TestStats *stats)
 {
+    TestSuite *prev_test_current = test_current;
+    const char *prev_test_current_scope = test_current_scope;
+
     auto prev_sigint  = signal(SIGINT,  test_sig_handler);
     auto prev_sigsegv = signal(SIGSEGV, test_sig_handler);
     auto prev_sigabrt = signal(SIGABRT, test_sig_handler);
@@ -391,8 +431,10 @@ int run_tests(TestSuite *tests, int count, TestStats *stats)
     extern jl_assert_handler_proc jl_assert_handler;
     extern jl_panic_handler_proc jl_panic_handler;
 
+    auto prev_assert = jl_assert_handler;
+    auto prev_panic  = jl_panic_handler;
     jl_assert_handler = test_assert_handler;
-    jl_panic_handler  = test_panic_handler;
+    jl_panic_handler = test_panic_handler;
 
     auto prev_sinks = log_sinks;
     log_sinks.count = 0;
@@ -400,7 +442,11 @@ int run_tests(TestSuite *tests, int count, TestStats *stats)
 
     run_tests_(tests, count, stats);
 
+    test_current = prev_test_current;
+    test_current_scope = prev_test_current_scope;
     log_sinks = prev_sinks;
+    jl_assert_handler = prev_assert;
+    jl_panic_handler = prev_panic;
 
     signal(SIGINT,  prev_sigint);
     signal(SIGSEGV, prev_sigsegv);
@@ -410,107 +456,3 @@ int run_tests(TestSuite *tests, int count, TestStats *stats)
 }
 
 #endif // TEST_H_IMPL
-
-#ifdef INTEGRATION_TEST_H_IMPL
-#undef INTEGRATION_TEST_H_IMPL
-
-#include "core.h"
-#include "memory.h"
-
-static bool itest_defer_log = false;
-
-static void itest_log_sink(void *sink_data, const char *src, u32 line, LogType type, const char *msg)
-{
-    if (test_current && type <= LOG_TYPE_ERROR) {
-        report_fail(src, (int)line, sz_from_enum(type), "%s", msg);
-    }
-
-    if (type <= LOG_TYPE_ERROR && !itest_defer_log) {
-        String filename = filename_of_sz(src);
-        const char *type_s = sz_from_enum(type);
-        char color = 49;
-        switch (type) {
-        case LOG_TYPE_ERROR: color = 31; break;
-        case LOG_TYPE_INFO:  color = 36; break;
-        case LOG_TYPE_PANIC: color = 91; break;
-        }
-        fprintf(stderr, "%.*s:%d \033[%dm%s\033[m: %s\n", STRFMT(filename), line, color, type_s, msg);
-    }
-}
-
-static bool itest_assert_handler(const char *src, int line, const char *sz_cond)
-{
-    report_fail(src, line, sz_cond, nullptr);
-    return false;
-}
-
-static bool itest_panic_handler(const char *src, int line, const char *sz_cond, const char *msg, ...)
-{
-    if (msg) {
-        va_list va_args;
-        va_start(va_args, msg);
-        report_failv(src, line, sz_cond, msg, va_args);
-        va_end(va_args);
-    } else {
-        report_fail(src, line, sz_cond, nullptr);
-    }
-
-    longjmp(test_jmp, 1);
-    return false;
-}
-
-int run_integration_tests_(TestSuite *tests, int count)
-{
-    auto prev_sinks = log_sinks;
-    log_sinks.count = 0;
-    array_add(&log_sinks, LogSink{ itest_log_sink, nullptr });
-
-    auto prev_assert = jl_assert_handler;
-    auto prev_panic  = jl_panic_handler;
-    jl_assert_handler = itest_assert_handler;
-    jl_panic_handler  = itest_panic_handler;
-
-    auto prev_sigsegv = signal(SIGSEGV, test_sig_handler);
-    auto prev_sigabrt = signal(SIGABRT, test_sig_handler);
-
-    int failed = 0;
-
-    for (int i = 0; i < count; i++) {
-        TestSuite *test = &tests[i];
-        test->result = nullptr;
-        test->passed = true;
-        test_current = test;
-
-        printf("/%s\n", test->name);
-
-        test_in_progress = 1;
-        int sig = setjmp(test_jmp);
-        if (sig == 0) {
-            test->proc();
-        } else {
-            printf("  %-78s : \033[31m[ERROR]\033[m\n", "(crashed)");
-            printf("\tsignal %d\n", sig);
-            test->passed = false;
-        }
-        test_in_progress = 0;
-
-        if (!test->passed) {
-            test_print_results(test->result);
-            failed++;
-        }
-
-        test_free_results(test->result);
-    }
-
-    test_current = nullptr;
-
-    log_sinks = prev_sinks;
-    jl_assert_handler = prev_assert;
-    jl_panic_handler  = prev_panic;
-    signal(SIGSEGV, prev_sigsegv);
-    signal(SIGABRT, prev_sigabrt);
-
-    return failed;
-}
-
-#endif // INTEGRATION_TEST_H_IMPL
