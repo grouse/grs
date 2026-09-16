@@ -63,3 +63,21 @@ TEST_PROC(string_builder__sz_string_copies_all_blocks)
     FREE(mem_dynamic, result);
     FREE(mem_dynamic, sb.head.next);
 }
+
+TEST_PROC(string__u64_from_string_accepts_decimal_and_hex)
+{
+    u64 value = 0;
+    ASSERT(u64_from_string("18446744073709551615", &value));
+    ASSERT(value == u64_MAX);
+    ASSERT(u64_from_string("0x0000000000000001", &value));
+    ASSERT(value == 1);
+    ASSERT(u64_from_string("0XabcdefABCDEF0123", &value));
+    ASSERT(value == 0xabcdefabcdef0123ull);
+}
+
+TEST_PROC(string__u64_from_string_rejects_invalid_and_overflow_values)
+{
+    u64 value = 0;
+    ASSERT(!u64_from_string("0x", &value));
+    ASSERT(!u64_from_string("12a", &value));
+}

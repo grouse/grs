@@ -9,6 +9,7 @@
 #include "generated/map.h"
 #include "generated/memory.h"
 #include "generated/string.h"
+#include "generated/lexer.h"
 
 int main(Array<String> args)
 {
@@ -22,6 +23,7 @@ int main(Array<String> args)
     RUN_TESTS(ARRAY__tests,  &stats);
     RUN_TESTS(MEMORY__tests, &stats);
     RUN_TESTS(STRING__tests, &stats);
+    RUN_TESTS(LEXER__tests,  &stats);
 
     test_print_summary(&stats);
     return stats.failed;

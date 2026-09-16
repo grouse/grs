@@ -49,6 +49,25 @@ Token next_token(Lexer *lexer, u32 flags)
             t.str.data = lexer->ptr++;
             lexer->col++; // TODO: utf8
 
+            if (t.str.data[0] == '0' && lexer->ptr < lexer->end &&
+                (lexer->ptr[0] == 'x' || lexer->ptr[0] == 'X'))
+            {
+                lexer->ptr++;
+                lexer->col++;
+
+                while (lexer->ptr < lexer->end &&
+                       ((*lexer->ptr >= '0' && *lexer->ptr <= '9') ||
+                        (*lexer->ptr >= 'a' && *lexer->ptr <= 'f') ||
+                        (*lexer->ptr >= 'A' && *lexer->ptr <= 'F')))
+                {
+                    lexer->ptr++;
+                    lexer->col++;
+                }
+
+                t.str.length = (i32)(lexer->ptr - t.str.data);
+                return t;
+            }
+
             while (lexer->ptr < lexer->end) {
                 if (t.type == TOKEN_INTEGER && *lexer->ptr == '.') {
                     t.type = TOKEN_NUMBER;
@@ -249,6 +268,18 @@ bool parse_u32(Lexer *lexer, u32 *value, i32 n /*= 1*/)
         if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
         if (!u32_from_string(lexer->t.str, &value[i])) {
             PARSE_ERROR(lexer, "invalid float string: '%.*s'", STRFMT(lexer->t.str));
+            return false;
+        }
+    }
+    return true;
+}
+
+bool parse_u64(Lexer *lexer, u64 *value, i32 n /*= 1*/)
+{
+    for (i32 i = 0; i < n; i++) {
+        if (!require_next_token(lexer, TOKEN_INTEGER)) return false;
+        if (!u64_from_string(lexer->t.str, &value[i])) {
+            PARSE_ERROR(lexer, "invalid u64 string: '%.*s'", STRFMT(lexer->t.str));
             return false;
         }
     }

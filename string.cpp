@@ -261,13 +261,25 @@ bool u64_from_string(String s, u64 *dst)
 {
     if (!s) return false;
 
-    u64 result = 0;
-
+    i32 base = 10;
     i32 i = 0;
-    if (s[0] == '-') return false;
+    if (s.length >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+        base = 16;
+        i = 2;
+    }
 
+    if (i == s.length || s[0] == '-') return false;
+
+    u64 result = 0;
     for (; i < s.length; i++) {
-        result = result * 10 + (s[i] - '0');
+        u32 digit;
+        if (s[i] >= '0' && s[i] <= '9') digit = s[i] - '0';
+        else if (base == 16 && s[i] >= 'a' && s[i] <= 'f') digit = 10 + s[i] - 'a';
+        else if (base == 16 && s[i] >= 'A' && s[i] <= 'F') digit = 10 + s[i] - 'A';
+        else return false;
+
+        if (digit >= (u32)base || result > (u64_MAX-digit)/(u32)base) return false;
+        result = result*base + digit;
     }
 
     *dst = result;
