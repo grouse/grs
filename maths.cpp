@@ -2184,6 +2184,13 @@ u32 rand_u32(XORShift128 *series)
     return series->state[0];
 }
 
+u64 rand_u64(XORShift128 *series)
+{
+    u64 high = rand_u32(series);
+    u64 low = rand_u32(series);
+    return (high << 32) | low;
+}
+
 i32 rand_i32(XORShift128 *series, i32 min, i32 max)
 {
     u32 r = rand_u32(series);

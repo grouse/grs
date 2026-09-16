@@ -306,6 +306,7 @@ struct XORShift128 {
 
 
 u32 rand_u32(XORShift128 *series);
+u64 rand_u64(XORShift128 *series);
 f32 rand_f32(XORShift128 *series);
 f32 rand_f32(XORShift128 *series, f32 min, f32 max);
 
