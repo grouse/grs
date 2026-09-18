@@ -312,6 +312,7 @@ void read_file(FileHandle handle, void *buffer, i32 size)
 	ASSERT(fd != -1);
 
 	ssize_t res = read(fd, buffer, size);
+	PANIC_IF(res != size, "expected to read %d bytes, read %zd", size, res);
 }
 
 
