@@ -462,6 +462,15 @@ void save_dirty_assets()
     }
 }
 
+void save_dirty_asset(AssetHandle handle)
+{
+    if (Asset *asset = get_asset(handle);
+        asset && asset->last_modified > asset->last_saved) 
+    {
+        save_asset(handle);
+    }
+}
+
 Array<AssetHandle> get_unsaved_assets(Allocator mem)
 {
     DynamicArray<AssetHandle> result{ .alloc = mem };

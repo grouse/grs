@@ -32,6 +32,7 @@ extern AssetHandle load_asset(String path, u8 *contents, i32 size);
 extern bool ensure_loaded(AssetHandle handle);
 extern void dirty_asset(AssetHandle handle);
 extern void save_dirty_assets();
+extern void save_dirty_asset(AssetHandle handle);
 extern Array<AssetHandle> get_unsaved_assets(Allocator mem);
 extern void save_asset(AssetHandle handle);
 extern String resolve_asset_path(String path, Allocator mem);
