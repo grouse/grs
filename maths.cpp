@@ -412,8 +412,9 @@ Vector3 operator/=(Vector3 &v, f32 s)
     return v;
 }
 
-bool operator==(const Vector3 &a, const Vector3 &b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
-bool operator!=(const Vector3 &a, const Vector3 &b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
+bool operator==(const Vector3 &lhs, const Vector3 &rhs) { return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z; }
+bool operator!=(const Vector3 &lhs, const Vector3 &rhs) { return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z; }
+bool3 vec3_eq  (const Vector3 &lhs, const Vector3 &rhs) { return { lhs.x == rhs.x, lhs.y == rhs.y, lhs.z == rhs.z }; }
 
 f32 dot(Vector3 a, Vector3 b)
 {
@@ -574,8 +575,9 @@ Vector4 operator/(Vector4 v, f32 s)
     return r;
 }
 
-bool operator==(const Vector4 &a, const Vector4 &b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
-bool operator!=(const Vector4 &a, const Vector4 &b) { return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w; }
+bool operator==(const Vector4 &lhs, const Vector4 &rhs) { return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z && lhs.w == rhs.w; }
+bool operator!=(const Vector4 &lhs, const Vector4 &rhs) { return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z || lhs.w != rhs.w; }
+bool4 vec4_eq  (const Vector4 &lhs, const Vector4 &rhs) { return { lhs.x == rhs.x, lhs.y == rhs.y, lhs.z == rhs.z, lhs.w == rhs.w }; }
 
 
 f32 dot(Vector4 a, Vector4 b)
