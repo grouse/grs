@@ -27,9 +27,13 @@ using std::isnan;
     constexpr T& operator[](i32 i) { M_BOUNDS_CHECK(i, 0, ARRAY_COUNT((values))-1); return values[i]; }\
     constexpr const T& operator[](i32 i) const { M_BOUNDS_CHECK(i, 0, ARRAY_COUNT((values))-1); return values[i]; }\
 
+#define vec2_ONE Vector2{ 1, 1 }
+#define vec3_ONE Vector3{ 1, 1, 1 }
+#define vec4_ONE Vector4{ 1, 1, 1, 1 }
+
 #define vec3_MAX Vector3{ f32_MAX, f32_MAX, f32_MAX }
 #define vec4_MAX Vector4{ f32_MAX, f32_MAX, f32_MAX, f32_MAX }
-#define vec3_ONE Vector3{ 1, 1, 1 }
+
 
 #define rad_from_deg(theta) ((theta) * (f32)f32_PI / 180.0f)
 
