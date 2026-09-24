@@ -19,7 +19,7 @@ struct {
     DynamicMap<String, asset_load_t> load_procs;
     DynamicMap<String, asset_save_t> save_procs;
 
-    DynamicMap<i32, DynamicArray<String>> by_type;
+    DynamicMap<i32, DynamicArray<String>> paths_by_type;
 } assets{};
 
 void init_assets()
@@ -280,14 +280,14 @@ void asset_file_event(FileEvent event)
         break;
     case FE_CREATE:
         if (type_id) {
-            if (auto *by_type = map_find(&assets.by_type, *type_id)) {
+            if (auto *by_type = map_find(&assets.paths_by_type, *type_id)) {
                 array_add(by_type, duplicate_string(event.path, mem_dynamic));
             }
         }
         break;
     case FE_DELETE:
         if (type_id) {
-            if (auto *by_type = map_find(&assets.by_type, *type_id)) {
+            if (auto *by_type = map_find(&assets.paths_by_type, *type_id)) {
                 for (i32 i = 0; i < by_type->count; i++) {
                     if (by_type->at(i) == event.path) {
                         array_remove_unsorted(by_type, i--);
@@ -547,7 +547,7 @@ String normalise_asset_path(String path, Allocator mem)
     return short_path;
 }
 
-Array<String> list_asset_files(Allocator mem)
+Array<String> list_asset_paths(Allocator mem)
 {
     DynamicArray<String> files{ .alloc = mem };
 
@@ -571,9 +571,9 @@ Array<String> list_asset_files(Allocator mem)
     return files;
 }
 
-Array<String> list_asset_files(i32 type)
+Array<String> list_asset_paths(i32 type)
 {
-    auto *files = map_find_emplace(&assets.by_type, type);
+    auto *files = map_find_emplace(&assets.paths_by_type, type);
 
     if (!files->alloc) {
         files->alloc = mem_dynamic;
@@ -604,7 +604,7 @@ Array<String> list_asset_files(i32 type)
     return *files;
 }
 
-Array<String> list_asset_files(Array<String> extensions, Allocator mem)
+Array<String> list_asset_paths(Array<String> extensions, Allocator mem)
 {
     DynamicArray<String> files{ .alloc = mem };
 
