@@ -43,6 +43,7 @@ struct Asset {
     i32 lock;
 
     String path;
+    String normalised;
     String identifier;
 
     i32 type_id;

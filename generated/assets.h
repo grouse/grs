@@ -15,6 +15,7 @@ extern i32 get_asset_type(AssetHandle handle);
 extern Asset *get_loaded_asset(AssetHandle handle);
 extern Asset *get_asset(AssetHandle handle);
 extern String get_asset_path(AssetHandle handle);
+extern String get_normalised_asset_path(AssetHandle handle);
 extern String get_asset_identifier(AssetHandle handle);
 extern AssetHandle gen_asset_handle();
 extern AssetHandle create_asset(AssetHandle handle, Asset asset);

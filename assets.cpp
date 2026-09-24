@@ -175,6 +175,13 @@ String get_asset_path(AssetHandle handle)
     return asset.path;
 }
 
+String get_normalised_asset_path(AssetHandle handle)
+{
+    Asset &asset = assets.loaded[handle.index];
+    if (asset.gen != handle.gen) return {};
+    return asset.normalised;
+}
+
 String get_asset_identifier(AssetHandle handle)
 {
     ASSERT(handle != ASSET_HANDLE_INVALID);
@@ -199,6 +206,7 @@ AssetHandle create_asset(AssetHandle handle, Asset asset)
     //LOG_INFO("creating asset '%.*s', handle: { %d %d }", STRFMT(asset.path), handle.index, handle.gen);
 
     asset.identifier = filename_of(asset.path);
+    asset.normalised = normalise_asset_path(asset.path, mem_dynamic);
 
     if (assets.loaded.count <= handle.index) {
         ASSERT(handle.gen == 1);
@@ -221,9 +229,9 @@ AssetHandle create_asset(Asset asset)
 AssetHandle create_asset(AssetHandle handle, String path, i32 type_id, void *data)
 {
     Asset asset{
-        .path = duplicate_string(path, mem_dynamic),
-        .type_id = type_id,
-        .data = data,
+        .path       = duplicate_string(path, mem_dynamic),
+        .type_id    = type_id,
+        .data       = data,
     };
 
     if (file_exists(path)) asset.last_saved = file_modified_timestamp(path);
