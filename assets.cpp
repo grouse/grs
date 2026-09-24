@@ -20,6 +20,7 @@ struct {
     DynamicMap<String, asset_save_t> save_procs;
 
     DynamicMap<i32, DynamicArray<String>> paths_by_type;
+    DynamicMap<i32, DynamicArray<AssetHandle>> assets_by_type;
 } assets{};
 
 void init_assets()
@@ -283,6 +284,10 @@ void asset_file_event(FileEvent event)
             if (auto *by_type = map_find(&assets.paths_by_type, *type_id)) {
                 array_add(by_type, duplicate_string(event.path, mem_dynamic));
             }
+
+            if (auto *by_type = map_find(&assets.assets_by_type, *type_id)) {
+                array_add(by_type, find_asset_handle(event.path));
+            }
         }
         break;
     case FE_DELETE:
@@ -293,7 +298,15 @@ void asset_file_event(FileEvent event)
                         array_remove_unsorted(by_type, i--);
                     }
                 }
+            }
 
+            if (auto *by_type = map_find(&assets.assets_by_type, *type_id)) {
+                AssetHandle handle = find_asset_handle(event.path);
+                for (i32 i = 0; i < by_type->count; i++) {
+                    if (by_type->at(i) == handle) {
+                        array_remove_unsorted(by_type, i--);
+                    }
+                }
             }
         }
         break;
@@ -573,35 +586,50 @@ Array<String> list_asset_paths(Allocator mem)
 
 Array<String> list_asset_paths(i32 type)
 {
-    auto *files = map_find_emplace(&assets.paths_by_type, type);
+    auto *paths = map_find_emplace(&assets.paths_by_type, type);
 
-    if (!files->alloc) {
-        files->alloc = mem_dynamic;
+    if (!paths->alloc) {
+        paths->alloc = mem_dynamic;
 
         for (auto f : assets.folders) {
-            i32 c = files->count;
-            list_files(files, f, files->alloc, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
+            i32 c = paths->count;
+            list_files(paths, f, paths->alloc, FILE_LIST_ABSOLUTE | FILE_LIST_RECURSIVE);
 
             // NOTE(jesper): dumb type filtering. The asset system probably ought to keep track of the filesystem better on its own, so these kinds of queries can be O(1), or close to it
-            for (i32 i = c; i < files->count; i++) {
-                String ext = extension_of(files->at(i));
+            for (i32 i = c; i < paths->count; i++) {
+                String ext = extension_of(paths->at(i));
                 i32 *t = map_find(&assets.types, ext);
                 if (t && *t == type) continue;
-                array_remove_unsorted(files, i--);
+                array_remove_unsorted(paths, i--);
             }
 
             // NOTE(jesper): handle the case of an asset folder being a subfolder to another. This should probably be handled in a much better way to avoid a lot of re-iteration of the filesystem, nevermind the allocation of the resolved file paths
             for (i32 i = 0; i < c; i++) {
-                for (i32 j = c; j < files->count; j++) {
-                    if (files->at(i) == files->at(j)) {
-                        array_remove_unsorted(files, j--);
+                for (i32 j = c; j < paths->count; j++) {
+                    if (paths->at(i) == paths->at(j)) {
+                        array_remove_unsorted(paths, j--);
                     }
                 }
             }
         }
     }
 
-    return *files;
+    return *paths;
+}
+
+Array<AssetHandle> list_asset_handles(i32 type)
+{
+    auto *handles = map_find_emplace(&assets.assets_by_type, type);
+
+    if (!handles->alloc) {
+        handles->alloc = mem_dynamic;
+
+        Array<String> paths = list_asset_paths(type);
+        array_grow(handles, paths.count);
+        for (auto it : paths) array_add(handles, find_asset_handle(it));
+    }
+
+    return *handles;
 }
 
 Array<String> list_asset_paths(Array<String> extensions, Allocator mem)

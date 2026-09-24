@@ -40,6 +40,7 @@ extern String resolve_asset_path(String path, Allocator mem);
 extern String normalise_asset_path(String path, Allocator mem);
 extern Array<String> list_asset_paths(Allocator mem);
 extern Array<String> list_asset_paths(i32 type);
+extern Array<AssetHandle> list_asset_handles(i32 type);
 extern Array<String> list_asset_paths(Array<String> extensions, Allocator mem);
 extern void *load_string_asset(AssetHandle, void *existing, String, u8 *data, i32 size);
 extern u32 hash32(const AssetHandle & it, u32 seed = HASH32_SEED);
