@@ -179,6 +179,11 @@ static_assert(sizeof(i8) == 1, "i8 sizeof mismatch");
 #define SCOPE_CEXPR(expr1, expr2)         for (i32 VAR(i) = 0; VAR(i) == 0 && (expr1); VAR(i) = ((expr2), 1))
 
 
+struct String;
+template<typename T> struct Array;
+template<typename T> Array<T> enum_values();
+template<typename T> Array<String> enum_labels();
+
 #define LOGR(...)      logf(__VA_ARGS__)
 #define LOG(...)       logf(__FILE__, __LINE__, __VA_ARGS__)
 #define LOG_ERROR(...) logf(__FILE__, __LINE__, LOG_TYPE_ERROR, __VA_ARGS__)
