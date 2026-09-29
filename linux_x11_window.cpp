@@ -72,6 +72,21 @@ u8 modifiers_from_x11(u32 x11_mask)
 	return modifiers;
 }
 
+u8 mouse_button_from_x11(u8 x11_button)
+{
+    u8 button = 0;
+
+    switch (x11_button) {
+    case 1: button = MB_PRIMARY; break;
+    case 2: button = MB_MIDDLE; break;
+    case 3: button = MB_SECONDARY; break;
+    case 8: button = MB_4; break;
+    case 9: button = MB_5; break;
+    }
+
+    return button;
+}
+
 u8 keycode_from_x11_keycode(KeyCode x11_keycode, KeySym sym)
 {
 	switch (sym) {
@@ -330,12 +345,7 @@ void linux_input_event(DynamicArray<WindowEvent> *stream, AppWindow *wnd, XEvent
 				.y = (i16)xevent.xbutton.y,
 			};
 
-			switch (xevent.xbutton.button) {
-			case 1: event.mouse.button = MB_PRIMARY; break;
-			case 2: event.mouse.button = MB_MIDDLE; break;
-			case 3: event.mouse.button = MB_SECONDARY; break;
-			}
-
+			event.mouse.button = mouse_button_from_x11(xevent.xbutton.button);
 			button_state |= event.mouse.button;
 		}
 		break;
@@ -357,12 +367,7 @@ void linux_input_event(DynamicArray<WindowEvent> *stream, AppWindow *wnd, XEvent
 				.y = (i16)xevent.xbutton.y,
 			};
 
-			switch (xevent.xbutton.button) {
-			case 1: event.mouse.button = MB_PRIMARY; break;
-			case 2: event.mouse.button = MB_MIDDLE; break;
-			case 3: event.mouse.button = MB_SECONDARY; break;
-			}
-
+			event.mouse.button = mouse_button_from_x11(xevent.xbutton.button);
 			button_state &= ~event.mouse.button;
 		}
 		break;
