@@ -257,6 +257,7 @@ extern Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z);
 extern Matrix4 mat4_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon =1e-5);
 extern Matrix4 mat4_rev_perspective(f32 fov, f32 aspect, f32 near_z, f32 far_z);
 extern Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon =1e-5);
+extern Matrix4 mat4_rev_orthographic(f32 half_height, f32 aspect, f32 near_z, f32 far_z);
 extern Matrix4 mat4_inv_transform3(Vector3 eye, Vector3 forward, Vector3 up);
 extern Matrix4 mat4_look_at(Vector3 eye, Vector3 forward, Vector3 up);
 extern Matrix4 mat4_transpose(Matrix4 m0);

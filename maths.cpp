@@ -1260,6 +1260,19 @@ Matrix4 mat4_rev_inf_perspective(f32 fov, f32 aspect, f32 near_z, f32 epsilon /*
     }};
 }
 
+Matrix4 mat4_rev_orthographic(f32 half_height, f32 aspect, f32 near_z, f32 far_z)
+{
+    f32 height_inv = 1.0f/half_height;
+    f32 depth_inv = 1.0f/(near_z-far_z);
+
+    return { .columns = {
+        { height_inv/aspect, 0,          0,                 0 },
+        { 0,                 height_inv, 0,                 0 },
+        { 0,                 0,          depth_inv,         0 },
+        { 0,                 0,          -far_z*depth_inv,  1 },
+    }};
+}
+
 Matrix4 mat4_inv_transform3(Vector3 eye, Vector3 forward, Vector3 up)
 {
     Vector3 Z = normalise(forward);
