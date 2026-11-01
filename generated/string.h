@@ -111,6 +111,7 @@ extern u32 utf32_it_next(String str, i32 *offset);
 extern i32 utf32_it_next(char **utf8, char *end);
 extern void reset_string_builder(StringBuilder *sb);
 extern String create_string(StringBuilder *sb, Allocator mem);
+extern const char *create_string_sz(StringBuilder *sb, Allocator mem);
 extern char *sz_string(StringBuilder *sb, Allocator mem);
 extern void append_data(StringBuilder *sb, void *data, i32 size);
 extern void append_char(StringBuilder *sb, char c);

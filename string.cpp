@@ -34,7 +34,7 @@ String string(const char *str, i32 length, Allocator mem)
     return s;
 }
 
-String string(const char *sz_str, Allocator mem) 
+String string(const char *sz_str, Allocator mem)
 {
     if (sz_str == nullptr) return {};
     return string(sz_str, i32(strlen(sz_str)), mem);
@@ -1142,6 +1142,25 @@ String create_string(StringBuilder *sb, Allocator mem)
     return str;
 }
 
+const char* create_string_sz(StringBuilder *sb, Allocator mem)
+{
+    i32 length = 0;
+    for (auto it = &sb->head; it && it->written > 0; it = it->next) {
+        length += it->written;
+    }
+
+    char *str = ALLOC_ARR(mem, char, length+1);
+
+    char *ptr = str;
+    for (auto it = &sb->head; it && it->written > 0; it = it->next) {
+        memcpy(ptr, it->data, it->written);
+        ptr += it->written;
+    }
+    str[length] = '\0';
+
+    return str;
+}
+
 char* sz_string(StringBuilder *sb, Allocator mem)
 {
     i32 length = 0;
@@ -1354,7 +1373,7 @@ Array<String> split_lines(String str, Allocator mem)
     for (i32 i = 0, s = 0, l = 0; i < str.length; i++) {
         if (str[i] == '\n' || str[i] == '\r') {
             lines[l++] = slice(str, s, i);
-            if (str[i] == '\n' && str[i+1] == '\r') s = ++i; 
+            if (str[i] == '\n' && str[i+1] == '\r') s = ++i;
             if (str[i] == '\r' && str[i+1] == '\n') s = ++i;
             s = i+1;
         }
