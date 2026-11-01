@@ -90,6 +90,9 @@ inline bool any_of(const bool4 &b) { return b.x || b.y || b.z || b.w; }
 inline bool all_of(const bool3 &b) { return b.x && b.y && b.z; }
 inline bool all_of(const bool4 &b) { return b.x && b.y && b.z && b.w; }
 
+inline i32 count_of(const bool3 &b) { return (i32)b.x + (i32)b.y + (i32)b.z; }
+inline i32 count_of(const bool4 &b) { return (i32)b.x + (i32)b.y + (i32)b.z + (i32)b.w; }
+
 struct Vector2 {
     union {
         struct { f32 x, y; };
